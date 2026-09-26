@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -18,17 +18,58 @@ export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('Tutte');
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  const PAGE_SIZE = 30;
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const fetchArticles = async () => {
     const { data } = await supabase
       .from('articles')
       .select('*, sources(name)')
       .order('published_at', { ascending: false })
-      .limit(30);
+      .range(0, PAGE_SIZE - 1);
     
-    if (data) setArticles(data);
+    if (data) {
+      setArticles(data);
+      setHasMore(data.length === PAGE_SIZE);
+    }
     setLoading(false);
   };
+
+  const loadMoreArticles = async () => {
+    if (loadingMore || !hasMore || articles.length === 0) return;
+    setLoadingMore(true);
+    
+    const currentLength = articles.length;
+    const { data } = await supabase
+      .from('articles')
+      .select('*, sources(name)')
+      .order('published_at', { ascending: false })
+      .range(currentLength, currentLength + PAGE_SIZE - 1);
+    
+    if (data && data.length > 0) {
+      setArticles(prev => [...prev, ...data]);
+      setHasMore(data.length === PAGE_SIZE);
+    } else {
+      setHasMore(false);
+    }
+    setLoadingMore(false);
+  };
+
+  const lastArticleRef = useCallback((node: HTMLDivElement) => {
+    if (loadingMore) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    
+    observerRef.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMoreArticles();
+      }
+    }, { rootMargin: '200px' }); // Carica leggermente prima che l'utente arrivi in fondo
+    
+    if (node) observerRef.current.observe(node);
+  }, [loadingMore, hasMore, articles]);
 
   useEffect(() => {
     fetchArticles();
@@ -123,46 +164,64 @@ export default function Home() {
               Nessuna notizia trovata per "{categoryFilter}".
             </div>
           )}
-          {filteredArticles?.map((article) => (
-            <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
-              
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  {article.ai_summary?.category && (
-                    <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
-                      {article.ai_summary.category}
+          {filteredArticles?.map((article, index) => {
+            const isLast = index === filteredArticles.length - 1;
+            return (
+              <article 
+                key={article.id} 
+                ref={isLast ? lastArticleRef : null}
+                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5"
+              >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
+                
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-2">
+                    {article.ai_summary?.category && (
+                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
+                        {article.ai_summary.category}
+                      </span>
+                    )}
+                    {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
+                  </div>
+                  <div className="flex items-center gap-3 ml-auto">
+                    <span className="text-xs text-gray-500">
+                      {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                  )}
-                  {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
+                    <ShareButton 
+                      title={article.title} 
+                      text={article.ai_summary?.excerpt} 
+                      url={`https://romaflash.pages.dev/article?id=${article.id}`} 
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 ml-auto">
-                  <span className="text-xs text-gray-500">
-                    {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  <ShareButton 
-                    title={article.title} 
-                    text={article.ai_summary?.excerpt} 
-                    url={`https://romaflash.pages.dev/article?id=${article.id}`} 
-                  />
-                </div>
-              </div>
-              
-              <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
-                <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
-                  {article.title}
-                </Link>
-              </h2>
+                
+                <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
+                  <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
+                    {article.title}
+                  </Link>
+                </h2>
 
-              <div className="mb-4 text-gray-300 text-sm leading-relaxed">
-                {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
-                  <p>{article.ai_summary.excerpt}</p>
-                ) : (
-                  <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
-                )}
-              </div>
-            </article>
-          ))}
+                <div className="mb-4 text-gray-300 text-sm leading-relaxed">
+                  {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
+                    <p>{article.ai_summary.excerpt}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+          
+          {loadingMore && (
+            <div className="py-6 text-center text-gray-500 text-sm animate-pulse">
+              Caricamento notizie precedenti...
+            </div>
+          )}
+          {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
+            <div className="py-8 text-center text-gray-500 text-sm">
+              Hai raggiunto la fine delle notizie! 🐺
+            </div>
+          )}
         </section>
       </main>
     </PullToRefresh>

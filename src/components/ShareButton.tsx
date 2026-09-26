@@ -13,7 +13,7 @@ export default function ShareButton({ title, text, url }: ShareButtonProps) {
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
       setCanShare(true);
     }
   }, []);

@@ -74,7 +74,7 @@ Il tuo compito è rielaborare completamente questa notizia con uno stile editori
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
-{"titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto..."}
+{"titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
 Nessuna formattazione markdown, solo il JSON puro.
 
 Titolo originale: ${item.title}
@@ -106,7 +106,12 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
 
             if (parsed.titolo) newTitle = parsed.titolo
             if (parsed.excerpt && parsed.content) {
-              aiSummary = { excerpt: parsed.excerpt, content: parsed.content }
+              aiSummary = { 
+                excerpt: parsed.excerpt, 
+                content: parsed.content,
+                category: parsed.category || "Altro",
+                sentiment: parsed.sentiment || "Neutro"
+              }
             }
           } catch (e) {
             console.error("Errore nel parsing della risposta di Gemini:", e, geminiData)

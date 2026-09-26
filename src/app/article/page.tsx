@@ -61,7 +61,17 @@ function ArticleContent() {
         </Link>
         
         <div className="flex items-center gap-3 text-xs uppercase tracking-wider mb-4">
-          <span className="text-gray-500 flex items-center gap-1">
+          {article.ai_summary?.category && (
+            <span className="px-2 py-1 rounded font-bold tracking-wider bg-gray-800 text-primary">
+              {article.ai_summary.category}
+            </span>
+          )}
+          {article.ai_summary?.sentiment && (
+            <span className="text-lg" title={article.ai_summary.sentiment}>
+              {article.ai_summary.sentiment === 'Positivo' ? '🔥' : article.ai_summary.sentiment === 'Negativo' ? '❄️' : '💬'}
+            </span>
+          )}
+          <span className="text-gray-500 flex items-center gap-1 ml-auto">
             <Clock className="w-3 h-3" />
             {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
           </span>

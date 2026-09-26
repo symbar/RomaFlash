@@ -14,6 +14,7 @@ const WolfLogo = ({ className }: { className?: string }) => (
 export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState('Tutte');
 
   useEffect(() => {
     async function fetchArticles() {
@@ -21,13 +22,25 @@ export default function Home() {
         .from('articles')
         .select('*, sources(name)')
         .order('published_at', { ascending: false })
-        .limit(20);
+        .limit(30); // Aumentato a 30 per avere più dati da filtrare
       
       if (data) setArticles(data);
       setLoading(false);
     }
     fetchArticles();
   }, []);
+
+  const getSentimentIcon = (sentiment?: string) => {
+    if (sentiment === 'Positivo') return '🔥';
+    if (sentiment === 'Negativo') return '❄️';
+    return '💬';
+  };
+
+  const categories = ['Tutte', 'Calciomercato', 'Partita', 'Infortunio', 'Dichiarazioni', 'Club', 'Altro'];
+  
+  const filteredArticles = categoryFilter === 'Tutte' 
+    ? articles 
+    : articles.filter(a => a.ai_summary?.category === categoryFilter);
 
   if (loading) {
     return (
@@ -68,12 +81,46 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Barre dei filtri orizzontale */}
+      <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">
+        {categories.map(cat => (
+          <button
+            key={cat}
+            onClick={() => setCategoryFilter(cat)}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+              categoryFilter === cat 
+                ? 'bg-primary text-black' 
+                : 'bg-card text-gray-400 hover:text-white border border-border'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <section className="space-y-4">
-        {articles?.map((article) => (
+        {filteredArticles.length === 0 && (
+          <div className="text-center py-10 text-gray-500">
+            Nessuna notizia trovata per "{categoryFilter}".
+          </div>
+        )}
+        {filteredArticles?.map((article) => (
           <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
             
-            <div className="flex justify-end items-start mb-3">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex items-center gap-2">
+                {article.ai_summary?.category && (
+                  <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
+                    {article.ai_summary.category}
+                  </span>
+                )}
+                {article.ai_summary?.sentiment && (
+                  <span className="text-sm" title={article.ai_summary.sentiment}>
+                    {getSentimentIcon(article.ai_summary.sentiment)}
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-gray-500">
                 {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
               </span>

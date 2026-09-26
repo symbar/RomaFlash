@@ -1,11 +1,9 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-
-export const runtime = 'edge';
-
-// Disabilita la cache di Next.js per questa pagina, vogliamo i dati sempre freschi
-export const revalidate = 0;
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -13,34 +11,66 @@ const WolfLogo = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default async function Home() {
-  // Fetch articoli dal database, ordinati per i più recenti
-  const { data: articles } = await supabase
-    .from('articles')
-    .select(`
-      *,
-      sources ( name )
-    `)
-    .order('published_at', { ascending: false })
-    .limit(20);
+export default function Home() {
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchArticles() {
+      const { data } = await supabase
+        .from('articles')
+        .select('*, sources(name)')
+        .order('published_at', { ascending: false })
+        .limit(20);
+      
+      if (data) setArticles(data);
+      setLoading(false);
+    }
+    fetchArticles();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 animate-pulse">
+        <header className="flex items-center justify-between py-6 mb-4 border-b border-border/50">
+          <div className="flex items-center gap-3 opacity-30">
+            <WolfLogo className="w-8 h-8 grayscale" />
+            <h1 className="text-2xl font-bold tracking-tight text-white">Roma<span className="text-gray-400">Flash</span></h1>
+          </div>
+          <div className="w-12 h-4 bg-gray-800 rounded"></div>
+        </header>
+        <section className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <article key={i} className="relative overflow-hidden bg-card/30 border border-border/30 rounded-xl p-5">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-800/50" />
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-20 h-3 bg-gray-800 rounded"></div>
+                <div className="w-12 h-3 bg-gray-800 rounded"></div>
+              </div>
+              <div className="w-3/4 h-6 bg-gray-700/50 rounded mb-2"></div>
+              <div className="w-1/2 h-6 bg-gray-700/50 rounded mb-6"></div>
+            </article>
+          ))}
+        </section>
+      </main>
+    );
+  }
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6">
+    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
       <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
         <div className="flex items-center gap-3">
           <WolfLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
         </div>
-        <div className="text-xs text-gray-400 font-mono">
-          <Clock className="inline w-3 h-3 mr-1" />
-          Live
+        <div className="text-xs text-gray-500 font-medium">
+          Live Feed
         </div>
       </header>
 
       <section className="space-y-4">
         {articles?.map((article) => (
-          <article key={article.id} className="relative overflow-hidden bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
-            {/* Gradiente Giallorosso laterale */}
+          <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
             
             <div className="flex justify-between items-start mb-3">
@@ -53,14 +83,10 @@ export default async function Home() {
             </div>
             
             <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
-              <Link href={`/article/${article.id}`} className="hover:text-primary transition-colors">
+              <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
                 {article.title}
               </Link>
             </h2>
-            
-            {article.image_url && (
-              <img src={article.image_url} alt={article.title} className="w-full h-48 object-cover rounded-lg mb-4 opacity-80" />
-            )}
 
             <div className="mb-4 text-gray-300 text-sm leading-relaxed">
               {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
@@ -69,16 +95,8 @@ export default async function Home() {
                 <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
               )}
             </div>
-
-
           </article>
         ))}
-
-        {!articles?.length && (
-          <div className="text-center text-gray-500 py-10">
-            Nessuna notizia trovata al momento. Il motore è in attesa.
-          </div>
-        )}
       </section>
     </main>
   );

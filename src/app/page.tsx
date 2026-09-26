@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
+import PullToRefresh from '@/components/PullToRefresh';
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -17,17 +18,18 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('Tutte');
 
+  const fetchArticles = async () => {
+    const { data } = await supabase
+      .from('articles')
+      .select('*, sources(name)')
+      .order('published_at', { ascending: false })
+      .limit(30);
+    
+    if (data) setArticles(data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    async function fetchArticles() {
-      const { data } = await supabase
-        .from('articles')
-        .select('*, sources(name)')
-        .order('published_at', { ascending: false })
-        .limit(30); // Aumentato a 30 per avere più dati da filtrare
-      
-      if (data) setArticles(data);
-      setLoading(false);
-    }
     fetchArticles();
   }, []);
 
@@ -71,76 +73,78 @@ export default function Home() {
   }
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
-      <header className="flex items-center justify-between py-6 mb-2 border-b border-border">
-        <div className="flex items-center gap-3">
-          <WolfLogo className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
-        </div>
-        <PushNotificationManager />
-      </header>
-
-      {/* Barre dei filtri orizzontale */}
-      <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setCategoryFilter(cat)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-              categoryFilter === cat 
-                ? 'bg-primary text-black' 
-                : 'bg-card text-gray-400 hover:text-white border border-border'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      <section className="space-y-4">
-        {filteredArticles.length === 0 && (
-          <div className="text-center py-10 text-gray-500">
-            Nessuna notizia trovata per "{categoryFilter}".
+    <PullToRefresh onRefresh={fetchArticles}>
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
+        <header className="flex items-center justify-between py-6 mb-2 border-b border-border">
+          <div className="flex items-center gap-3">
+            <WolfLogo className="w-8 h-8" />
+            <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
           </div>
-        )}
-        {filteredArticles?.map((article) => (
-          <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
-            
-            <div className="flex justify-between items-start mb-3">
-              <div className="flex items-center gap-2">
-                {article.ai_summary?.category && (
-                  <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
-                    {article.ai_summary.category}
-                  </span>
-                )}
-                {article.ai_summary?.sentiment && (
-                  <span className="text-sm" title={article.ai_summary.sentiment}>
-                    {getSentimentIcon(article.ai_summary.sentiment)}
-                  </span>
+          <PushNotificationManager />
+        </header>
+
+        {/* Barre dei filtri orizzontale */}
+        <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                categoryFilter === cat 
+                  ? 'bg-primary text-black' 
+                  : 'bg-card text-gray-400 hover:text-white border border-border'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <section className="space-y-4">
+          {filteredArticles.length === 0 && (
+            <div className="text-center py-10 text-gray-500">
+              Nessuna notizia trovata per "{categoryFilter}".
+            </div>
+          )}
+          {filteredArticles?.map((article) => (
+            <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
+              
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-2">
+                  {article.ai_summary?.category && (
+                    <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
+                      {article.ai_summary.category}
+                    </span>
+                  )}
+                  {article.ai_summary?.sentiment && (
+                    <span className="text-sm" title={article.ai_summary.sentiment}>
+                      {getSentimentIcon(article.ai_summary.sentiment)}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-gray-500">
+                  {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              
+              <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
+                <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
+                  {article.title}
+                </Link>
+              </h2>
+
+              <div className="mb-4 text-gray-300 text-sm leading-relaxed">
+                {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
+                  <p>{article.ai_summary.excerpt}</p>
+                ) : (
+                  <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
                 )}
               </div>
-              <span className="text-xs text-gray-500">
-                {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-            
-            <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
-              <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
-                {article.title}
-              </Link>
-            </h2>
-
-            <div className="mb-4 text-gray-300 text-sm leading-relaxed">
-              {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
-                <p>{article.ai_summary.excerpt}</p>
-              ) : (
-                <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
-              )}
-            </div>
-          </article>
-        ))}
-      </section>
-    </main>
+            </article>
+          ))}
+        </section>
+      </main>
+    </PullToRefresh>
   );
 }

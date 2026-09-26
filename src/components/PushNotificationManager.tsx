@@ -74,6 +74,18 @@ export default function PushNotificationManager() {
     }
   }
 
+  async function unsubscribeFromPush() {
+    try {
+      if (subscription) {
+        await subscription.unsubscribe();
+        setSubscription(null);
+        alert('Notifiche disattivate.');
+      }
+    } catch (error) {
+      console.error('Errore disiscrizione push:', error);
+    }
+  }
+
   if (!isSupported) return null;
 
   return (
@@ -88,9 +100,9 @@ export default function PushNotificationManager() {
         </button>
       ) : (
         <button 
-          title="Notifiche Attive"
-          disabled
-          className="p-2 rounded-full bg-card/50 border border-border text-green-500 flex items-center justify-center opacity-70"
+          onClick={unsubscribeFromPush}
+          title="Disattiva Notifiche"
+          className="p-2 rounded-full bg-card/50 hover:bg-card border border-border text-green-500 hover:text-red-500 transition-colors flex items-center justify-center"
         >
           <BellRing className="w-5 h-5" />
         </button>

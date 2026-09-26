@@ -11,6 +11,7 @@ function ArticleContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [article, setArticle] = useState<any>(null);
+  const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +23,26 @@ function ArticleContent() {
         .eq('id', id)
         .single();
       
-      if (data) setArticle(data);
+      if (data) {
+        setArticle(data);
+        
+        // Fetch related articles (same category)
+        if (data.ai_summary?.category) {
+          const { data: recentData } = await supabase
+            .from('articles')
+            .select('id, title, published_at, ai_summary')
+            .neq('id', data.id)
+            .order('published_at', { ascending: false })
+            .limit(20);
+            
+          if (recentData) {
+            const related = recentData
+              .filter(a => a.ai_summary?.category === data.ai_summary.category)
+              .slice(0, 3);
+            setRelatedArticles(related);
+          }
+        }
+      }
       setLoading(false);
     }
     fetchArticle();
@@ -113,6 +133,34 @@ function ArticleContent() {
           paragraph.trim() ? <p key={idx} className="mb-6">{paragraph}</p> : null
         ))}
       </article>
+
+      {relatedArticles.length > 0 && (
+        <section className="mt-16 pt-8 border-t border-border/50">
+          <h3 className="text-xl font-serif font-bold mb-6 text-white flex items-center gap-2">
+            Continua a leggere <span className="text-sm font-sans font-normal text-gray-500 bg-gray-800 px-2 py-0.5 rounded">{article.ai_summary.category}</span>
+          </h3>
+          <div className="space-y-4">
+            {relatedArticles.map((rel) => (
+              <Link 
+                key={rel.id} 
+                href={`/article?id=${rel.id}`}
+                className="block p-4 rounded-xl bg-card border border-border hover:bg-card/80 transition-colors"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-base font-bold text-gray-200 leading-tight">
+                    {rel.title}
+                  </h4>
+                  {rel.ai_summary?.sentiment && getSentimentBadge(rel.ai_summary.sentiment)}
+                </div>
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {new Date(rel.published_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

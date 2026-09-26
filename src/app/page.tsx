@@ -77,9 +77,6 @@ export default function Home() {
           <WolfLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
         </div>
-        <div className="text-xs text-gray-500 font-medium">
-          Live Feed
-        </div>
       </header>
       
       <PushNotificationManager />

@@ -48,12 +48,9 @@ export default function PushNotificationManager() {
       }
 
       const registration = await navigator.serviceWorker.ready;
-      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-        alert("Chiave VAPID pubblica mancante.");
-        return;
-      }
+      const vapidPublicKey = "BALaMVsvTLzWt3OESGQevk88tUvpNwEG6Ou20ssGg2mmnOauhPlbqmKCjIPF8wdD3vjzgxhdFtXl23S_9pUwWE8";
 
-      const applicationServerKey = urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+      const applicationServerKey = urlB64ToUint8Array(vapidPublicKey);
       
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,

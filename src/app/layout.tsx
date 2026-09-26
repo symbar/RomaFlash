@@ -36,27 +36,10 @@ export default function RootLayout({
       lang="it"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground pb-20">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         
         {children}
 
-        {/* Bottom Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/50 pb-[env(safe-area-inset-bottom)]">
-          <div className="max-w-2xl mx-auto px-6 py-3 flex justify-between items-center">
-            <button className="flex flex-col items-center gap-1 text-primary">
-              <Home className="w-6 h-6" />
-              <span className="text-[10px] font-semibold">Home</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
-              <Bookmark className="w-6 h-6" />
-              <span className="text-[10px] font-semibold">Salvati</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
-              <User className="w-6 h-6" />
-              <span className="text-[10px] font-semibold">Profilo</span>
-            </button>
-          </div>
-        </nav>
       </body>
     </html>
   );

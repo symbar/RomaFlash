@@ -37,6 +37,18 @@ serve(async (req) => {
       })
     }
 
+    // 2b. Recupera i titoli recenti per la deduplicazione
+    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    const { data: recentArticles } = await supabase
+      .from('articles')
+      .select('title')
+      .gte('published_at', twelveHoursAgo)
+      .not('original_url', 'like', 'romaflash-daily-briefing-%')
+      
+    const recentTitlesList = recentArticles && recentArticles.length > 0 
+      ? recentArticles.map(a => `- ${a.title}`).join('\n')
+      : "Nessun articolo recente."
+
     const parser = new Parser()
     let processedCount = 0
 
@@ -53,7 +65,7 @@ serve(async (req) => {
         for (const item of items) {
           if (!item.link || !item.title) continue;
 
-          // Controlla se la notizia esiste già nel DB
+          // Controlla se la notizia esiste già nel DB (duplicato esatto dell'URL)
           const { data: existing } = await supabase
             .from('articles')
             .select('id')
@@ -67,15 +79,22 @@ serve(async (req) => {
 
           console.log(`Nuova notizia trovata: ${item.title}`)
 
-          // 4. Chiama Gemini per il riassunto
+          // 4. Chiama Gemini per il riassunto e il controllo anti-spam
           const prompt = `Sei un giornalista sportivo esperto dell'AS Roma. 
 Il tuo compito è rielaborare completamente questa notizia con uno stile editoriale accattivante.
+TUTTAVIA, prima verifica se questa notizia tratta LO STESSO IDENTICO EVENTO di uno dei seguenti titoli già pubblicati oggi:
+---
+${recentTitlesList}
+---
+Se la notizia parla ESATTAMENTE dello stesso evento/argomento di uno di questi titoli, imposta "is_duplicate" a true e lascia vuoti gli altri campi.
+Altrimenti, imposta "is_duplicate" a false e procedi con la rielaborazione:
+
 1. Scrivi un nuovo titolo (diverso dall'originale).
 2. Scrivi un breve riassunto di 2 righe (excerpt) per la homepage.
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
-{"titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
+{"is_duplicate": false, "titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
 Nessuna formattazione markdown, solo il JSON puro.
 
 Titolo originale: ${item.title}
@@ -104,6 +123,11 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
             // Prova a parsare l'array JSON dalla risposta (pulendo eventuale markdown)
             const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim()
             const parsed = JSON.parse(cleanJson)
+
+            if (parsed.is_duplicate === true) {
+              console.log(`DUPLICATO INTELLIGENTE RILEVATO DA GEMINI: ${item.title}`);
+              continue; // Salta il salvataggio su Supabase
+            }
 
             if (parsed.titolo) newTitle = parsed.titolo
             if (parsed.excerpt && parsed.content) {

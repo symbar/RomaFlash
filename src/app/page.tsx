@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
 import PullToRefresh from '@/components/PullToRefresh';
 import ShareButton from '@/components/ShareButton';
+import { motion } from 'framer-motion';
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -167,7 +168,10 @@ export default function Home() {
           {filteredArticles?.map((article, index) => {
             const isLast = index === filteredArticles.length - 1;
             return (
-              <article 
+              <motion.article 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: (index % 10) * 0.05 }}
                 key={article.id} 
                 ref={isLast ? lastArticleRef : null}
                 className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5"
@@ -208,7 +212,7 @@ export default function Home() {
                     <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
                   )}
                 </div>
-              </article>
+              </motion.article>
             );
           })}
           

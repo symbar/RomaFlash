@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
@@ -33,10 +33,26 @@ export default function Home() {
     fetchArticles();
   }, []);
 
-  const getSentimentIcon = (sentiment?: string) => {
-    if (sentiment === 'Positivo') return '🔥';
-    if (sentiment === 'Negativo') return '❄️';
-    return '💬';
+  const getSentimentBadge = (sentiment?: string) => {
+    if (sentiment === 'Positivo') {
+      return (
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-orange-500/10 text-orange-500 border border-orange-500/20">
+          <Flame className="w-3 h-3" /> Hot
+        </span>
+      );
+    }
+    if (sentiment === 'Negativo') {
+      return (
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <Snowflake className="w-3 h-3" /> Cold
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-400 border border-gray-500/20">
+        <MessageCircle className="w-3 h-3" /> News
+      </span>
+    );
   };
 
   const categories = ['Tutte', 'Calciomercato', 'Partita', 'Infortunio', 'Dichiarazioni', 'Club', 'Altro'];
@@ -117,11 +133,7 @@ export default function Home() {
                       {article.ai_summary.category}
                     </span>
                   )}
-                  {article.ai_summary?.sentiment && (
-                    <span className="text-sm" title={article.ai_summary.sentiment}>
-                      {getSentimentIcon(article.ai_summary.sentiment)}
-                    </span>
-                  )}
+                  {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                 </div>
                 <span className="text-xs text-gray-500">
                   {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}

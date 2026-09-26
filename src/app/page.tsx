@@ -1,11 +1,32 @@
-import { Flame, Clock, ChevronRight } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
-export default function Home() {
+// Disabilita la cache di Next.js per questa pagina, vogliamo i dati sempre freschi
+export const revalidate = 0;
+
+const WolfLogo = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
+    <path fill="#f0b516" d="M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6"/>
+  </svg>
+);
+
+export default async function Home() {
+  // Fetch articoli dal database, ordinati per i più recenti
+  const { data: articles } = await supabase
+    .from('articles')
+    .select(`
+      *,
+      sources ( name )
+    `)
+    .order('published_at', { ascending: false })
+    .limit(20);
+
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6">
       <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <Flame className="text-secondary w-8 h-8" />
+        <div className="flex items-center gap-3">
+          <WolfLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
         </div>
         <div className="text-xs text-gray-400 font-mono">
@@ -15,66 +36,47 @@ export default function Home() {
       </header>
 
       <section className="space-y-4">
-        {/* Placeholder per il primo articolo (lo sostituiremo con i dati veri di Supabase) */}
-        <article className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-semibold text-secondary uppercase tracking-wider">Calciomercato</span>
-            <span className="text-xs text-gray-500">10 min fa</span>
-          </div>
-          
-          <h2 className="text-xl font-bold leading-tight mb-3">
-            Accordo raggiunto per il nuovo attaccante: le cifre dell'affare
-          </h2>
-          
-          <ul className="space-y-2 mb-4 text-gray-300 text-sm">
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0" />
-              <span>Contratto di 4 anni a 2.5 milioni a stagione.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0" />
-              <span>Domani previste le visite mediche a Villa Stuart.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0" />
-              <span>La Roma verserà 15 milioni più 3 di bonus nelle casse del club cedente.</span>
-            </li>
-          </ul>
+        {articles?.map((article) => (
+          <article key={article.id} className="relative overflow-hidden bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
+            {/* Gradiente Giallorosso laterale */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
+            
+            <div className="flex justify-between items-start mb-3">
+              <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
+                {article.sources?.name || 'News'}
+              </span>
+              <span className="text-xs text-gray-500">
+                {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            
+            <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
+              <Link href={`/article/${article.id}`} className="hover:text-primary transition-colors">
+                {article.title}
+              </Link>
+            </h2>
+            
+            {article.image_url && (
+              <img src={article.image_url} alt={article.title} className="w-full h-48 object-cover rounded-lg mb-4 opacity-80" />
+            )}
 
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-            <span className="text-xs text-gray-500">Fonte: Corriere dello Sport</span>
-            <button className="text-primary text-sm font-semibold flex items-center gap-1 hover:text-primary/80">
-              Leggi originale <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </article>
+            <div className="mb-4 text-gray-300 text-sm leading-relaxed">
+              {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
+                <p>{article.ai_summary.excerpt}</p>
+              ) : (
+                <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
+              )}
+            </div>
 
-        {/* Placeholder 2 */}
-        <article className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
-          <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-semibold text-secondary uppercase tracking-wider">Trigoria</span>
-            <span className="text-xs text-gray-500">2 ore fa</span>
+
+          </article>
+        ))}
+
+        {!articles?.length && (
+          <div className="text-center text-gray-500 py-10">
+            Nessuna notizia trovata al momento. Il motore è in attesa.
           </div>
-          <h2 className="text-xl font-bold leading-tight mb-3">
-            Allenamento mattutino: due giocatori a parte
-          </h2>
-          <ul className="space-y-2 mb-4 text-gray-300 text-sm">
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0" />
-              <span>Lavoro di scarico per i titolari dell'ultima partita.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-secondary mt-1.5 flex-shrink-0" />
-              <span>Ancora differenziato per i due infortunati, out per la prossima gara.</span>
-            </li>
-          </ul>
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-            <span className="text-xs text-gray-500">Fonte: VoceGiallorossa</span>
-            <button className="text-primary text-sm font-semibold flex items-center gap-1 hover:text-primary/80">
-              Leggi originale <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </article>
+        )}
       </section>
     </main>
   );

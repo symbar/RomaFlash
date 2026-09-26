@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { ArrowLeft, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
+export const runtime = 'edge';
+
 export const revalidate = 0;
 
 export default async function ArticlePage({ params }: { params: { id: string } }) {

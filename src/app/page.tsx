@@ -2,6 +2,8 @@ import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+export const runtime = 'edge';
+
 // Disabilita la cache di Next.js per questa pagina, vogliamo i dati sempre freschi
 export const revalidate = 0;
 

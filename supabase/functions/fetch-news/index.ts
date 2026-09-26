@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 import Parser from "https://esm.sh/rss-parser@3.13.0"
+import webpush from "npm:web-push@3.6.7"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -137,6 +138,36 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
             console.error(`Errore inserimento in DB per: ${item.title}`, insertError)
           } else {
             processedCount++
+            
+            // Invia notifica push
+            const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')
+            const vapidPrivate = Deno.env.get('VAPID_PRIVATE_KEY')
+            
+            if (vapidPublic && vapidPrivate) {
+              webpush.setVapidDetails('mailto:hello@romaflash.com', vapidPublic, vapidPrivate)
+              
+              const { data: subs } = await supabase.from('push_subscriptions').select('*')
+              if (subs && subs.length > 0) {
+                const payload = JSON.stringify({
+                  title: newTitle,
+                  body: aiSummary.excerpt || "Nuovo articolo su RomaFlash",
+                  url: `/?refresh=1`
+                })
+                
+                console.log(`Invio notifica a ${subs.length} iscritti...`)
+                for (const sub of subs) {
+                  try {
+                    await webpush.sendNotification(sub.subscription, payload)
+                  } catch (e) {
+                    console.error('Errore invio push a utente (potrebbe essersi disiscritto):', e)
+                    // Opzionale: se l'errore è 410 (Gone), cancella la sub dal DB
+                    if (e.statusCode === 410) {
+                      await supabase.from('push_subscriptions').delete().eq('id', sub.id)
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       } catch (feedError) {

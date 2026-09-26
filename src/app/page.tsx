@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -71,7 +72,7 @@ export default function Home() {
 
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
-      <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
+      <header className="flex items-center justify-between py-6 mb-2 border-b border-border">
         <div className="flex items-center gap-3">
           <WolfLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
@@ -80,6 +81,8 @@ export default function Home() {
           Live Feed
         </div>
       </header>
+      
+      <PushNotificationManager />
 
       {/* Barre dei filtri orizzontale */}
       <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">

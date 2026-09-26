@@ -28,12 +28,36 @@ export default function PushNotificationManager() {
     }
   }
 
+  function urlB64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   async function subscribeToPush() {
     try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert("Devi concedere il permesso per le notifiche nelle impostazioni del tuo browser.");
+        return;
+      }
+
       const registration = await navigator.serviceWorker.ready;
+      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+        alert("Chiave VAPID pubblica mancante.");
+        return;
+      }
+
+      const applicationServerKey = urlB64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+      
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+        applicationServerKey,
       });
       
       setSubscription(sub);

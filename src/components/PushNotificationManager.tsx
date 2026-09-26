@@ -77,21 +77,24 @@ export default function PushNotificationManager() {
   if (!isSupported) return null;
 
   return (
-    <div className="flex justify-center p-4">
+    <>
       {!subscription ? (
         <button 
           onClick={subscribeToPush}
-          className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/50 rounded-full text-sm font-semibold transition-colors"
+          title="Attiva Notifiche Push"
+          className="p-2 rounded-full bg-card hover:bg-card/80 border border-border text-primary transition-colors flex items-center justify-center animate-pulse"
         >
-          <Bell className="w-4 h-4" />
-          Attiva Notifiche Push
+          <Bell className="w-5 h-5" />
         </button>
       ) : (
-        <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-300 border border-gray-700 rounded-full text-sm font-semibold opacity-70">
-          <BellRing className="w-4 h-4 text-green-500" />
-          Notifiche Attive
-        </div>
+        <button 
+          title="Notifiche Attive"
+          disabled
+          className="p-2 rounded-full bg-card/50 border border-border text-green-500 flex items-center justify-center opacity-70"
+        >
+          <BellRing className="w-5 h-5" />
+        </button>
       )}
-    </div>
+    </>
   );
 }

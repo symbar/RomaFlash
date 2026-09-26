@@ -77,9 +77,8 @@ export default function Home() {
           <WolfLogo className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
         </div>
+        <PushNotificationManager />
       </header>
-      
-      <PushNotificationManager />
 
       {/* Barre dei filtri orizzontale */}
       <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">

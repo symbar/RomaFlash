@@ -61,7 +61,6 @@ function ArticleContent() {
         </Link>
         
         <div className="flex items-center gap-3 text-xs uppercase tracking-wider mb-4">
-          <span className="font-bold text-primary">{article.sources?.name || 'News'}</span>
           <span className="text-gray-500 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}

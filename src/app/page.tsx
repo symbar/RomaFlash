@@ -73,10 +73,7 @@ export default function Home() {
           <article key={article.id} className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
             
-            <div className="flex justify-between items-start mb-3">
-              <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
-                {article.sources?.name || 'News'}
-              </span>
+            <div className="flex justify-end items-start mb-3">
               <span className="text-xs text-gray-500">
                 {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
               </span>

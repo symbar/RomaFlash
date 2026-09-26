@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
 import PullToRefresh from '@/components/PullToRefresh';
+import ShareButton from '@/components/ShareButton';
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -135,9 +136,16 @@ export default function Home() {
                   )}
                   {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                 </div>
-                <span className="text-xs text-gray-500">
-                  {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                <div className="flex items-center gap-3 ml-auto">
+                  <span className="text-xs text-gray-500">
+                    {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <ShareButton 
+                    title={article.title} 
+                    text={article.ai_summary?.excerpt} 
+                    url={`https://romaflash.pages.dev/article?id=${article.id}`} 
+                  />
+                </div>
               </div>
               
               <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">

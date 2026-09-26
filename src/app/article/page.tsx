@@ -3,8 +3,9 @@
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import ShareButton from '@/components/ShareButton';
 
 function ArticleContent() {
   const searchParams = useSearchParams();
@@ -52,6 +53,28 @@ function ArticleContent() {
 
   const content = article.ai_summary?.content || "Contenuto in elaborazione...";
 
+  const getSentimentBadge = (sentiment?: string) => {
+    if (sentiment === 'Positivo') {
+      return (
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-orange-500/10 text-orange-500 border border-orange-500/20">
+          <Flame className="w-3 h-3" /> Hot
+        </span>
+      );
+    }
+    if (sentiment === 'Negativo') {
+      return (
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <Snowflake className="w-3 h-3" /> Cold
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-400 border border-gray-500/20">
+        <MessageCircle className="w-3 h-3" /> News
+      </span>
+    );
+  };
+
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
       <header className="py-4 mb-6 border-b border-border/50">
@@ -62,19 +85,22 @@ function ArticleContent() {
         
         <div className="flex items-center gap-3 text-xs uppercase tracking-wider mb-4">
           {article.ai_summary?.category && (
-            <span className="px-2 py-1 rounded font-bold tracking-wider bg-gray-800 text-primary">
+            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
               {article.ai_summary.category}
             </span>
           )}
-          {article.ai_summary?.sentiment && (
-            <span className="text-lg" title={article.ai_summary.sentiment}>
-              {article.ai_summary.sentiment === 'Positivo' ? '🔥' : article.ai_summary.sentiment === 'Negativo' ? '❄️' : '💬'}
+          {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
+          <div className="flex items-center gap-3 ml-auto text-gray-500">
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
             </span>
-          )}
-          <span className="text-gray-500 flex items-center gap-1 ml-auto">
-            <Clock className="w-3 h-3" />
-            {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-          </span>
+            <ShareButton 
+              title={article.title} 
+              text={article.ai_summary?.excerpt} 
+              url={`https://romaflash.pages.dev/article?id=${article.id}`} 
+            />
+          </div>
         </div>
 
         <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight text-white mb-6">

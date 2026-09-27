@@ -7,6 +7,7 @@ import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react'
 import { useSearchParams } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import PitchView from '@/components/PitchView';
+import PollWidget from '@/components/PollWidget';
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -149,6 +150,10 @@ function ArticleContent() {
           paragraph.trim() ? <p key={idx} className="mb-6">{paragraph}</p> : null
         ))}
       </article>
+
+      {article.ai_summary?.poll && (
+        <PollWidget articleId={article.id} poll={article.ai_summary.poll} />
+      )}
 
       {relatedArticles.length > 0 && (
         <section className="mt-16 pt-8 border-t border-border/50">

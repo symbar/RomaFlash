@@ -102,6 +102,7 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 2. Scrivi un breve riassunto di 2 righe (excerpt) per la homepage.
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
+5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -118,9 +119,13 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
     "difensori": ["Celik", "Mancini", "Ndicka", "Angelino"],
     "centrocampisti": ["Cristante", "Paredes", "Pellegrini"],
     "attaccanti": ["Dybala", "Dovbyk", "El Shaarawy"]
-  } 
+  },
+  "poll": {
+    "question": "Giusto esonerare l'allenatore?",
+    "options": ["Sì, era ora", "No, diamogli tempo", "Colpa della società"]
+  }
 }
-Nessuna formattazione markdown, solo il JSON puro. Se non ci sono formazioni, metti "formation": null.
+Nessuna formattazione markdown, solo il JSON puro. Se non ci sono formazioni o sondaggi, metti i rispettivi campi a null.
 
 Titolo originale: ${item.title}
 Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto aggiuntivo."}`

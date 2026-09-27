@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Clock, Flame, Snowflake, MessageCircle, ArrowUp } from 'lucide-react';
@@ -112,7 +112,7 @@ export default function Home() {
     fetchNextMatch();
 
     // Invece di affidarci ai WebSockets (che spesso vengono bloccati dai firewall o dalle policy RLS gratuite),
-    // usiamo un robustissimo polling HTTP. Ogni 45 secondi controlliamo in silenzio se ci sono novità.
+    // usiamo un robustissimo polling HTTP. Ogni 45 secondi controlliamo in silenzio se ci sono novitÃ .
     const intervalId = setInterval(async () => {
       // Usiamo una funzione per non dipendere dallo state 'articles' che potrebbe essere vecchio nella closure
       setArticles(currentArticles => {
@@ -172,7 +172,7 @@ export default function Home() {
         <header className="flex items-center justify-between py-6 mb-4 border-b border-border/50">
           <div className="flex items-center gap-3 opacity-30">
             <WolfLogo className="w-8 h-8 grayscale" />
-            <h1 className="text-2xl font-bold tracking-tight text-white">Roma<span className="text-gray-400">Flash</span></h1>
+            <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
           </div>
           <div className="w-12 h-4 bg-gray-800 rounded"></div>
         </header>
@@ -214,7 +214,7 @@ export default function Home() {
         <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
           <div className="flex items-center gap-3">
             <WolfLogo className="w-8 h-8" />
-            <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
+            <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
           </div>
           <PushNotificationManager />
         </header>
@@ -312,7 +312,7 @@ export default function Home() {
           )}
           {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
             <div className="py-8 text-center text-gray-500 text-sm">
-              Hai raggiunto la fine delle notizie! 🐺
+              Hai raggiunto la fine delle notizie! ðŸº
             </div>
           )}
         </section>
@@ -320,3 +320,4 @@ export default function Home() {
     </PullToRefresh>
   );
 }
+

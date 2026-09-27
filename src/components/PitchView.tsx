@@ -28,28 +28,28 @@ export default function PitchView({ formation }: { formation: any }) {
           {/* Attaccanti */}
           <div className="flex justify-evenly items-center w-full pt-4">
             {formation.attaccanti?.map((player: string, i: number) => (
-              <PlayerDot key={tt- + i} name={player} role="ATT" />
+              <PlayerDot key={"att-" + i} name={player} role="ATT" />
             ))}
           </div>
           
           {/* Centrocampisti */}
           <div className="flex justify-evenly items-center w-full">
             {formation.centrocampisti?.map((player: string, i: number) => (
-              <PlayerDot key={cen- + i} name={player} role="CEN" />
+              <PlayerDot key={"cen-" + i} name={player} role="CEN" />
             ))}
           </div>
 
           {/* Difensori */}
           <div className="flex justify-evenly items-center w-full">
             {formation.difensori?.map((player: string, i: number) => (
-              <PlayerDot key={def- + i} name={player} role="DIF" />
+              <PlayerDot key={"def-" + i} name={player} role="DIF" />
             ))}
           </div>
 
           {/* Portiere */}
           <div className="flex justify-center items-center w-full pb-2">
             {formation.portiere?.map((player: string, i: number) => (
-              <PlayerDot key={gk- + i} name={player} role="POR" />
+              <PlayerDot key={"gk-" + i} name={player} role="POR" />
             ))}
           </div>
         </div>
@@ -81,3 +81,8 @@ function PlayerDot({ name, role }: { name: string, role: string }) {
     </div>
   );
 }
+
+
+
+
+

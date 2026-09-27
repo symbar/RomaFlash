@@ -1,0 +1,1 @@
+DELETE FROM articles WHERE original_url = 'https://fake-poll-news.com/esonero';

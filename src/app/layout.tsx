@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 };
 
 import TabBar from '@/components/TabBar';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default function RootLayout({
   children,
@@ -35,11 +36,13 @@ export default function RootLayout({
     <html
       lang="it"
       className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        
-        {children}
-        <TabBar />
+        <ThemeProvider>
+          {children}
+          <TabBar />
+        </ThemeProvider>
       </body>
     </html>
   );

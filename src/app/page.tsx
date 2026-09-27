@@ -5,6 +5,7 @@ import { Clock, Flame, Snowflake, MessageCircle, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import PullToRefresh from '@/components/PullToRefresh';
 import ShareButton from '@/components/ShareButton';
 import { motion } from 'framer-motion';
@@ -216,7 +217,10 @@ export default function Home() {
             <WolfLogo className="w-8 h-8" />
             <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
           </div>
-          <PushNotificationManager />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <PushNotificationManager />
+          </div>
         </header>
 
         {/* Widget Prossima Partita - Incassato sotto l'header */}
@@ -320,4 +324,5 @@ export default function Home() {
     </PullToRefresh>
   );
 }
+
 

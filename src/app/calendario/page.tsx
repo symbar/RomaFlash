@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+﻿import { supabase } from '@/lib/supabase';
 import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 
 export const revalidate = 60;
@@ -28,7 +28,7 @@ export default async function CalendarioPage() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
+    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
       <header className="py-6 mb-4 border-b border-border">
         <h1 className="text-2xl font-bold tracking-tight text-white">Calendario <span className="text-primary">AS Roma</span></h1>
         <p className="text-gray-400 text-sm mt-1">Tutte le competizioni stagionali</p>
@@ -100,9 +100,10 @@ export default async function CalendarioPage() {
 
 function TrophyIcon({ comp }: { comp: string }) {
   const c = comp.toLowerCase();
-  if (c.includes('serie a')) return <span>🇮🇹</span>;
-  if (c.includes('champions')) return <span>⭐</span>;
-  if (c.includes('coppa')) return <span>🎯</span>;
-  if (c.includes('europa')) return <span>🌍</span>;
+  if (c.includes('serie a')) return <span>ðŸ‡®ðŸ‡¹</span>;
+  if (c.includes('champions')) return <span>â­</span>;
+  if (c.includes('coppa')) return <span>ðŸŽ¯</span>;
+  if (c.includes('europa')) return <span>ðŸŒ</span>;
   return <CalendarIcon className="w-3 h-3" />;
 }
+

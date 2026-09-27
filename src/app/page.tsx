@@ -169,7 +169,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24 animate-pulse">
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
         <header className="flex items-center justify-between py-6 mb-4 border-b border-border/50">
           <div className="flex items-center gap-3 opacity-30">
             <WolfLogo className="w-8 h-8 grayscale" />
@@ -196,7 +196,7 @@ export default function Home() {
 
   return (
     <PullToRefresh onRefresh={fetchArticles}>
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24 relative">
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 relative">
         {newArticlesCount > 0 && (
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
             <button 
@@ -324,6 +324,7 @@ export default function Home() {
     </PullToRefresh>
   );
 }
+
 
 
 

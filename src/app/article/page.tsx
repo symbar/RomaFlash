@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -64,7 +64,7 @@ function ArticleContent() {
 
   if (loading) {
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24 animate-pulse">
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
         <div className="w-24 h-6 bg-gray-800 rounded mb-8"></div>
         <div className="w-3/4 h-10 bg-gray-700 rounded mb-6"></div>
         <div className="space-y-4">
@@ -78,7 +78,7 @@ function ArticleContent() {
 
   if (!article) {
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24 text-center">
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 text-center">
         <h1 className="text-2xl font-bold mb-4">Articolo non trovato</h1>
         <Link href="/" className="text-primary hover:underline">Torna alla home</Link>
       </main>
@@ -110,7 +110,7 @@ function ArticleContent() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
+    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
       <header className="py-4 mb-6 border-b border-border/50">
         <Link href="/" className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -193,4 +193,5 @@ export default function ArticlePage() {
     </Suspense>
   );
 }
+
 

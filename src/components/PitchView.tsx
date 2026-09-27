@@ -7,7 +7,7 @@ export default function PitchView({ formation }: { formation: any }) {
   const adText = "ROMAFLASH • ROMAFLASH • ROMAFLASH • ROMAFLASH • ROMAFLASH • ROMAFLASH • ROMAFLASH • ";
 
   return (
-    <div className="w-full max-w-md mx-auto my-8 bg-black rounded-xl p-3 border-4 border-gray-900 shadow-2xl relative">
+    <div className="w-full max-w-md mx-auto my-8 bg-black rounded-xl p-3 border-4 border-gray-900 shadow-2xl relative touch-pan-y">
       
       {/* Cartellone Pubblicitario Top */}
       <div className="w-full h-5 bg-primary flex items-center justify-center overflow-hidden mb-2 rounded-sm border border-black shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]">
@@ -81,6 +81,7 @@ function PlayerDot({ name, role }: { name: string, role: string }) {
     </div>
   );
 }
+
 
 
 

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+﻿import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 export const revalidate = 60; // Revalidate every 60 seconds
@@ -11,7 +11,7 @@ export default async function ClassificaPage() {
     .order('position', { ascending: true });
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
+    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
       <header className="py-6 mb-2 border-b border-border">
         <h1 className="text-2xl font-bold tracking-tight text-white">Classifica <span className="text-primary">Serie A</span></h1>
         <p className="text-gray-400 text-sm mt-1">Aggiornata in tempo reale</p>
@@ -64,3 +64,4 @@ export default async function ClassificaPage() {
     </main>
   );
 }
+

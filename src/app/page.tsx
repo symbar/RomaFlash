@@ -186,17 +186,17 @@ export default function Home() {
           {filteredArticles?.map((article, index) => {
             const isLast = index === filteredArticles.length - 1;
             return (
-              <motion.article 
+                <motion.article 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: (index % 10) * 0.05 }}
                 key={article.id} 
                 ref={isLast ? lastArticleRef : null}
-                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-5"
+                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-4"
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
                 
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center gap-2">
                     {article.ai_summary?.category && (
                       <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
@@ -217,17 +217,17 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <h2 className="text-2xl font-serif font-bold leading-tight mb-4 text-white">
+                <h2 className="text-lg md:text-xl font-serif font-bold leading-tight mb-1.5 text-white">
                   <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
                     {article.title}
                   </Link>
                 </h2>
 
-                <div className="mb-4 text-gray-300 text-sm leading-relaxed">
+                <div className="text-gray-400 text-sm leading-snug line-clamp-2">
                   {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
                     <p>{article.ai_summary.excerpt}</p>
                   ) : (
-                    <p className="text-gray-500 italic">Clicca il titolo per leggere l'articolo.</p>
+                    <p className="italic">Clicca il titolo per leggere l'articolo.</p>
                   )}
                 </div>
               </motion.article>

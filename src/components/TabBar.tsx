@@ -12,18 +12,18 @@ export default function TabBar() {
       <div className="flex justify-around items-center h-16">
         
         <Link href="/" className="flex flex-col items-center justify-center w-full h-full gap-1">
-          <Home className={`w-6 h-6 transition-colors ${pathname === '/' ? 'text-primary' : 'text-gray-500'}`} />
-          <span className={`text-[10px] font-medium ${pathname === '/' ? 'text-primary' : 'text-gray-500'}`}>Home</span>
+          <Home className={`w-6 h-6 transition-colors ${pathname === '/' ? 'text-secondary' : 'text-gray-500'}`} />
+          <span className={`text-[10px] font-medium ${pathname === '/' ? 'text-secondary' : 'text-gray-500'}`}>Home</span>
         </Link>
         
         <Link href="/classifica" className="flex flex-col items-center justify-center w-full h-full gap-1">
-          <Trophy className={`w-6 h-6 transition-colors ${pathname === '/classifica' ? 'text-primary' : 'text-gray-500'}`} />
-          <span className={`text-[10px] font-medium ${pathname === '/classifica' ? 'text-primary' : 'text-gray-500'}`}>Classifica</span>
+          <Trophy className={`w-6 h-6 transition-colors ${pathname === '/classifica' ? 'text-secondary' : 'text-gray-500'}`} />
+          <span className={`text-[10px] font-medium ${pathname === '/classifica' ? 'text-secondary' : 'text-gray-500'}`}>Classifica</span>
         </Link>
         
         <Link href="/calendario" className="flex flex-col items-center justify-center w-full h-full gap-1">
-          <CalendarDays className={`w-6 h-6 transition-colors ${pathname === '/calendario' ? 'text-primary' : 'text-gray-500'}`} />
-          <span className={`text-[10px] font-medium ${pathname === '/calendario' ? 'text-primary' : 'text-gray-500'}`}>Calendario</span>
+          <CalendarDays className={`w-6 h-6 transition-colors ${pathname === '/calendario' ? 'text-secondary' : 'text-gray-500'}`} />
+          <span className={`text-[10px] font-medium ${pathname === '/calendario' ? 'text-secondary' : 'text-gray-500'}`}>Calendario</span>
         </Link>
         
       </div>

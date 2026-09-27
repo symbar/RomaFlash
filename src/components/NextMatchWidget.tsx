@@ -68,7 +68,7 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
   if (!timeLeft) return null; // Nascondi il widget se non c'è una partita imminente
 
   return (
-    <div className="bg-gradient-to-r from-red-900 to-yellow-700 p-[1px] shadow-lg overflow-hidden">
+    <div className="bg-gradient-to-r from-primary to-secondary p-[1px] shadow-lg overflow-hidden">
       <div className="bg-black px-4 py-2 flex items-center justify-between text-xs md:text-sm">
         
         {/* Info Partita */}

@@ -1,11 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { supabase } from '@/lib/supabase';
 import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 
 export const revalidate = 60;
 
 export default async function CalendarioPage() {
-  const supabase = createServerComponentClient({ cookies });
   
   const { data: matches } = await supabase
     .from('calendar_matches')

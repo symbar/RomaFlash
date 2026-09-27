@@ -1,11 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function ClassificaPage() {
-  const supabase = createServerComponentClient({ cookies });
   
   const { data: standings } = await supabase
     .from('standings')

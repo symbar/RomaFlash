@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
+import { Clock, Flame, Snowflake, MessageCircle, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
@@ -90,8 +90,29 @@ export default function Home() {
     if (node) observerRef.current.observe(node);
   }, [loadingMore, hasMore, articles]);
 
+  const [newArticlesCount, setNewArticlesCount] = useState(0);
+
   useEffect(() => {
     fetchArticles();
+
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'articles',
+        },
+        (payload) => {
+          setNewArticlesCount((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const getSentimentBadge = (sentiment?: string) => {
@@ -151,7 +172,22 @@ export default function Home() {
 
   return (
     <PullToRefresh onRefresh={fetchArticles}>
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6">
+      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 relative">
+        {newArticlesCount > 0 && (
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
+            <button 
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setNewArticlesCount(0);
+                fetchArticles();
+              }}
+              className="bg-primary text-black font-bold text-sm px-5 py-2 rounded-full shadow-[0_0_20px_rgba(240,181,22,0.3)] border border-primary/50 hover:bg-yellow-400 transition-all flex items-center gap-2 animate-bounce"
+            >
+              <ArrowUp className="w-4 h-4" />
+              {newArticlesCount} Nuov{newArticlesCount === 1 ? 'a' : 'e'} Notizi{newArticlesCount === 1 ? 'a' : 'e'}
+            </button>
+          </div>
+        )}
         <header className="flex items-center justify-between py-6 mb-2 border-b border-border">
           <div className="flex items-center gap-3">
             <WolfLogo className="w-8 h-8" />

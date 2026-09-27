@@ -96,10 +96,26 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 1. Scrivi un nuovo titolo (diverso dall'originale).
 2. Scrivi un breve riassunto di 2 righe (excerpt) per la homepage.
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
+4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
-{"is_duplicate": false, "is_spam": false, "titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
-Nessuna formattazione markdown, solo il JSON puro.
+{
+  "is_duplicate": false, 
+  "is_spam": false, 
+  "titolo": "Nuovo titolo", 
+  "excerpt": "Breve riassunto", 
+  "content": "Testo completo dell'articolo riscritto...", 
+  "category": "Probabili Formazioni, Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", 
+  "sentiment": "Positivo, Negativo o Neutro",
+  "formation": {
+    "modulo": "4-3-3",
+    "portiere": ["Svilar"],
+    "difensori": ["Celik", "Mancini", "Ndicka", "Angelino"],
+    "centrocampisti": ["Cristante", "Paredes", "Pellegrini"],
+    "attaccanti": ["Dybala", "Dovbyk", "El Shaarawy"]
+  } 
+}
+Nessuna formattazione markdown, solo il JSON puro. Se non ci sono formazioni, metti "formation": null.
 
 Titolo originale: ${item.title}
 Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto aggiuntivo."}`
@@ -144,7 +160,8 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
                 excerpt: parsed.excerpt, 
                 content: parsed.content,
                 category: parsed.category || "Altro",
-                sentiment: parsed.sentiment || "Neutro"
+                sentiment: parsed.sentiment || "Neutro",
+                formation: parsed.formation || null
               }
             } else {
               console.error("Gemini response missing required fields:", parsed)

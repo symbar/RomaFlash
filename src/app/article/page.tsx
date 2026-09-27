@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import PitchView from '@/components/PitchView';
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -141,6 +142,9 @@ function ArticleContent() {
       </header>
 
       <article className="text-base md:text-lg leading-relaxed text-gray-300">
+        {article.ai_summary?.formation && (
+          <PitchView formation={article.ai_summary.formation} />
+        )}
         {content.split('\n').map((paragraph: string, idx: number) => (
           paragraph.trim() ? <p key={idx} className="mb-6">{paragraph}</p> : null
         ))}

@@ -10,6 +10,26 @@ interface NextMatchProps {
   matchDate: string; // ISO string
 }
 
+const getCompetitionLogo = (competition: string) => {
+  const comp = competition.toLowerCase();
+  if (comp.includes('serie a')) {
+    return "https://upload.wikimedia.org/wikipedia/commons/e/e1/Serie_A_logo_%282021%29.svg";
+  }
+  if (comp.includes('champions')) {
+    return "https://upload.wikimedia.org/wikipedia/commons/4/4c/UEFA_Champions_League_logo_2.svg";
+  }
+  if (comp.includes('coppa italia')) {
+    return "https://upload.wikimedia.org/wikipedia/commons/8/87/Coppa_Italia_Frecciarossa_logo.svg";
+  }
+  if (comp.includes('europa league')) {
+    return "https://upload.wikimedia.org/wikipedia/commons/c/cd/Europa_League_2021.svg";
+  }
+  if (comp.includes('conference')) {
+    return "https://upload.wikimedia.org/wikipedia/commons/4/47/UEFA_Europa_Conference_League_logo.svg";
+  }
+  return null;
+}
+
 export default function NextMatchWidget({ homeTeam, awayTeam, competition, matchDate }: NextMatchProps) {
   const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
 
@@ -44,8 +64,15 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
         {/* Info Partita */}
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <span className="text-gray-400 flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider">
-              <Trophy className="w-3 h-3 text-yellow-500" /> {competition}
+            <span className="text-gray-400 flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider">
+              {getCompetitionLogo(competition) ? (
+                <div className="w-4 h-4 bg-white/90 rounded-sm p-0.5 flex items-center justify-center">
+                  <img src={getCompetitionLogo(competition)!} alt={competition} className="w-full h-full object-contain" />
+                </div>
+              ) : (
+                <Trophy className="w-3 h-3 text-yellow-500" />
+              )}
+              {competition}
             </span>
             <span className="font-bold text-white uppercase tracking-wide">
               {homeTeam} <span className="text-yellow-500 font-normal mx-1">vs</span> {awayTeam}

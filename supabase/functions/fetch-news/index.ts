@@ -41,10 +41,15 @@ serve(async (req) => {
     const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
-      .select('title')
+      .select('title, published_at')
       .gte('published_at', twelveHoursAgo)
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
+      .order('published_at', { ascending: false });
       
+    const latestPublishedAt = recentArticles && recentArticles.length > 0 
+      ? new Date(recentArticles[0].published_at).getTime() 
+      : 0;
+
     const recentTitlesList = recentArticles && recentArticles.length > 0 
       ? recentArticles.map(a => `- ${a.title}`).join('\n')
       : "Nessun articolo recente."
@@ -175,7 +180,16 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
           // Per ora disabilitiamo l'immagine originale come richiesto
           const imageUrl = null
 
-          // 5. Salva su Supabase
+          // 5. Determina la data di pubblicazione (Falsificazione a fin di bene se è in ritardo)
+          let finalPublishedAt = item.isoDate || item.pubDate || new Date().toISOString()
+          const articleTime = new Date(finalPublishedAt).getTime()
+          
+          if (articleTime < latestPublishedAt) {
+            console.log(`[TIME OVERRIDE] Articolo in ritardo rilevato. Originale: ${finalPublishedAt}. Forzato a NOW().`)
+            finalPublishedAt = new Date().toISOString()
+          }
+
+          // 6. Salva su Supabase
           const { error: insertError } = await supabase
             .from('articles')
             .insert({
@@ -184,7 +198,7 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
               original_url: item.link,
               image_url: imageUrl,
               ai_summary: aiSummary,
-              published_at: item.isoDate || item.pubDate || new Date().toISOString()
+              published_at: finalPublishedAt
             })
 
           if (insertError) {

@@ -48,7 +48,7 @@ export default function Home() {
     const { data } = await supabase
       .from('articles')
       .select('*, sources(name)')
-      .order('created_at', { ascending: false })
+      .order('published_at', { ascending: false })
       .range(0, PAGE_SIZE - 1);
     
     if (data) {
@@ -66,7 +66,7 @@ export default function Home() {
     const { data } = await supabase
       .from('articles')
       .select('*, sources(name)')
-      .order('created_at', { ascending: false })
+      .order('published_at', { ascending: false })
       .range(currentLength, currentLength + PAGE_SIZE - 1);
     
     if (data && data.length > 0) {
@@ -103,13 +103,13 @@ export default function Home() {
       setArticles(currentArticles => {
         if (currentArticles.length === 0) return currentArticles;
         
-        const latestLocalTime = currentArticles[0].created_at;
+        const latestLocalTime = currentArticles[0].published_at;
         
-        // Chiediamo a Supabase: "Ci sono articoli inseriti (created_at) dopo il mio ultimo?"
+        // Chiediamo a Supabase: "Ci sono articoli con data di pubblicazione > della mia ultima?"
         supabase
           .from('articles')
           .select('id', { count: 'exact', head: true })
-          .gt('created_at', latestLocalTime)
+          .gt('published_at', latestLocalTime)
           .then(({ count }) => {
             if (count && count > 0) {
               setNewArticlesCount(count);

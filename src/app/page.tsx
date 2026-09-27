@@ -95,24 +95,31 @@ export default function Home() {
   useEffect(() => {
     fetchArticles();
 
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'articles',
-        },
-        (payload) => {
-          setNewArticlesCount((prev) => prev + 1);
-        }
-      )
-      .subscribe();
+    // Invece di affidarci ai WebSockets (che spesso vengono bloccati dai firewall o dalle policy RLS gratuite),
+    // usiamo un robustissimo polling HTTP. Ogni 45 secondi controlliamo in silenzio se ci sono novità.
+    const intervalId = setInterval(async () => {
+      // Usiamo una funzione per non dipendere dallo state 'articles' che potrebbe essere vecchio nella closure
+      setArticles(currentArticles => {
+        if (currentArticles.length === 0) return currentArticles;
+        
+        const latestLocalTime = currentArticles[0].published_at;
+        
+        // Chiediamo a Supabase: "Ci sono articoli con data di pubblicazione > della mia ultima?"
+        supabase
+          .from('articles')
+          .select('id', { count: 'exact', head: true })
+          .gt('published_at', latestLocalTime)
+          .then(({ count }) => {
+            if (count && count > 0) {
+              setNewArticlesCount(count);
+            }
+          });
+          
+        return currentArticles;
+      });
+    }, 45000); // Controlla ogni 45 secondi
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => clearInterval(intervalId);
   }, []);
 
   const getSentimentBadge = (sentiment?: string) => {

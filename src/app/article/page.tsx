@@ -7,6 +7,18 @@ import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react'
 import { useSearchParams } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const isToday = date.getDate() === now.getDate() && 
+                  date.getMonth() === now.getMonth() && 
+                  date.getFullYear() === now.getFullYear();
+  const timeString = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  if (isToday) return timeString;
+  const dayMonth = date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+  return `${dayMonth} ${timeString}`;
+}
+
 function ArticleContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -113,7 +125,7 @@ function ArticleContent() {
           <div className="flex items-center gap-3 ml-auto text-gray-500">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              {new Date(article.published_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+              {formatDate(article.published_at)}
             </span>
             <ShareButton 
               title={article.title} 

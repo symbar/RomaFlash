@@ -181,14 +181,6 @@ export default function Home() {
   return (
     <PullToRefresh onRefresh={fetchArticles}>
       <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 relative">
-        <div className="mb-4 rounded-xl overflow-hidden">
-          <NextMatchWidget 
-            homeTeam="Roma" 
-            awayTeam="Napoli" 
-            competition="Serie A" 
-            matchDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()} 
-          />
-        </div>
         {newArticlesCount > 0 && (
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
             <button 
@@ -204,13 +196,23 @@ export default function Home() {
             </button>
           </div>
         )}
-        <header className="flex items-center justify-between py-6 mb-2 border-b border-border">
+        <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
           <div className="flex items-center gap-3">
             <WolfLogo className="w-8 h-8" />
             <h1 className="text-2xl font-bold tracking-tight">Roma<span className="text-primary">Flash</span></h1>
           </div>
           <PushNotificationManager />
         </header>
+
+        {/* Widget Prossima Partita - Incassato sotto l'header */}
+        <div className="mb-6 rounded-xl overflow-hidden ring-1 ring-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <NextMatchWidget 
+            homeTeam="Roma" 
+            awayTeam="Napoli" 
+            competition="Serie A" 
+            matchDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()} 
+          />
+        </div>
 
         {/* Barre dei filtri orizzontale */}
         <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">

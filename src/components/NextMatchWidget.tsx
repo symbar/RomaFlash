@@ -13,19 +13,19 @@ interface NextMatchProps {
 const getCompetitionLogo = (competition: string) => {
   const comp = competition.toLowerCase();
   if (comp.includes('serie a')) {
-    return "https://upload.wikimedia.org/wikipedia/commons/e/e1/Serie_A_logo_%282021%29.svg";
+    return "/logos/serie_a.png";
   }
   if (comp.includes('champions')) {
-    return "https://upload.wikimedia.org/wikipedia/commons/4/4c/UEFA_Champions_League_logo_2.svg";
+    return "/logos/champions.png";
   }
   if (comp.includes('coppa italia')) {
-    return "https://upload.wikimedia.org/wikipedia/commons/8/87/Coppa_Italia_Frecciarossa_logo.svg";
+    return "/logos/coppa.png";
   }
   if (comp.includes('europa league')) {
-    return "https://upload.wikimedia.org/wikipedia/commons/c/cd/Europa_League_2021.svg";
+    return "/logos/europa.png";
   }
   if (comp.includes('conference')) {
-    return "https://upload.wikimedia.org/wikipedia/commons/4/47/UEFA_Europa_Conference_League_logo.svg";
+    return "/logos/conference.png";
   }
   return null;
 }

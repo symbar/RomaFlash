@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   themeColor: "#000000",
 };
 
-import { Home, Bookmark, User } from 'lucide-react';
+import TabBar from '@/components/TabBar';
 
 export default function RootLayout({
   children,
@@ -39,7 +39,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         
         {children}
-
+        <TabBar />
       </body>
     </html>
   );

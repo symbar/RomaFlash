@@ -208,8 +208,8 @@ export default function Home() {
         <div className="mb-6 rounded-xl overflow-hidden ring-1 ring-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
           <NextMatchWidget 
             homeTeam="Roma" 
-            awayTeam="Napoli" 
-            competition="Serie A" 
+            awayTeam="Real Madrid" 
+            competition="Champions League" 
             matchDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()} 
           />
         </div>

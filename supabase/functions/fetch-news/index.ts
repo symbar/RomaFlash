@@ -137,10 +137,13 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
                 category: parsed.category || "Altro",
                 sentiment: parsed.sentiment || "Neutro"
               }
+            } else {
+              console.error("Gemini response missing required fields:", parsed)
+              continue; // Salta il salvataggio se mancano i campi per non pubblicare vuoto
             }
           } catch (e) {
             console.error("Errore nel parsing della risposta di Gemini:", e, geminiData)
-            aiSummary = { excerpt: "Riassunto non disponibile.", content: "Articolo non disponibile." }
+            continue; // Salta il salvataggio in caso di errore di parsing
           }
 
           // Per ora disabilitiamo l'immagine originale come richiesto

@@ -82,19 +82,23 @@ serve(async (req) => {
           // 4. Chiama Gemini per il riassunto e il controllo anti-spam
           const prompt = `Sei un giornalista sportivo esperto dell'AS Roma. 
 Il tuo compito è rielaborare completamente questa notizia con uno stile editoriale accattivante.
-TUTTAVIA, prima verifica se questa notizia tratta LO STESSO IDENTICO EVENTO di uno dei seguenti titoli già pubblicati oggi:
+TUTTAVIA, hai anche il compito di fare da "Filtro Anti-Spam". Devi controllare due cose:
+
+1) DUPLICATI: verifica se questa notizia tratta LO STESSO IDENTICO EVENTO di uno dei seguenti titoli già pubblicati oggi:
 ---
 ${recentTitlesList}
 ---
-Se la notizia parla ESATTAMENTE dello stesso evento/argomento di uno di questi titoli, imposta "is_duplicate" a true e lascia vuoti gli altri campi.
-Altrimenti, imposta "is_duplicate" a false e procedi con la rielaborazione:
+Se la notizia parla ESATTAMENTE dello stesso evento/argomento di uno di questi titoli, imposta "is_duplicate" a true.
 
+2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o di calcio. Se l'articolo è un annuncio del sito web stesso (es. "Cerchiamo collaboratori", "Lavora con noi", problemi ai server) o non c'entra nulla con la squadra, imposta "is_spam" a true.
+
+Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo (diverso dall'originale).
 2. Scrivi un breve riassunto di 2 righe (excerpt) per la homepage.
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
-{"is_duplicate": false, "titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
+{"is_duplicate": false, "is_spam": false, "titolo": "Nuovo titolo", "excerpt": "Breve riassunto", "content": "Testo completo dell'articolo riscritto...", "category": "Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", "sentiment": "Positivo, Negativo o Neutro"}
 Nessuna formattazione markdown, solo il JSON puro.
 
 Titolo originale: ${item.title}
@@ -126,6 +130,11 @@ Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto 
 
             if (parsed.is_duplicate === true) {
               console.log(`DUPLICATO INTELLIGENTE RILEVATO DA GEMINI: ${item.title}`);
+              continue; // Salta il salvataggio su Supabase
+            }
+            
+            if (parsed.is_spam === true) {
+              console.log(`SPAM O OFF-TOPIC RILEVATO DA GEMINI: ${item.title}`);
               continue; // Salta il salvataggio su Supabase
             }
 

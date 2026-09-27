@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -168,7 +168,7 @@ function ArticleContent() {
                 className="block p-4 rounded-xl bg-card border border-border hover:bg-card/80 transition-colors"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="text-base font-bold text-gray-200 leading-tight">
+                  <h4 className="text-base font-bold text-foreground leading-tight">
                     {rel.title}
                   </h4>
                   {rel.ai_summary?.sentiment && getSentimentBadge(rel.ai_summary.sentiment)}
@@ -193,3 +193,4 @@ export default function ArticlePage() {
     </Suspense>
   );
 }
+

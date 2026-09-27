@@ -45,7 +45,7 @@ function ArticleContent() {
             .from('articles')
             .select('id, title, published_at, ai_summary')
             .neq('id', data.id)
-            .order('published_at', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(20);
             
           if (recentData) {

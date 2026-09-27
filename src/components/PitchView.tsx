@@ -16,28 +16,28 @@ export default function PitchView({ formation }: { formation: any }) {
         {/* Attaccanti */}
         <div className="flex justify-evenly items-center w-full pt-4">
           {formation.attaccanti?.map((player: string, i: number) => (
-            <PlayerDot key={`att-${i}`} name={player} />
+            <PlayerDot key={`att-${i}`} name={player} role="ATT" />
           ))}
         </div>
         
         {/* Centrocampisti */}
         <div className="flex justify-evenly items-center w-full">
           {formation.centrocampisti?.map((player: string, i: number) => (
-            <PlayerDot key={`cen-${i}`} name={player} />
+            <PlayerDot key={`cen-${i}`} name={player} role="CEN" />
           ))}
         </div>
 
         {/* Difensori */}
         <div className="flex justify-evenly items-center w-full">
           {formation.difensori?.map((player: string, i: number) => (
-            <PlayerDot key={`def-${i}`} name={player} />
+            <PlayerDot key={`def-${i}`} name={player} role="DIF" />
           ))}
         </div>
 
         {/* Portiere */}
         <div className="flex justify-center items-center w-full pb-2">
           {formation.portiere?.map((player: string, i: number) => (
-            <PlayerDot key={`gk-${i}`} name={player} />
+            <PlayerDot key={`gk-${i}`} name={player} role="POR" />
           ))}
         </div>
       </div>
@@ -49,11 +49,11 @@ export default function PitchView({ formation }: { formation: any }) {
   );
 }
 
-function PlayerDot({ name }: { name: string }) {
+function PlayerDot({ name, role }: { name: string, role: string }) {
   return (
     <div className="flex flex-col items-center gap-1 group">
       <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-600 border-2 border-yellow-500 shadow-md flex items-center justify-center transform transition-transform group-hover:scale-110">
-        <span className="text-[10px] md:text-xs font-bold text-white uppercase">{name.substring(0, 2)}</span>
+        <span className="text-[9px] md:text-[10px] font-bold text-white uppercase">{role}</span>
       </div>
       <span className="text-white text-[10px] md:text-xs font-bold bg-black/60 px-2 py-0.5 rounded shadow whitespace-nowrap">
         {name}

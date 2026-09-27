@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -110,7 +110,7 @@ function ArticleContent() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6">
+    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-24">
       <header className="py-4 mb-6 border-b border-border/50">
         <Link href="/" className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5" />

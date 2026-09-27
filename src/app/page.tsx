@@ -8,6 +8,7 @@ import PushNotificationManager from '@/components/PushNotificationManager';
 import PullToRefresh from '@/components/PullToRefresh';
 import ShareButton from '@/components/ShareButton';
 import { motion } from 'framer-motion';
+import NextMatchWidget from '@/components/NextMatchWidget';
 
 const WolfLogo = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 512 512">
@@ -180,6 +181,14 @@ export default function Home() {
   return (
     <PullToRefresh onRefresh={fetchArticles}>
       <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 relative">
+        <div className="mb-4 rounded-xl overflow-hidden">
+          <NextMatchWidget 
+            homeTeam="Roma" 
+            awayTeam="Napoli" 
+            competition="Serie A" 
+            matchDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()} 
+          />
+        </div>
         {newArticlesCount > 0 && (
           <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
             <button 

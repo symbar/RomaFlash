@@ -1,0 +1,1 @@
+CREATE TABLE next_match ( id SERIAL PRIMARY KEY, home_team TEXT NOT NULL, away_team TEXT NOT NULL, competition TEXT NOT NULL, match_date TIMESTAMPTZ NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW() );

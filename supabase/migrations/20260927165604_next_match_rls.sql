@@ -1,0 +1,1 @@
+ALTER TABLE next_match ENABLE ROW LEVEL SECURITY; CREATE POLICY "Public read access on next_match" ON next_match FOR SELECT USING (true);

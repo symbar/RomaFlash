@@ -58,6 +58,20 @@ export default function Home() {
     setLoading(false);
   };
 
+  const [nextMatch, setNextMatch] = useState<{home_team: string, away_team: string, competition: string, match_date: string} | null>(null);
+
+  const fetchNextMatch = async () => {
+    const { data } = await supabase
+      .from('next_match')
+      .select('*')
+      .limit(1)
+      .maybeSingle();
+      
+    if (data) {
+      setNextMatch(data);
+    }
+  };
+
   const loadMoreArticles = async () => {
     if (loadingMore || !hasMore || articles.length === 0) return;
     setLoadingMore(true);
@@ -95,6 +109,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchArticles();
+    fetchNextMatch();
 
     // Invece di affidarci ai WebSockets (che spesso vengono bloccati dai firewall o dalle policy RLS gratuite),
     // usiamo un robustissimo polling HTTP. Ogni 45 secondi controlliamo in silenzio se ci sono novità.
@@ -205,14 +220,16 @@ export default function Home() {
         </header>
 
         {/* Widget Prossima Partita - Incassato sotto l'header */}
-        <div className="mb-6 rounded-xl overflow-hidden ring-1 ring-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-          <NextMatchWidget 
-            homeTeam="Roma" 
-            awayTeam="Real Madrid" 
-            competition="Champions League" 
-            matchDate={new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString()} 
-          />
-        </div>
+        {nextMatch && (
+          <div className="mb-6 rounded-xl overflow-hidden ring-1 ring-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+            <NextMatchWidget 
+              homeTeam={nextMatch.home_team} 
+              awayTeam={nextMatch.away_team} 
+              competition={nextMatch.competition} 
+              matchDate={nextMatch.match_date} 
+            />
+          </div>
+        )}
 
         {/* Barre dei filtri orizzontale */}
         <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">

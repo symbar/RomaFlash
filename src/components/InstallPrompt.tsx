@@ -81,7 +81,7 @@ export function InstallPrompt() {
   return (
     <>
       {/* Banner Principale */}
-      <div className="fixed top-4 left-4 right-4 md:max-w-md md:left-1/2 md:-translate-x-1/2 bg-roma-red text-white p-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-top-10 fade-in duration-500 border border-white/20">
+      <div className="fixed bottom-20 left-4 right-4 md:max-w-md md:left-1/2 md:-translate-x-1/2 bg-card text-card-foreground p-4 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 animate-in slide-in-from-bottom-10 fade-in duration-500 border-2 border-roma-red">
         <button 
           onClick={handleDismiss}
           className="absolute top-2 right-2 p-1 bg-black/20 hover:bg-black/40 rounded-full transition-colors"
@@ -89,12 +89,12 @@ export function InstallPrompt() {
           <X className="w-4 h-4" />
         </button>
         <div className="flex items-start gap-4 pr-6">
-          <div className="bg-white/20 p-2 rounded-xl shrink-0">
-            <Download className="w-6 h-6 text-roma-yellow" />
+          <div className="bg-roma-red/10 p-2 rounded-xl shrink-0">
+            <Download className="w-6 h-6 text-roma-red" />
           </div>
           <div>
             <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta RomaFlash con te</h4>
-            <p className="text-sm text-white/90 leading-tight mb-3">
+            <p className="text-sm text-muted-foreground leading-tight mb-3">
               Installa l'App gratuita per non perdere nemmeno una notizia. Senza pubblicità.
             </p>
             <button 
@@ -156,3 +156,5 @@ export function InstallPrompt() {
     </>
   );
 }
+
+

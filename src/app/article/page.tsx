@@ -154,7 +154,7 @@ function ArticleContent() {
               <>
                 {paragraphs.map((p: string, i: number) => <p key={i} className="mb-6">{p}</p>)}
                 {hasTweet && (
-                  <div className="my-8 flex justify-center bg-transparent rounded-xl overflow-hidden touch-pan-y pointer-events-auto">
+                  <div className="my-8 flex justify-center w-full">
                     <Tweet id={tweetId || ''} />
                   </div>
                 )}
@@ -171,7 +171,7 @@ function ArticleContent() {
             <>
               {firstHalf.map((p: string, i: number) => <p key={'f'+i} className="mb-6">{p}</p>)}
               
-              <div className="my-8 flex justify-center bg-transparent rounded-xl overflow-hidden touch-pan-y pointer-events-auto">
+              <div className="my-8 flex justify-center w-full">
                 <Tweet id={tweetId || ''} />
               </div>
               

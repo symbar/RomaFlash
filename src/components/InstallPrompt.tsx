@@ -27,8 +27,8 @@ export function InstallPrompt() {
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIOSDevice);
 
-    // if (checkStandalone() || hasDismissed) { // BYPASS PER TEST
-      // setIsStandalone(true); return; }
+    if (checkStandalone() || hasDismissed) {
+      setIsStandalone(true); return; }
 
     setIsStandalone(false);
 
@@ -155,6 +155,7 @@ export function InstallPrompt() {
     </>
   );
 }
+
 
 
 

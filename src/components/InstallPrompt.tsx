@@ -35,9 +35,7 @@ export function InstallPrompt() {
     setIsStandalone(false);
 
     // Aspettiamo un paio di secondi prima di far apparire il banner per non aggredire l'utente
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 2500);
+    const timer = setTimeout(() => { setIsVisible(true); }, 100);
 
     // Catturo l'evento nativo di Android/Chrome per l'installazione automatica
     const handleBeforeInstallPrompt = (e: any) => {
@@ -80,32 +78,35 @@ export function InstallPrompt() {
 
   return (
     <>
-      {/* Banner Principale */}
-      <div className="fixed bottom-20 left-4 right-4 md:max-w-md md:left-1/2 md:-translate-x-1/2 bg-card text-card-foreground p-4 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 animate-in slide-in-from-bottom-10 fade-in duration-500 border-2 border-primary">
-        <button 
-          onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 bg-black/20 hover:bg-black/40 rounded-full transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-        <div className="flex items-start gap-4 pr-6">
-          <div className="bg-primary/10 p-2 rounded-xl shrink-0">
-            <Download className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta <span className="text-primary">Roma</span><span className="text-secondary">Flash</span> con te</h4>
-            <p className="text-sm text-muted-foreground leading-tight mb-3">
-              Installa l'App gratuita per non perdere nemmeno una notizia. Senza pubblicità.
-            </p>
+      {/* Banner Principale Statico in Cima */}
+        <div className="w-full bg-card border-b-2 border-primary shadow-sm animate-in slide-in-from-top-4 fade-in duration-500 relative">
+          <div className="max-w-2xl mx-auto p-3 flex items-center gap-3">
+            <button 
+              onClick={handleDismiss}
+              className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/10 rounded-full transition-colors shrink-0"
+              aria-label="Chiudi"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+              <Download className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-bold text-sm leading-tight text-foreground truncate">
+                Installa <span className="text-primary">Roma</span><span className="text-secondary">Flash</span>
+              </h4>
+              <p className="text-xs text-muted-foreground leading-tight truncate">
+                Pi� veloce, niente pubblicit�.
+              </p>
+            </div>
             <button 
               onClick={handleInstallClick}
-              className="bg-secondary text-black px-4 py-1.5 rounded-lg font-bold text-sm shadow-md hover:scale-105 transition-transform"
+              className="bg-secondary text-black px-4 py-1.5 rounded-full font-bold text-sm shadow-sm hover:scale-105 transition-transform shrink-0 whitespace-nowrap"
             >
-              Installa Ora
+              Installa
             </button>
           </div>
         </div>
-      </div>
 
       {/* Modal Istruzioni iOS */}
       {showiOSInstructions && (

@@ -95,7 +95,7 @@ ${recentTitlesList}
 ---
 Se la notizia parla ESATTAMENTE dello stesso evento/argomento di uno di questi titoli, imposta "is_duplicate" a true.
 
-2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o di calcio. Se l'articolo è un annuncio del sito web stesso (es. "Cerchiamo collaboratori", "Lavora con noi", problemi ai server) o non c'entra nulla con la squadra, imposta "is_spam" a true.
+2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o di calcio. Se l'articolo è un annuncio del sito web stesso (es. "Cerchiamo collaboratori", "Lavora con noi", problemi ai server) o non c'entra nulla con la squadra, imposta "is_spam" a true. ATTENZIONE: I post e i feed provenienti dai canali social ufficiali (es. Twitter AS Roma) NON SONO MAI SPAM. Accettali sempre (is_spam: false) anche se sono auguri di compleanno, vendita biglietti o foto.
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo (diverso dall'originale).
@@ -264,4 +264,5 @@ Contenuto originale:
     })
   }
 })
+
 

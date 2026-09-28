@@ -111,7 +111,11 @@ export function InstallPrompt() {
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center p-4 animate-in fade-in">
           <div className="bg-card w-full max-w-sm rounded-2xl p-6 relative border border-border shadow-2xl animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0 md:zoom-in-95">
             <button 
-              onClick={() => setShowiOSInstructions(false)}
+              onClick={() => {
+              setShowiOSInstructions(false);
+              setIsVisible(false);
+              localStorage.setItem('romaflash_dismiss_top_banner', 'true');
+            }}
               className="absolute top-4 right-4 text-gray-400 hover:text-white"
             >
               <X className="w-6 h-6" />
@@ -144,7 +148,11 @@ export function InstallPrompt() {
             </div>
             
             <button 
-              onClick={() => setShowiOSInstructions(false)}
+              onClick={() => {
+              setShowiOSInstructions(false);
+              setIsVisible(false);
+              localStorage.setItem('romaflash_dismiss_top_banner', 'true');
+            }}
               className="w-full mt-8 bg-white text-black font-bold py-3 rounded-xl"
             >
               Ho capito, grazie!

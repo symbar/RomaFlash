@@ -101,8 +101,8 @@ export default async function CalendarioPage() {
 function TrophyIcon({ comp }: { comp: string }) {
   const c = comp.toLowerCase();
   if (c.includes('serie a')) return <span>????</span>;
-  if (c.includes('champions')) return <span>?</span>;
+  if (c.includes('champions')) return <span>??</span>;
   if (c.includes('coppa')) return <span>??</span>;
-  if (c.includes('europa')) return <span>??</span>;
+  if (c.includes('europa')) return <span>????</span>;
   return <CalendarIcon className="w-3 h-3" />;
 }

@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 import Parser from "https://esm.sh/rss-parser@3.13.0"
 import webpush from "npm:web-push@3.6.7"
@@ -65,7 +65,7 @@ serve(async (req) => {
         const feed = await parser.parseURL(source.rss_url)
         
         // Prendiamo solo le ultime 5 notizie per evitare di sovraccaricare l'API al primo avvio
-        const items = feed.items.slice(0, 5)
+        const items = feed.items.slice(0, 2)
 
         for (const item of items) {
           if (!item.link || !item.title) continue;
@@ -264,3 +264,4 @@ Contenuto originale:
     })
   }
 })
+

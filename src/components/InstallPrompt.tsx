@@ -93,7 +93,7 @@ export function InstallPrompt() {
             <Download className="w-6 h-6 text-roma-red" />
           </div>
           <div>
-            <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta RomaFlash con te</h4>
+            <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta <span className="text-roma-red">Roma</span><span className="text-roma-yellow">Flash</span> con te</h4>
             <p className="text-sm text-muted-foreground leading-tight mb-3">
               Installa l'App gratuita per non perdere nemmeno una notizia. Senza pubblicità.
             </p>
@@ -156,5 +156,6 @@ export function InstallPrompt() {
     </>
   );
 }
+
 
 

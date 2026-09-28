@@ -143,18 +143,44 @@ function ArticleContent() {
         </h1>
       </header>
 
-      <article className="text-base md:text-lg leading-relaxed text-gray-300">
-        {article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com')) && (
-          <div className="my-6 flex justify-center light:bg-white dark:bg-black rounded-xl">
-            <Tweet id={article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] || ''} />
-          </div>
-        )}
-        {article.ai_summary?.formation && (
-          <PitchView formation={article.ai_summary.formation} />
-        )}
-        {content.split('\n').map((paragraph: string, idx: number) => (
-          paragraph.trim() ? <p key={idx} className="mb-6">{paragraph}</p> : null
-        ))}
+      <article className="text-base md:text-lg leading-relaxed text-foreground">
+        {(() => {
+          const paragraphs = content.split('\n').filter((p: string) => p.trim() !== '');
+          const hasTweet = article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com'));
+          const tweetId = hasTweet ? article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] : '';
+          
+          if (!hasTweet || paragraphs.length < 2) {
+            return (
+              <>
+                {paragraphs.map((p: string, i: number) => <p key={i} className="mb-6">{p}</p>)}
+                {hasTweet && (
+                  <div className="my-8 flex justify-center bg-transparent rounded-xl overflow-hidden">
+                    <Tweet id={tweetId || ''} />
+                  </div>
+                )}
+                {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
+              </>
+            );
+          }
+
+          const midPoint = Math.ceil(paragraphs.length / 2);
+          const firstHalf = paragraphs.slice(0, midPoint);
+          const secondHalf = paragraphs.slice(midPoint);
+
+          return (
+            <>
+              {firstHalf.map((p: string, i: number) => <p key={'f'+i} className="mb-6">{p}</p>)}
+              
+              <div className="my-8 flex justify-center bg-transparent rounded-xl overflow-hidden">
+                <Tweet id={tweetId || ''} />
+              </div>
+              
+              {secondHalf.map((p: string, i: number) => <p key={'s'+i} className="mb-6">{p}</p>)}
+              
+              {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
+            </>
+          );
+        })()}
       </article>
 
       {article.ai_summary?.poll && (

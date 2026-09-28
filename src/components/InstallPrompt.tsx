@@ -94,7 +94,7 @@ export function InstallPrompt() {
                 Installa <span className="text-primary">Roma</span><span className="text-secondary">Flash</span>
               </h4>
               <p className="text-xs text-muted-foreground leading-tight truncate">
-                Pi� veloce, niente pubblicit�.
+                Più veloce, niente pubblicità.
               </p>
             </div>
             <button 

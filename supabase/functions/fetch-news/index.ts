@@ -103,6 +103,7 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
+  6. NUOVA REGOLA (Social Embed): Se la fonte o l'articolo contiene un link a un post o un Tweet ufficiale (es. da nitter, twitter, o instagram), estrai l'URL di quel post originale (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url". Altrimenti "social_embed_url": null.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -113,6 +114,7 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "content": "Testo completo dell'articolo riscritto...", 
   "category": "Probabili Formazioni, Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", 
   "sentiment": "Positivo, Negativo o Neutro",
+    "social_embed_url": "https://twitter.com/...",
   "formation": {
     "modulo": "4-3-3",
     "portiere": ["Svilar"],
@@ -128,7 +130,8 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 Nessuna formattazione markdown, solo il JSON puro. Se non ci sono formazioni o sondaggi, metti i rispettivi campi a null.
 
 Titolo originale: ${item.title}
-Contenuto originale: ${item.contentSnippet || item.content || "Nessun contenuto aggiuntivo."}`
+Contenuto originale: 
+  Link della fonte originale: ${item.contentSnippet || item.content || "Nessun contenuto aggiuntivo."}`
 
           const geminiResponse = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiApiKey}`,

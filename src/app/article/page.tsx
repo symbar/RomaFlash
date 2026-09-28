@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import { Tweet } from 'react-tweet';
 import PitchView from '@/components/PitchView';
 import PollWidget from '@/components/PollWidget';
 
@@ -143,6 +144,11 @@ function ArticleContent() {
       </header>
 
       <article className="text-base md:text-lg leading-relaxed text-gray-300">
+        {article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com')) && (
+          <div className="my-6 flex justify-center light:bg-white dark:bg-black rounded-xl">
+            <Tweet id={article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] || ''} />
+          </div>
+        )}
         {article.ai_summary?.formation && (
           <PitchView formation={article.ai_summary.formation} />
         )}

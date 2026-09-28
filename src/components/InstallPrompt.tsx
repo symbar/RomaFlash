@@ -81,7 +81,7 @@ export function InstallPrompt() {
   return (
     <>
       {/* Banner Principale */}
-      <div className="fixed bottom-20 left-4 right-4 md:max-w-md md:left-1/2 md:-translate-x-1/2 bg-card text-card-foreground p-4 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 animate-in slide-in-from-bottom-10 fade-in duration-500 border-2 border-roma-red">
+      <div className="fixed bottom-20 left-4 right-4 md:max-w-md md:left-1/2 md:-translate-x-1/2 bg-card text-card-foreground p-4 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 animate-in slide-in-from-bottom-10 fade-in duration-500 border-2 border-primary">
         <button 
           onClick={handleDismiss}
           className="absolute top-2 right-2 p-1 bg-black/20 hover:bg-black/40 rounded-full transition-colors"
@@ -89,17 +89,17 @@ export function InstallPrompt() {
           <X className="w-4 h-4" />
         </button>
         <div className="flex items-start gap-4 pr-6">
-          <div className="bg-roma-red/10 p-2 rounded-xl shrink-0">
-            <Download className="w-6 h-6 text-roma-red" />
+          <div className="bg-primary/10 p-2 rounded-xl shrink-0">
+            <Download className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta <span className="text-roma-red">Roma</span><span className="text-roma-yellow">Flash</span> con te</h4>
+            <h4 className="font-bold font-serif text-lg leading-tight mb-1">Porta <span className="text-primary">Roma</span><span className="text-secondary">Flash</span> con te</h4>
             <p className="text-sm text-muted-foreground leading-tight mb-3">
               Installa l'App gratuita per non perdere nemmeno una notizia. Senza pubblicità.
             </p>
             <button 
               onClick={handleInstallClick}
-              className="bg-roma-yellow text-black px-4 py-1.5 rounded-lg font-bold text-sm shadow-md hover:scale-105 transition-transform"
+              className="bg-secondary text-black px-4 py-1.5 rounded-lg font-bold text-sm shadow-md hover:scale-105 transition-transform"
             >
               Installa Ora
             </button>
@@ -156,6 +156,7 @@ export function InstallPrompt() {
     </>
   );
 }
+
 
 
 

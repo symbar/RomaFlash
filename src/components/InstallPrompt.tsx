@@ -20,7 +20,7 @@ export function InstallPrompt() {
     };
 
     // 2. Controllo se l'utente l'ha chiuso in passato
-    const hasDismissed = localStorage.getItem('romaflash_dismiss_install') === 'true';
+    const hasDismissed = localStorage.getItem('romaflash_dismiss_top_banner') === 'true';
 
     // 3. Riconosco il sistema operativo
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -53,7 +53,7 @@ export function InstallPrompt() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem('romaflash_dismiss_install', 'true');
+    localStorage.setItem('romaflash_dismiss_top_banner', 'true');
   };
 
   const handleInstallClick = async () => {
@@ -157,6 +157,7 @@ export function InstallPrompt() {
     </>
   );
 }
+
 
 
 

@@ -161,7 +161,7 @@ export default function Home() {
     );
   };
 
-  const categories = ['Tutte', 'Calciomercato', 'Partita', 'Infortunio', 'Dichiarazioni', 'Club', 'Altro'];
+  const categories = ['Tutte', 'Calciomercato', 'Partita', 'Infortunio', 'Dichiarazioni', 'Club', 'Social', 'Altro'];
   
   const filteredArticles = categoryFilter === 'Tutte' 
     ? articles 
@@ -325,6 +325,7 @@ export default function Home() {
     </PullToRefresh>
   );
 }
+
 
 
 

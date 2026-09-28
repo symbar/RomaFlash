@@ -41,14 +41,15 @@ export default function RootLayout({
     >
       <body className="bg-background text-foreground min-h-screen">
         <ThemeProvider>
-          {children}
-          <TabBar />
             <InstallPrompt />
+            {children}
+            <TabBar />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
 
 
 

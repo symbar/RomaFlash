@@ -22,12 +22,13 @@ export function InstallPrompt() {
     // 2. Controllo se l'utente l'ha chiuso in passato
     const hasDismissed = localStorage.getItem('romaflash_dismiss_top_banner') === 'true';
 
-    // 3. Riconosco il sistema operativo
+        // 3. Riconosco il sistema operativo
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
     setIsIOS(isIOSDevice);
 
-    if (checkStandalone() || hasDismissed) {
+    if (checkStandalone() || hasDismissed || !isMobile) {
       setIsStandalone(true); return; }
 
     setIsStandalone(false);

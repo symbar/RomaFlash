@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { InstallPrompt } from '@/components/InstallPrompt';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,9 +43,12 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <TabBar />
+            <InstallPrompt />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
+
 

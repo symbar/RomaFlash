@@ -317,7 +317,7 @@ export default function Home() {
           )}
           {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
             <div className="py-8 text-center text-gray-500 text-sm">
-              Hai raggiunto la fine delle notizie! ðŸº
+              Hai raggiunto la fine delle notizie! 🐺
             </div>
           )}
         </section>
@@ -325,6 +325,8 @@ export default function Home() {
     </PullToRefresh>
   );
 }
+
+
 
 
 

@@ -114,7 +114,7 @@ function ArticleContent() {
 
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
-      <motion.div layoutId={`article-container-${article.id}`} className="bg-background">
+      <div className="bg-background">
       <header className="py-4 mb-6 border-b border-border/50">
         <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -217,8 +217,8 @@ function ArticleContent() {
           </div>
         </section>
       )}
-      </motion.div>
-    </main>
+      </div>
+      </main>
   );
 }
 

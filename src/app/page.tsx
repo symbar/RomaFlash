@@ -284,7 +284,6 @@ export default function Home() {
             const isLast = index === filteredArticles.length - 1;
             return (
                 <motion.article 
-                layoutId={`article-container-${article.id}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}

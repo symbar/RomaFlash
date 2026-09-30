@@ -176,7 +176,7 @@ export default function Home() {
       );
     }
     return (
-      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-400 border border-gray-500/20">
+      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-600 dark:text-gray-500 dark:text-gray-400 border border-gray-500/20">
         <MessageCircle className="w-3 h-3" /> News
       </span>
     );
@@ -196,18 +196,18 @@ export default function Home() {
             <WolfLogo className="w-8 h-8 grayscale" />
             <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
           </div>
-          <div className="w-12 h-4 bg-gray-800 rounded"></div>
+          <div className="w-12 h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
         </header>
         <section className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
             <article key={i} className="relative overflow-hidden bg-card/30 border border-border/30 rounded-xl p-5">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-800/50" />
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800/50" />
               <div className="flex justify-between items-start mb-4">
-                <div className="w-20 h-3 bg-gray-800 rounded"></div>
-                <div className="w-12 h-3 bg-gray-800 rounded"></div>
+                <div className="w-20 h-3 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                <div className="w-12 h-3 bg-gray-200 dark:bg-gray-800 rounded"></div>
               </div>
-              <div className="w-3/4 h-6 bg-gray-700/50 rounded mb-2"></div>
-              <div className="w-1/2 h-6 bg-gray-700/50 rounded mb-6"></div>
+              <div className="w-3/4 h-6 bg-gray-300 dark:bg-gray-700/50 rounded mb-2"></div>
+              <div className="w-1/2 h-6 bg-gray-300 dark:bg-gray-700/50 rounded mb-6"></div>
             </article>
           ))}
         </section>
@@ -266,7 +266,7 @@ export default function Home() {
               className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
                 categoryFilter === cat 
                   ? 'bg-primary text-black' 
-                  : 'bg-card text-gray-400 hover:text-white border border-border'
+                  : 'bg-card text-gray-600 dark:text-gray-500 dark:text-gray-400 hover:text-foreground border border-border'
               }`}
             >
               {cat}
@@ -276,7 +276,7 @@ export default function Home() {
 
         <section className="space-y-4">
           {filteredArticles.length === 0 && (
-            <div className="text-center py-10 text-gray-500">
+            <div className="text-center py-10 text-gray-600 dark:text-gray-500">
               Nessuna notizia trovata per "{categoryFilter}".
             </div>
           )}
@@ -298,14 +298,14 @@ export default function Home() {
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center gap-2">
                     {article.ai_summary?.category && (
-                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
+                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-200 dark:bg-gray-800 text-primary">
                         {article.ai_summary.category}
                       </span>
                     )}
                     {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                   </div>
                   <div className="flex items-center gap-3 ml-auto">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-600 dark:text-gray-500">
                       {formatDate(article.published_at)}
                     </span>
                     <ShareButton 
@@ -316,13 +316,13 @@ export default function Home() {
                   </div>
                 </div>
                 
-                <h2 className="text-lg md:text-xl font-serif font-bold leading-tight mb-1.5 text-white">
+                <h2 className="text-lg md:text-xl font-serif font-bold leading-tight mb-1.5 text-foreground">
                   <span className="hover:text-primary transition-colors">
                     {article.title}
                   </span>
                 </h2>
 
-                <div className="text-gray-400 text-sm leading-snug line-clamp-2">
+                <div className="text-gray-600 dark:text-gray-500 dark:text-gray-400 text-sm leading-snug line-clamp-2">
                   {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
                     <p>{article.ai_summary.excerpt}</p>
                   ) : (
@@ -334,12 +334,12 @@ export default function Home() {
           })}
           
           {loadingMore && (
-            <div className="py-6 text-center text-gray-500 text-sm animate-pulse">
+            <div className="py-6 text-center text-gray-600 dark:text-gray-500 text-sm animate-pulse">
               Caricamento notizie precedenti...
             </div>
           )}
           {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
-            <div className="py-8 text-center text-gray-500 text-sm">
+            <div className="py-8 text-center text-gray-600 dark:text-gray-500 text-sm">
               Hai raggiunto la fine delle notizie! 🐺
             </div>
           )}

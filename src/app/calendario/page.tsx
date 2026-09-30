@@ -1,4 +1,4 @@
-﻿import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 
 export const revalidate = 60;
@@ -100,9 +100,9 @@ export default async function CalendarioPage() {
 
 function TrophyIcon({ comp }: { comp: string }) {
   const c = comp.toLowerCase();
-  if (c.includes('serie a')) return <span>????</span>;
-  if (c.includes('champions')) return <span>??</span>;
-  if (c.includes('coppa')) return <span>??</span>;
-  if (c.includes('europa')) return <span>????</span>;
+  if (c.includes('serie a')) return <span className="text-sm">🇮🇹</span>;
+  if (c.includes('champions')) return <span className="text-sm">⭐️</span>;
+  if (c.includes('coppa')) return <span className="text-sm">🏆</span>;
+  if (c.includes('europa')) return <span className="text-sm">🇪🇺</span>;
   return <CalendarIcon className="w-3 h-3" />;
 }

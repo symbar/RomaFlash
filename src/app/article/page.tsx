@@ -65,7 +65,22 @@ function ArticleContent() {
     fetchArticle();
   }, [id]);
 
+  const [showSkeleton, setShowSkeleton] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      timer = setTimeout(() => setShowSkeleton(true), 300);
+    } else {
+      setShowSkeleton(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   if (loading) {
+    if (!showSkeleton) {
+      return <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32"></main>;
+    }
     return (
       <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
         <div className="w-24 h-6 bg-gray-800 rounded mb-8"></div>

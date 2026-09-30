@@ -35,10 +35,16 @@ function formatDate(dateString: string) {
   }
 }
 
+
+let cachedArticles: any[] = [];
+let cachedNextMatch: any | null = null;
+let cachedCategoryFilter: string = 'Tutte';
+let savedScrollPosition: number = 0;
+
 export default function Home() {
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState('Tutte');
+  const [articles, setArticles] = useState<any[]>(cachedArticles);
+  const [loading, setLoading] = useState(cachedArticles.length === 0);
+  const [categoryFilter, setCategoryFilter] = useState(cachedCategoryFilter);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   
@@ -59,7 +65,7 @@ export default function Home() {
     setLoading(false);
   };
 
-  const [nextMatch, setNextMatch] = useState<{home_team: string, away_team: string, competition: string, match_date: string} | null>(null);
+  const [nextMatch, setNextMatch] = useState<{home_team: string, away_team: string, competition: string, match_date: string} | null>(cachedNextMatch);
 
   const fetchNextMatch = async () => {
     const { data } = await supabase
@@ -107,6 +113,19 @@ export default function Home() {
   }, [loadingMore, hasMore, articles]);
 
   const [newArticlesCount, setNewArticlesCount] = useState(0);
+
+  useEffect(() => { cachedArticles = articles; }, [articles]);
+  useEffect(() => { cachedCategoryFilter = categoryFilter; }, [categoryFilter]);
+  useEffect(() => { cachedNextMatch = nextMatch; }, [nextMatch]);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      savedScrollPosition = window.scrollY;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
 
   useEffect(() => {
     fetchArticles();

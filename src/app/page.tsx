@@ -287,7 +287,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 0.98 }} whileTap={{ scale: 0.94 }}
                 key={article.id} 
                 ref={isLast ? lastArticleRef : null}
                 className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-4 cursor-pointer"

@@ -284,12 +284,15 @@ export default function Home() {
             const isLast = index === filteredArticles.length - 1;
             return (
                 <motion.article 
-                initial={{ opacity: 0, y: 20 }}
+                layoutId={`article-container-${article.id}`}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: (index % 10) * 0.05 }}
+                transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}
+                whileTap={{ scale: 0.97 }}
                 key={article.id} 
                 ref={isLast ? lastArticleRef : null}
-                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-4"
+                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-4 cursor-pointer"
+                onClick={() => router.push(`/article?id=${article.id}`)}
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
                 
@@ -315,9 +318,9 @@ export default function Home() {
                 </div>
                 
                 <h2 className="text-lg md:text-xl font-serif font-bold leading-tight mb-1.5 text-white">
-                  <Link href={`/article?id=${article.id}`} className="hover:text-primary transition-colors">
+                  <span className="hover:text-primary transition-colors">
                     {article.title}
-                  </Link>
+                  </span>
                 </h2>
 
                 <div className="text-gray-400 text-sm leading-snug line-clamp-2">

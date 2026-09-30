@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Clock, Flame, Snowflake, MessageCircle, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -42,6 +43,7 @@ let cachedCategoryFilter: string = 'Tutte';
 let savedScrollPosition: number = 0;
 
 export default function Home() {
+  const router = useRouter();
   const [articles, setArticles] = useState<any[]>(cachedArticles);
   const [loading, setLoading] = useState(cachedArticles.length === 0);
   const [categoryFilter, setCategoryFilter] = useState(cachedCategoryFilter);

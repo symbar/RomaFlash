@@ -68,7 +68,7 @@ function ArticleContent() {
   const [showSkeleton, setShowSkeleton] = useState(false);
 
   useEffect(() => {
-    let timer;
+    let timer: NodeJS.Timeout;
     if (loading) {
       timer = setTimeout(() => setShowSkeleton(true), 300);
     } else {

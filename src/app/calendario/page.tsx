@@ -12,7 +12,7 @@ export default async function CalendarioPage() {
 
   const formatDate = (isoString: string) => {
     const d = new Date(isoString);
-    return new Intl.DateTimeFormat('it-IT', { 
+    return new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', 
       weekday: 'short', 
       day: '2-digit', 
       month: 'long',

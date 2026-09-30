@@ -24,7 +24,7 @@ function formatDate(dateString: string) {
                   date.getMonth() === now.getMonth() && 
                   date.getFullYear() === now.getFullYear();
                   
-  const timeString = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const timeString = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
   
   if (isToday) {
     return timeString;

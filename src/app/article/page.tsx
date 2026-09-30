@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import { Tweet } from 'react-tweet';
 import PitchView from '@/components/PitchView';
@@ -16,7 +16,7 @@ function formatDate(dateString: string) {
   const isToday = date.getDate() === now.getDate() && 
                   date.getMonth() === now.getMonth() && 
                   date.getFullYear() === now.getFullYear();
-  const timeString = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const timeString = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' });
   if (isToday) return timeString;
   const dayMonth = date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
   return `${dayMonth} ${timeString}`;
@@ -24,6 +24,7 @@ function formatDate(dateString: string) {
 
 function ArticleContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get('id');
   const [article, setArticle] = useState<any>(null);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
@@ -113,10 +114,10 @@ function ArticleContent() {
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
       <header className="py-4 mb-6 border-b border-border/50">
-        <Link href="/" className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
+        <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5" />
           Torna alle notizie
-        </Link>
+        </button>
         
         <div className="flex items-center gap-3 text-xs uppercase tracking-wider mb-4">
           {article.ai_summary?.category && (

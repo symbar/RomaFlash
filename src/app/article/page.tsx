@@ -217,6 +217,7 @@ function ArticleContent() {
           </div>
         </section>
       )}
+      </motion.div>
     </main>
   );
 }

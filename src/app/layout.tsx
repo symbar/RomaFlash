@@ -2,6 +2,7 @@
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { InstallPrompt } from '@/components/InstallPrompt';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,8 +45,12 @@ export default function RootLayout({
             <InstallPrompt />
             {children}
             <TabBar />
+
         </ThemeProvider>
+        {/* Cloudflare Web Analytics */}
+        <Script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9ec688eb17b641bd998e97d1651c6cde"}'></Script>
       </body>
+
     </html>
   );
 }

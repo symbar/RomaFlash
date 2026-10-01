@@ -161,16 +161,26 @@ function ArticleContent() {
         </h1>
         
         {article.ai_summary?.youtube_id && (
-          <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-8 border border-border">
-            <iframe 
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${article.ai_summary.youtube_id}?autoplay=0`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
+          <a 
+            href={`https://www.youtube.com/watch?v=${article.ai_summary.youtube_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-8 relative group border border-border bg-black"
+          >
+            <img 
+              src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} 
+              alt="Guarda su YouTube"
+              className="w-full h-full object-cover transition-transform group-hover:scale-105 opacity-80 group-hover:opacity-100"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-12 bg-red-600 rounded-xl flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">
+                <svg className="w-8 h-8 text-white fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+            <div className="absolute top-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded font-semibold backdrop-blur-sm">
+              Guarda su YouTube
+            </div>
+          </a>
         )}
       </header>
 

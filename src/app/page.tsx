@@ -302,6 +302,11 @@ export default function Home() {
                         {article.ai_summary.category}
                       </span>
                     )}
+                    {article.ai_summary?.youtube_id && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                        ▶ Video
+                      </span>
+                    )}
                     {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                   </div>
                   <div className="flex items-center gap-3 ml-auto">

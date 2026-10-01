@@ -83,12 +83,12 @@ function ArticleContent() {
     }
     return (
       <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
-        <div className="w-24 h-6 bg-gray-800 rounded mb-8"></div>
-        <div className="w-3/4 h-10 bg-gray-700 rounded mb-6"></div>
+        <div className="w-24 h-6 bg-gray-200 dark:bg-gray-800 rounded mb-8"></div>
+        <div className="w-3/4 h-10 bg-gray-300 dark:bg-gray-700 rounded mb-6"></div>
         <div className="space-y-4">
-          <div className="w-full h-4 bg-gray-800 rounded"></div>
-          <div className="w-full h-4 bg-gray-800 rounded"></div>
-          <div className="w-5/6 h-4 bg-gray-800 rounded"></div>
+          <div className="w-full h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
+          <div className="w-full h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
+          <div className="w-5/6 h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
         </div>
       </main>
     );
@@ -138,7 +138,7 @@ function ArticleContent() {
         
         <div className="flex items-center gap-3 text-xs uppercase tracking-wider mb-4">
           {article.ai_summary?.category && (
-            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-800 text-primary">
+            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-200 dark:bg-gray-800 text-primary">
               {article.ai_summary.category}
             </span>
           )}
@@ -156,9 +156,22 @@ function ArticleContent() {
           </div>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight text-white mb-6">
+        <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight text-foreground mb-6">
           {article.title}
         </h1>
+        
+        {article.ai_summary?.youtube_id && (
+          <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-8 border border-border">
+            <iframe 
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${article.ai_summary.youtube_id}?autoplay=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )}
       </header>
 
       <article className="text-base md:text-lg leading-relaxed text-foreground">
@@ -207,8 +220,8 @@ function ArticleContent() {
 
       {relatedArticles.length > 0 && (
         <section className="mt-16 pt-8 border-t border-border/50">
-          <h3 className="text-xl font-serif font-bold mb-6 text-white flex items-center gap-2">
-            Continua a leggere <span className="text-sm font-sans font-normal text-gray-500 bg-gray-800 px-2 py-0.5 rounded">{article.ai_summary.category}</span>
+          <h3 className="text-xl font-serif font-bold mb-6 text-foreground flex items-center gap-2">
+            Continua a leggere <span className="text-sm font-sans font-normal text-gray-500 bg-gray-200 dark:bg-gray-800 px-2 py-0.5 rounded">{article.ai_summary.category}</span>
           </h3>
           <div className="space-y-4">
             {relatedArticles.map((rel) => (

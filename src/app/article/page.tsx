@@ -168,7 +168,7 @@ function ArticleContent() {
             className="block w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-8 relative group border border-border bg-black"
           >
             <img 
-              src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} 
+              src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} 
               alt="Guarda su YouTube"
               className="w-full h-full object-cover transition-transform group-hover:scale-105 opacity-80 group-hover:opacity-100"
             />

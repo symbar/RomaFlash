@@ -284,80 +284,122 @@ export default function Home() {
             const isLast = index === filteredArticles.length - 1;
             return (
                 <motion.article 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}
-                whileHover={{ scale: 0.98 }} whileTap={{ scale: 0.94 }}
-                key={article.id} 
-                ref={isLast ? lastArticleRef : null}
-                className="relative overflow-hidden bg-card hover:bg-card/80 transition-colors border border-border rounded-xl p-4 cursor-pointer"
-                onClick={() => router.push(`/article?id=${article.id}`)}
-              >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
-                  {/* Immagine condizionale (YouTube o Placeholder per il primo articolo) */}
-                  {article.ai_summary?.youtube_id ? (
-                    <div className="w-full h-48 md:h-56 -mx-5 -mt-5 mb-4 relative overflow-hidden bg-black/10">
-                      <img 
-                        src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`}
-                        alt="Video Thumbnail"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-                          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}
+                  whileHover={{ scale: 0.98 }} whileTap={{ scale: 0.94 }}
+                  key={article.id} 
+                  ref={isLast ? lastArticleRef : null}
+                  className={`relative overflow-hidden group cursor-pointer transition-all duration-300 flex flex-col ${
+                    index === 0 ? 'md:col-span-2 lg:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
+                  } ${
+                    article.ai_summary?.category === 'Dichiarazioni'
+                      ? 'bg-primary border-transparent p-6 justify-between rounded-2xl'
+                      : index === 0 
+                        ? 'bg-card border border-border rounded-2xl' 
+                        : 'bg-card border border-border rounded-2xl'
+                  }`}
+                  onClick={() => router.push(`/article?id=${article.id}`)}
+                >
+                  
+                  {/* DICHIAZIONI LAYOUT */}
+                  {article.ai_summary?.category === 'Dichiarazioni' ? (
+                    <>
+                      <div>
+                        <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide mb-4 inline-block backdrop-blur-sm">
+                          Dichiarazioni
+                        </span>
+                        <svg className="w-8 h-8 text-white/50 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                        <h2 className="text-xl font-bold text-white leading-snug italic">"{article.title}"</h2>
+                      </div>
+                      <div className="mt-6 flex items-center justify-between">
+                         <span className="text-white/80 text-xs font-medium">{formatDate(article.published_at)}</span>
+                         <ShareButton title={article.title} text={article.ai_summary?.excerpt} url={`https://romaflash.pages.dev/article?id=${article.id}`} />
+                      </div>
+                    </>
+                  ) : 
+                  
+                  /* FIRST ITEM HERO LAYOUT */
+                  index === 0 ? (
+                    <>
+                      <div className="h-56 md:h-72 bg-gradient-to-tr from-black via-black/80 to-primary/40 relative overflow-hidden flex flex-col justify-end p-6">
+                        {article.ai_summary?.youtube_id && (
+                           <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" alt="Video" />
+                        )}
+                        <div className="relative z-10">
+                          <div className="flex gap-2 mb-3">
+                            <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded shadow-md uppercase tracking-wide">
+                              In Evidenza
+                            </span>
+                            {article.ai_summary?.youtube_id && (
+                              <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide flex items-center gap-1 shadow-md">
+                                Video
+                              </span>
+                            )}
+                          </div>
+                          <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
+                            {article.title}
+                          </h2>
                         </div>
                       </div>
-                    </div>
-                  ) : index === 0 ? (
-                    <div className="w-full h-56 md:h-72 -mx-5 -mt-5 mb-4 relative overflow-hidden bg-primary/10">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent"></div>
-                      <div className="absolute bottom-4 left-5">
-                        <span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">In Evidenza</span>
+                      <div className="p-5 md:p-6 flex-1 flex flex-col justify-between">
+                        <p className="text-gray-600 dark:text-white/70 leading-relaxed mb-4 line-clamp-2 md:line-clamp-3">
+                          {article.ai_summary?.excerpt || "Clicca per leggere l'articolo completo."}
+                        </p>
+                        <div className="flex items-center justify-between text-sm text-gray-500 font-medium">
+                          <div className="flex items-center gap-2">
+                             {article.ai_summary?.category && (
+                              <span className="flex items-center gap-1 text-primary">
+                                {article.ai_summary.category}
+                              </span>
+                             )}
+                          </div>
+                          <span>{formatDate(article.published_at)}</span>
+                        </div>
                       </div>
-                    </div>
-                  ) : null}
-
-                
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    {article.ai_summary?.category && (
-                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-200 dark:bg-gray-800 text-primary">
-                        {article.ai_summary.category}
-                      </span>
-                    )}
-                    {article.ai_summary?.youtube_id && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
-                        ▶ Video
-                      </span>
-                    )}
-                    {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
-                  </div>
-                  <div className="flex items-center gap-3 ml-auto">
-                    <span className="text-xs text-gray-500 dark:text-white/50">
-                      {formatDate(article.published_at)}
-                    </span>
-                    <ShareButton 
-                      title={article.title} 
-                      text={article.ai_summary?.excerpt} 
-                      url={`https://romaflash.pages.dev/article?id=${article.id}`} 
-                    />
-                  </div>
-                </div>
-                
-                <h2 className="text-lg md:text-xl font-serif font-bold leading-tight mb-1.5 text-foreground">
-                  <span className="hover:text-primary transition-colors">
-                    {article.title}
-                  </span>
-                </h2>
-
-                <div className="text-gray-600 dark:text-white/70 text-sm leading-snug line-clamp-2">
-                  {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
-                    <p>{article.ai_summary.excerpt}</p>
-                  ) : (
-                    <p className="italic">Clicca il titolo per leggere l'articolo.</p>
+                    </>
+                  ) : 
+                  
+                  /* STANDARD CARD LAYOUT */
+                  (
+                    <>
+                      {/* Image header for videos on standard cards */}
+                      {article.ai_summary?.youtube_id && (
+                        <div className="h-48 relative overflow-hidden bg-black">
+                          <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" alt="Video" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+                              <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex gap-2 mb-2">
+                            {article.ai_summary?.category && (
+                              <span className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide">
+                                {article.ai_summary.category}
+                              </span>
+                            )}
+                            {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
+                          </div>
+                          <h2 className="text-lg font-bold text-foreground leading-snug mb-2 group-hover:text-primary transition-colors">
+                            {article.title}
+                          </h2>
+                          <p className="text-sm text-gray-600 dark:text-white/70 line-clamp-3">
+                            {article.ai_summary?.excerpt || "Clicca per leggere l'articolo."}
+                          </p>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-gray-500 font-medium">
+                          <span>{formatDate(article.published_at)}</span>
+                          <ShareButton title={article.title} text={article.ai_summary?.excerpt} url={`https://romaflash.pages.dev/article?id=${article.id}`} />
+                        </div>
+                      </div>
+                    </>
                   )}
-                </div>
-              </motion.article>
+                </motion.article>
             );
           })}
           

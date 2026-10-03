@@ -20,15 +20,15 @@ export default function DesktopSidebar() {
       </div>
       
       <nav className="flex-1 px-4 py-8 space-y-2">
-        <Link href="/" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-foreground'}`}>
+        <Link href="/" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground'}`}>
           <Home className="w-5 h-5" />
           Le Ultime
         </Link>
-        <Link href="/classifica" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/classifica' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-foreground'}`}>
+        <Link href="/classifica" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/classifica' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground'}`}>
           <Trophy className="w-5 h-5" />
           Classifica
         </Link>
-        <Link href="/calendario" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/calendario' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-foreground'}`}>
+        <Link href="/calendario" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${pathname === '/calendario' ? 'bg-primary text-white shadow-md' : 'text-gray-600 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground'}`}>
           <CalendarDays className="w-5 h-5" />
           Calendario
         </Link>

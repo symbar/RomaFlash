@@ -187,9 +187,11 @@ function ArticleContent() {
       <article className="text-base md:text-lg leading-relaxed text-foreground">
         {(() => {
           const paragraphs = content.split('\n').filter((p: string) => p.trim() !== '');
-          const hasTweet = article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com'));
-          const tweetId = hasTweet ? article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] : '';
+          let hasTweet = article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com'));
+          let tweetId = hasTweet ? article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] : '';
+          if (tweetId && !/^\d+$/.test(tweetId)) tweetId = '';
           
+          if (tweetId === '') hasTweet = false;
           if (!hasTweet || paragraphs.length < 2) {
             return (
               <>

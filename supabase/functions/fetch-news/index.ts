@@ -114,7 +114,7 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "content": "Testo completo dell'articolo riscritto...", 
   "category": "Probabili Formazioni, Calciomercato, Infortunio, Dichiarazioni, Partita o Altro", 
   "sentiment": "Positivo, Negativo o Neutro",
-    "social_embed_url": "https://twitter.com/...",
+    "social_embed_url": null, // INSERISCI SOLO UN URL REALE. SE NON ESISTE, DEVE ESSERE null. NON INVENTARE URL CON PUNTINI DI SOSPENSIONE.
   "formation": {
     "modulo": "4-3-3",
     "portiere": ["Svilar"],

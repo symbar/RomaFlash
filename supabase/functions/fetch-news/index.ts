@@ -38,11 +38,11 @@ serve(async (req) => {
     }
 
     // 2b. Recupera i titoli recenti per la deduplicazione
-    const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
       .select('title, published_at')
-      .gte('published_at', twelveHoursAgo)
+      .gte('published_at', twentyFourHoursAgo)
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
       .order('published_at', { ascending: false });
       
@@ -50,7 +50,7 @@ serve(async (req) => {
       ? new Date(recentArticles[0].published_at).getTime() 
       : 0;
 
-    const recentTitlesList = recentArticles && recentArticles.length > 0 
+    let recentTitlesList = recentArticles && recentArticles.length > 0 
       ? recentArticles.map(a => `- ${a.title}`).join('\n')
       : "Nessun articolo recente."
 
@@ -93,7 +93,7 @@ TUTTAVIA, hai anche il compito di fare da "Filtro Anti-Spam". Devi controllare d
 ---
 ${recentTitlesList}
 ---
-Se la notizia parla ESATTAMENTE dello stesso evento/argomento di uno di questi titoli, imposta "is_duplicate" a true.
+ATTENZIONE: i titoli nella lista sopra sono stati rielaborati. Devi valutare il SENSO e l'ARGOMENTO CENTRALE, non la corrispondenza esatta delle parole. Se l'argomento centrale (es. "Lobont incontra De Rossi") è lo stesso di un articolo già in lista, DEVI impostare "is_duplicate" a true. Sii molto severo, preferiamo scartare una notizia piuttosto che avere due articoli sullo stesso evento.
 
 2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o di calcio. Se l'articolo è un annuncio del sito web stesso (es. "Cerchiamo collaboratori", "Lavora con noi", problemi ai server) o non c'entra nulla con la squadra, imposta "is_spam" a true. ATTENZIONE: I post e i feed provenienti dai canali social ufficiali (es. Twitter AS Roma) NON SONO MAI SPAM. Accettali sempre (is_spam: false) anche se sono auguri di compleanno, vendita biglietti o foto.
 
@@ -103,7 +103,7 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
-  6. NUOVA REGOLA (Social Embed): Se la fonte o l'articolo contiene un link a un post o un Tweet ufficiale (es. da nitter, twitter, o instagram), estrai l'URL di quel post originale (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url". Altrimenti "social_embed_url": null.
+  6. NUOVA REGOLA (Social Embed): Se la fonte o l'articolo contiene un link a un post o un Tweet ufficiale (es. da nitter, twitter, o instagram), estrai l'URL di quel post originale (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". Altrimenti "social_embed_url": null.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -167,14 +167,24 @@ Contenuto originale:
               continue; // Salta il salvataggio su Supabase
             }
 
-            if (parsed.titolo) newTitle = parsed.titolo
+            if (parsed.titolo) {
+              newTitle = parsed.titolo.replace(/<bos>/g, '').replace(/<eos>/g, '').replace(/\*\*2/g, '').replace(/<[^>]+>/g, '');
+            }
             if (parsed.excerpt && parsed.content) {
               aiSummary = { 
                 excerpt: parsed.excerpt, 
                 content: parsed.content,
                 category: parsed.category || "Altro",
                 sentiment: parsed.sentiment || "Neutro",
-                formation: parsed.formation || null
+                formation: parsed.formation || null,
+                social_embed_url: parsed.social_embed_url || null,
+                poll: parsed.poll || null
+              }
+              
+              // Fallback: se l'articolo PROVIENE direttamente da Twitter/Nitter, forza il social_embed_url
+              if ((item.link.includes('nitter') || item.link.includes('twitter.com') || item.link.includes('x.com')) && !aiSummary.social_embed_url) {
+                  aiSummary.social_embed_url = item.link.replace(/nitter.[a-z]+/, 'twitter.com').replace('x.com', 'twitter.com');
+                  aiSummary.category = "Social";
               }
             } else {
               console.error("Gemini response missing required fields:", parsed)
@@ -212,7 +222,8 @@ Contenuto originale:
           if (insertError) {
             console.error(`Errore inserimento in DB per: ${item.title}`, insertError)
           } else {
-            processedCount++
+            processedCount++;
+            recentTitlesList += "\n- " + newTitle;
             
             // Invia notifica push
             const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')

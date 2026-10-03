@@ -27,6 +27,7 @@ export const metadata: Metadata = {
 };
 
 import TabBar from '@/components/TabBar';
+import DesktopSidebar from '@/components/DesktopSidebar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default function RootLayout({
@@ -43,7 +44,12 @@ export default function RootLayout({
       <body className="bg-background text-foreground min-h-screen">
         <ThemeProvider>
             <InstallPrompt />
-            {children}
+            <div className="flex min-h-screen max-w-[1600px] mx-auto">
+              <DesktopSidebar />
+              <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+                {children}
+              </div>
+            </div>
             <TabBar />
 
         </ThemeProvider>

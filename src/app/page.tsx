@@ -190,7 +190,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 animate-pulse">
         <header className="flex items-center justify-between py-6 mb-4 border-b border-border/50">
           <div className="flex items-center gap-3 opacity-30">
             <WolfLogo className="w-8 h-8 grayscale" />
@@ -198,7 +198,7 @@ export default function Home() {
           </div>
           <div className="w-12 h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
         </header>
-        <section className="space-y-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <article key={i} className="relative overflow-hidden bg-card/30 border border-border/30 rounded-xl p-5">
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800/50" />

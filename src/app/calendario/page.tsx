@@ -28,7 +28,7 @@ export default async function CalendarioPage() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
+    <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-6 pb-32">
       <header className="py-6 mb-4 border-b border-border">
         <h1 className="text-2xl font-bold tracking-tight text-white">Calendario <span className="text-primary">AS Roma</span></h1>
         <p className="text-gray-400 text-sm mt-1">Tutte le competizioni stagionali</p>

@@ -1,5 +1,7 @@
 "use client";
 
+import { WolfLogo } from '@/components/Icons';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Trophy, CalendarDays } from 'lucide-react';
@@ -23,6 +25,20 @@ export default function DesktopSidebar() {
           Calendario
         </Link>
       </nav>
+      
+      {/* Footer Legale Desktop */}
+      <div className="mt-auto pt-8 border-t border-border">
+        <div className="flex items-center gap-2 mb-3 opacity-60">
+          <WolfLogo className="w-5 h-5" />
+          <span className="text-sm font-bold text-foreground tracking-tight">RomaFlash</span>
+        </div>
+        <p className="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400 mb-3">
+          Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. Non può considerarsi un prodotto editoriale. Non affiliato all'AS Roma.
+        </p>
+        <p className="text-[10px] text-gray-400 dark:text-gray-500">
+          &copy; {new Date().getFullYear()} RomaFlash.
+        </p>
+      </div>
     </aside>
   );
 }

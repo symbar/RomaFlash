@@ -50,7 +50,7 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   
-  const PAGE_SIZE = 30;
+  const PAGE_SIZE = 15;
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const fetchArticles = async () => {

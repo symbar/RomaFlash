@@ -17,35 +17,35 @@ export function LegalModal() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
           <div 
-            className="bg-card w-full max-w-md rounded-2xl p-6 shadow-2xl relative border border-border"
+            className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-3xl p-8 shadow-2xl relative border border-gray-200 dark:border-gray-800"
             onClick={e => e.stopPropagation()}
           >
             <button 
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 p-2 text-gray-500 hover:text-foreground transition-colors"
+              className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-gray-100 dark:bg-gray-800 rounded-full"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex flex-col items-center mb-6">
-              <WolfLogo className="w-12 h-12 mb-3 opacity-80" />
-              <h2 className="text-xl font-bold text-foreground">Roma<span className="text-primary">Flash</span></h2>
-              <p className="text-sm text-gray-500 mt-1">Aggregatore Non Ufficiale</p>
+              <WolfLogo className="w-16 h-16 mb-4 opacity-90" />
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Roma<span className="text-primary">Flash</span></h2>
+              <p className="text-sm font-medium text-gray-500 mt-1 uppercase tracking-widest">Aggregatore</p>
             </div>
 
-            <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300">
+            <div className="space-y-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed text-center">
               <p>
-                <strong>Disclaimer Legale:</strong> Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. Non può pertanto considerarsi un prodotto editoriale ai sensi della legge n° 62 del 7.03.2001.
+                <strong className="text-gray-900 dark:text-white">Disclaimer:</strong> Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicita'. Non puo' considerarsi un prodotto editoriale.
               </p>
               <p>
-                Tutti i marchi riportati appartengono ai legittimi proprietari. RomaFlash è un aggregatore automatico di notizie e non è in alcun modo affiliato all'AS Roma.
+                Tutti i marchi appartengono ai legittimi proprietari. RomaFlash e' un aggregatore automatico e non e' affiliato all'AS Roma.
               </p>
             </div>
             
-            <div className="mt-8 text-center text-xs text-gray-400">
-              &copy; {new Date().getFullYear()} RomaFlash. Tutti i diritti riservati.
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center text-xs text-gray-400 font-medium">
+              &copy; {new Date().getFullYear()} RomaFlash
             </div>
           </div>
         </div>

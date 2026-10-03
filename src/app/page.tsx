@@ -294,6 +294,29 @@ export default function Home() {
                 onClick={() => router.push(`/article?id=${article.id}`)}
               >
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/80 to-secondary opacity-80" />
+                  {/* Immagine condizionale (YouTube o Placeholder per il primo articolo) */}
+                  {article.ai_summary?.youtube_id ? (
+                    <div className="w-full h-48 md:h-56 -mx-5 -mt-5 mb-4 relative overflow-hidden bg-black/10">
+                      <img 
+                        src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`}
+                        alt="Video Thumbnail"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+                          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                        </div>
+                      </div>
+                    </div>
+                  ) : index === 0 ? (
+                    <div className="w-full h-56 md:h-72 -mx-5 -mt-5 mb-4 relative overflow-hidden bg-primary/10">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent"></div>
+                      <div className="absolute bottom-4 left-5">
+                        <span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded shadow-md uppercase tracking-wider">In Evidenza</span>
+                      </div>
+                    </div>
+                  ) : null}
+
                 
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center gap-2">

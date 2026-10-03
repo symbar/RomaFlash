@@ -187,8 +187,12 @@ function ArticleContent() {
       <article className="text-base md:text-lg leading-relaxed text-foreground">
         {(() => {
           const paragraphs = content.split('\n').filter((p: string) => p.trim() !== '');
-          let hasTweet = article.ai_summary?.social_embed_url && (article.ai_summary.social_embed_url.includes('twitter.com') || article.ai_summary.social_embed_url.includes('x.com'));
-          let tweetId = hasTweet ? article.ai_summary.social_embed_url.split('status/')[1]?.split('?')[0] : '';
+          let embedUrl = (article.original_url && (article.original_url.includes('twitter.com') || article.original_url.includes('x.com'))) 
+            ? article.original_url 
+            : article.ai_summary?.social_embed_url;
+            
+          let hasTweet = embedUrl && (embedUrl.includes('twitter.com') || embedUrl.includes('x.com'));
+          let tweetId = hasTweet ? embedUrl.split('status/')[1]?.split('?')[0] : '';
           if (tweetId && !/^\d+$/.test(tweetId)) tweetId = '';
           
           if (tweetId === '') hasTweet = false;
@@ -198,7 +202,7 @@ function ArticleContent() {
                 {paragraphs.map((p: string, i: number) => <p key={i} className="mb-6">{p}</p>)}
                 {hasTweet && (
                   <div className="my-8 flex justify-center w-full">
-                    <Tweet id={tweetId || ''} components={{ TweetNotFound: () => <></> }} />
+                    <Tweet id={tweetId || ''} />
                   </div>
                 )}
                 {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
@@ -215,7 +219,7 @@ function ArticleContent() {
               {firstHalf.map((p: string, i: number) => <p key={'f'+i} className="mb-6">{p}</p>)}
               
               <div className="my-8 flex justify-center w-full">
-                <Tweet id={tweetId || ''} components={{ TweetNotFound: () => <></> }} />
+                <Tweet id={tweetId || ''} />
               </div>
               
               {secondHalf.map((p: string, i: number) => <p key={'s'+i} className="mb-6">{p}</p>)}

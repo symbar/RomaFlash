@@ -176,7 +176,7 @@ export default function Home() {
       );
     }
     return (
-      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-600 dark:text-gray-500 dark:text-gray-400 border border-gray-500/20">
+      <span className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-500/10 text-gray-600 dark:text-gray-300 border border-gray-500/20">
         <MessageCircle className="w-3 h-3" /> News
       </span>
     );
@@ -266,7 +266,7 @@ export default function Home() {
               className={`px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
                 categoryFilter === cat 
                   ? 'bg-primary text-black' 
-                  : 'bg-card text-gray-600 dark:text-gray-500 dark:text-gray-400 hover:text-foreground border border-border'
+                  : 'bg-card text-gray-600 dark:text-gray-300 hover:text-foreground border border-border'
               }`}
             >
               {cat}
@@ -276,7 +276,7 @@ export default function Home() {
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredArticles.length === 0 && (
-            <div className="text-center py-10 text-gray-600 dark:text-gray-500">
+            <div className="text-center py-10 text-gray-500 dark:text-gray-400">
               Nessuna notizia trovata per "{categoryFilter}".
             </div>
           )}
@@ -310,7 +310,7 @@ export default function Home() {
                     {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                   </div>
                   <div className="flex items-center gap-3 ml-auto">
-                    <span className="text-xs text-gray-600 dark:text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {formatDate(article.published_at)}
                     </span>
                     <ShareButton 
@@ -327,7 +327,7 @@ export default function Home() {
                   </span>
                 </h2>
 
-                <div className="text-gray-600 dark:text-gray-500 dark:text-gray-400 text-sm leading-snug line-clamp-2">
+                <div className="text-gray-600 dark:text-gray-300 text-sm leading-snug line-clamp-2">
                   {article.ai_summary && !Array.isArray(article.ai_summary) && article.ai_summary.excerpt ? (
                     <p>{article.ai_summary.excerpt}</p>
                   ) : (
@@ -339,12 +339,12 @@ export default function Home() {
           })}
           
           {loadingMore && (
-            <div className="py-6 text-center text-gray-600 dark:text-gray-500 text-sm animate-pulse">
+            <div className="py-6 text-center text-gray-500 dark:text-gray-400 text-sm animate-pulse">
               Caricamento notizie precedenti...
             </div>
           )}
           {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
-            <div className="py-8 text-center text-gray-600 dark:text-gray-500 text-sm">
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
               Hai raggiunto la fine delle notizie! 🐺
             </div>
           )}

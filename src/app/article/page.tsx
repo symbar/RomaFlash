@@ -198,7 +198,7 @@ function ArticleContent() {
                 {paragraphs.map((p: string, i: number) => <p key={i} className="mb-6">{p}</p>)}
                 {hasTweet && (
                   <div className="my-8 flex justify-center w-full">
-                    <Tweet id={tweetId || ''} />
+                    <Tweet id={tweetId || ''} components={{ TweetNotFound: () => <></> }} />
                   </div>
                 )}
                 {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
@@ -215,7 +215,7 @@ function ArticleContent() {
               {firstHalf.map((p: string, i: number) => <p key={'f'+i} className="mb-6">{p}</p>)}
               
               <div className="my-8 flex justify-center w-full">
-                <Tweet id={tweetId || ''} />
+                <Tweet id={tweetId || ''} components={{ TweetNotFound: () => <></> }} />
               </div>
               
               {secondHalf.map((p: string, i: number) => <p key={'s'+i} className="mb-6">{p}</p>)}

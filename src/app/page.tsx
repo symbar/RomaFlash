@@ -292,34 +292,11 @@ export default function Home() {
                   ref={isLast ? lastArticleRef : null}
                   className={`relative overflow-hidden group cursor-pointer transition-all duration-300 flex flex-col ${
                     index === 0 ? 'md:col-span-2 lg:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
-                  } ${
-                    article.ai_summary?.category === 'Dichiarazioni'
-                      ? 'bg-primary border-transparent p-6 justify-between rounded-2xl'
-                      : index === 0 
-                        ? 'bg-card border border-border rounded-2xl' 
-                        : 'bg-card border border-border rounded-2xl'
-                  }`}
+                  } bg-card border border-border rounded-2xl`}
                   onClick={() => router.push(`/article?id=${article.id}`)}
                 >
                   
-                  {/* DICHIAZIONI LAYOUT */}
-                  {article.ai_summary?.category === 'Dichiarazioni' ? (
-                    <>
-                      <div>
-                        <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide mb-4 inline-block backdrop-blur-sm">
-                          Dichiarazioni
-                        </span>
-                        <svg className="w-8 h-8 text-white/50 mb-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
-                        <h2 className="text-xl font-bold text-white leading-snug italic">"{article.title}"</h2>
-                      </div>
-                      <div className="mt-6 flex items-center justify-between">
-                         <span className="text-white/80 text-xs font-medium">{formatDate(article.published_at)}</span>
-                         <ShareButton title={article.title} text={article.ai_summary?.excerpt} url={`https://romaflash.pages.dev/article?id=${article.id}`} />
-                      </div>
-                    </>
-                  ) : 
-                  
-                  /* FIRST ITEM HERO LAYOUT */
+                  {/* FIRST ITEM HERO LAYOUT */
                   index === 0 ? (
                     <>
                       <div className="h-56 md:h-72 bg-gradient-to-tr from-black via-black/80 to-primary/40 relative overflow-hidden flex flex-col justify-end p-6">

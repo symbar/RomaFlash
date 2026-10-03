@@ -217,7 +217,7 @@ export default function Home() {
 
   return (
     <PullToRefresh onRefresh={fetchArticles}>
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 relative">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 relative">
         {newArticlesCount > 0 && (
           <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50">
             <button 
@@ -274,7 +274,7 @@ export default function Home() {
           ))}
         </div>
 
-        <section className="space-y-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredArticles.length === 0 && (
             <div className="text-center py-10 text-gray-600 dark:text-gray-500">
               Nessuna notizia trovata per "{categoryFilter}".

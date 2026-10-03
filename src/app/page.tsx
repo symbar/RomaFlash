@@ -238,8 +238,9 @@ export default function Home() {
             <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <PushNotificationManager />
+            <LegalModal />
+              <ThemeToggle />
+              <PushNotificationManager />
           </div>
         </header>
 

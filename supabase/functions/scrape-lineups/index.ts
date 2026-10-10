@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
@@ -23,7 +22,7 @@ serve(async (req) => {
         const $ = cheerio.load(html);
 
         const matches = $('ul.match-list > li.match');
-        let teamsData = [];
+        let recordsToUpsert: any[] = [];
 
         matches.each((i, match) => {
             const homeName = $(match).find("label.team-home meta[itemprop='name']").attr("content");
@@ -33,15 +32,15 @@ serve(async (req) => {
                 const homeCard = $(match).find('.card.team-card').eq(0);
                 const awayCard = $(match).find('.card.team-card').eq(1);
 
-                const parseTeam = (cardSelector, teamName) => {
-                    const starters = [];
-                    const bench = [];
+                const parseTeam = (cardSelector: any, teamName: string) => {
+                    const starters: any[] = [];
+                    const bench: any[] = [];
                     
                     const formationText = cardSelector.text().replace(/\s+/g, ' ');
                     const formationMatch = formationText.match(/\d-\d-\d-\d|\d-\d-\d/);
                     const formation = formationMatch ? formationMatch[0] : "N/A";
 
-                    cardSelector.find('.player-list.starters .pill').each((i, el) => {
+                    cardSelector.find('.player-list.starters .pill').each((i: number, el: any) => {
                         const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
                         const prob = parseInt(probText.replace('%', '')) || 100;
@@ -51,7 +50,7 @@ serve(async (req) => {
                         }
                     });
 
-                    cardSelector.find('.player-list.reserves .pill').each((i, el) => {
+                    cardSelector.find('.player-list.reserves .pill').each((i: number, el: any) => {
                         const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
                         const prob = parseInt(probText.replace('%', '')) || 0;
@@ -64,11 +63,11 @@ serve(async (req) => {
                     return { teamName, formation, starters, bench };
                 };
 
-                const homeTeamData = parseTeam(homeCard, homeName);
-                const awayTeamData = parseTeam(awayCard, awayName);
+                const homeTeamData = parseTeam(homeCard, homeName || "");
+                const awayTeamData = parseTeam(awayCard, awayName || "");
 
                 // PARSE DETAILS (Injuries, Suspensions, Ballottaggi)
-                const details = {};
+                const details: any = {};
                 ['Ballottaggi', 'Squalificati', 'Diffidati', 'Infortunati', 'In dubbio'].forEach(secName => {
                     let header = $(match).find(`h4:contains("${secName}"), a.label:contains("${secName}")`).last();
                     if (header.length) {
@@ -77,17 +76,17 @@ serve(async (req) => {
                             siblingRef = header.closest('div');
                         }
                         const nextContents = siblingRef.nextAll('.content');
-                        const homeItems = [];
-                        const awayItems = [];
+                        const homeItems: any[] = [];
+                        const awayItems: any[] = [];
                         
                         if (nextContents.length >= 2) {
                             const homeContent = $(nextContents[0]);
                             const awayContent = $(nextContents[1]);
                             
                             if (secName === 'Ballottaggi') {
-                               homeContent.find('.ballot').each((i, b) => {
-                                   const pair = [];
-                                   $(b).find('li.dot').each((j, d) => {
+                               homeContent.find('.ballot').each((i: number, b: any) => {
+                                   const pair: any[] = [];
+                                   $(b).find('li.dot').each((j: number, d: any) => {
                                        pair.push({
                                            name: $(d).find('.player-name span').text().trim() || $(d).find('.player-name').text().trim(),
                                            prob: parseInt($(d).find('.percentage').text().trim())
@@ -95,9 +94,9 @@ serve(async (req) => {
                                    });
                                    if (pair.length > 0) homeItems.push(pair);
                                });
-                               awayContent.find('.ballot').each((i, b) => {
-                                   const pair = [];
-                                   $(b).find('li.dot').each((j, d) => {
+                               awayContent.find('.ballot').each((i: number, b: any) => {
+                                   const pair: any[] = [];
+                                   $(b).find('li.dot').each((j: number, d: any) => {
                                        pair.push({
                                            name: $(d).find('.player-name span').text().trim() || $(d).find('.player-name').text().trim(),
                                            prob: parseInt($(d).find('.percentage').text().trim())
@@ -106,8 +105,8 @@ serve(async (req) => {
                                    if (pair.length > 0) awayItems.push(pair);
                                });
                             } else {
-                               const parseList = (content, items) => {
-                                   content.find('li, .empty-list-message').each((i, li) => {
+                               const parseList = (content: any, items: any[]) => {
+                                   content.find('li, .empty-list-message').each((i: number, li: any) => {
                                        let name = $(li).find('.player-name span').text().trim() || $(li).find('.player-name').text().trim();
                                        let desc = $(li).find('.player-status-note').text().trim() || $(li).find('.description').text().trim() || '';
                                        let text = $(li).text().replace(/\s+/g, ' ').trim();
@@ -129,55 +128,61 @@ serve(async (req) => {
                     }
                 });
 
-                teamsData.push({
-                    home_team: homeName,
-                    away_team: awayName,
-                    home_formation: homeTeamData.formation,
-                    away_formation: awayTeamData.formation,
-                    home_starters: homeTeamData.starters,
-                    away_starters: awayTeamData.starters,
-                    bench: { home: homeTeamData.bench, away: awayTeamData.bench },
-                    details: details
+                const match_name = `${homeName} - ${awayName}`;
+
+                recordsToUpsert.push({
+                    team: homeName,
+                    match_name: match_name,
+                    formation: homeTeamData.formation,
+                    starters: homeTeamData.starters,
+                    bench: homeTeamData.bench,
+                    details: {
+                        Ballottaggi: details.Ballottaggi?.home || [],
+                        Squalificati: details.Squalificati?.home || [],
+                        Diffidati: details.Diffidati?.home || [],
+                        Infortunati: details.Infortunati?.home || [],
+                        "In dubbio": details["In dubbio"]?.home || []
+                    },
+                    updated_at: new Date().toISOString()
+                });
+
+                recordsToUpsert.push({
+                    team: awayName,
+                    match_name: match_name,
+                    formation: awayTeamData.formation,
+                    starters: awayTeamData.starters,
+                    bench: awayTeamData.bench,
+                    details: {
+                        Ballottaggi: details.Ballottaggi?.away || [],
+                        Squalificati: details.Squalificati?.away || [],
+                        Diffidati: details.Diffidati?.away || [],
+                        Infortunati: details.Infortunati?.away || [],
+                        "In dubbio": details["In dubbio"]?.away || []
+                    },
+                    updated_at: new Date().toISOString()
                 });
             }
         });
 
-        if (teamsData.length === 0) {
-             console.log("Nessuna partita della Roma trovata.");
-        }
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         
-        for (const data of teamsData) {
+        for (const record of recordsToUpsert) {
             const { error } = await supabase
                 .from('lineups')
-                .upsert(
-                    { 
-                        home_team: data.home_team, 
-                        away_team: data.away_team, 
-                        home_formation: data.home_formation,
-                        away_formation: data.away_formation,
-                        home_starters: data.home_starters,
-                        away_starters: data.away_starters,
-                        bench: data.bench,
-                        details: data.details,
-                        updated_at: new Date().toISOString()
-                    },
-                    { onConflict: 'home_team,away_team' }
-                );
+                .upsert(record, { onConflict: 'team' });
 
             if (error) {
-                console.error("Error upserting:", error);
+                console.error(`Error upserting ${record.team}:`, error);
             } else {
-                console.log(`Upserted data for ${data.home_team} vs ${data.away_team}`);
+                console.log(`Successfully upserted ${record.team}`);
             }
         }
 
-        return new Response(JSON.stringify({ success: true, teamsData }), {
+        return new Response(JSON.stringify({ success: true, count: recordsToUpsert.length }), {
             headers: { "Content-Type": "application/json" },
         });
     } catch (error) {
         console.error(error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        return new Response(JSON.stringify({ error: (error as any).message }), { status: 500 });
     }
 });

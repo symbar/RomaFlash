@@ -370,7 +370,8 @@ export default function FormazioniPage() {
         const formatData = (d: any) => ({
            formation: d?.formation || 'N/A',
            starters: d?.starters || [],
-           bench: d?.bench || [], details: null as any
+           bench: d?.bench || [],
+           details: d?.details || null
         });
 
         if (isRomaHome) {
@@ -402,22 +403,22 @@ export default function FormazioniPage() {
         >
           {/* Match Header */}
           <div className="flex flex-col items-center justify-center pt-4">
-            <div className="flex items-center justify-center gap-6 md:gap-16">
-              <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-border">
-                <span className="font-bold text-sm md:text-xl text-gray-900 dark:text-[#ffffff]">{matchState.homeTeam}</span>
-                <img src={matchState.homeLogo} alt={matchState.homeTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain bg-[#ffffff] rounded-md p-1" />
+            <div className="flex items-center justify-center gap-4 md:gap-8">
+              <div className="flex items-center gap-2">
+                <span className={`font-bold text-lg md:text-2xl ${matchState.homeTeam === 'Roma' ? 'text-primary' : 'text-gray-900'}`}>{matchState.homeTeam}</span>
+                {matchState.homeTeam === 'Roma' && <img src={matchState.homeLogo} alt="Roma" className="w-8 h-8 md:w-10 md:h-10 object-contain" />}
               </div>
-              <div className="text-xl font-bold text-gray-400">VS</div>
-              <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-primary/20">
-                <img src={matchState.awayLogo} alt={matchState.awayTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
-                <span className="font-bold text-sm md:text-xl text-primary">{matchState.awayTeam}</span>
+              <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-[11px] md:text-xs font-bold text-gray-500 shadow-sm">VS</div>
+              <div className="flex items-center gap-2">
+                {matchState.awayTeam === 'Roma' && <img src={matchState.awayLogo} alt="Roma" className="w-8 h-8 md:w-10 md:h-10 object-contain" />}
+                <span className={`font-bold text-lg md:text-2xl ${matchState.awayTeam === 'Roma' ? 'text-primary' : 'text-gray-900'}`}>{matchState.awayTeam}</span>
               </div>
             </div>
           </div>
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
           {/* bg-[#15803d] prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
-          <div className="relative w-full h-80 md:h-[450px] rounded-3xl overflow-hidden shadow-2xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          <div className="relative w-full h-[460px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) - Made wider (120%) so it doesn't cut corners! */}
             <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex" 
@@ -465,8 +466,9 @@ export default function FormazioniPage() {
           </div>
 
           {/* TWO COLUMNS LISTS */}
-          <div className="flex flex-col md:flex-row gap-4 mt-6">
+          <div className="flex flex-col md:flex-row gap-4 mt-6 relative">
             <TeamList teamName={matchState.homeTeam} formation={homeState.formation} players={homeState} isAway={false} />
+            <div className="hidden md:flex absolute left-1/2 top-2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#ffffff] border border-border items-center justify-center text-[10px] font-bold text-gray-500 z-20 shadow-sm">VS</div>
             <TeamList teamName={matchState.awayTeam} formation={awayState.formation} players={awayState} isAway={true} />
           </div>
           
@@ -499,40 +501,14 @@ export default function FormazioniPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
                 
                 
-{/* Home Details */}
-<div className="p-6">
-  <DynamicDetails details={homeState?.details} color="#3b82f6" />
-</div>
-{/* Away Details */}
-
+                {/* Home Details */}
                 <div className="p-6">
-                  {/* Ballottaggi */}
-                  <div className="flex justify-center mb-6">
-                    <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
-                  </div>
-                  
-                  
+                  <DynamicDetails details={homeState?.details} color="#3b82f6" />
+                </div>
 
-                  {/* Squalificati */}
-                  <div className="flex justify-center mb-4 mt-8">
-                    <span className="bg-red-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Squalificati</span>
-                  </div>
-                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
-
-                  {/* Diffidati */}
-                  <div className="flex justify-center mb-4">
-                    <span className="bg-yellow-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Diffidati</span>
-                  </div>
-                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
-
-                  {/* Infortunati */}
-                  <div className="flex justify-center mb-4">
-                    <span className="bg-orange-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Infortunati</span>
-                  </div>
-                  <div className="mb-4">
-                    <div className="text-sm font-bold text-gray-900 dark:text-[#ffffff] mb-1">Saelemaekers</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Frattura al malleolo, rientro a Novembre.</div>
-                  </div>
+                {/* Away Details */}
+                <div className="p-6">
+                  <DynamicDetails details={awayState?.details} color="#ef4444" />
                 </div>
 
               </div>

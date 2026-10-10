@@ -95,56 +95,119 @@ function ProgressBar({ prob }: { prob: number }) {
 }
 
 
-function DynamicBallottaggi({ teamData, color }: { teamData: any, color: string }) {
-  if (!teamData || !teamData.starters) return <div className="text-center text-xs text-gray-500 mb-8">Nessun dato</div>;
-  const allBallots = [...teamData.starters, ...teamData.bench].filter(p => p.ballottaggio && p.prob > 0 && p.prob < 100).sort((a, b) => b.prob - a.prob);
-  
-  if (allBallots.length === 0) {
-    return <div className="text-center text-xs text-gray-500 mb-8">Nessun ballottaggio</div>;
-  }
 
-  const groups: any[] = [];
-  const roles = ['p', 'd', 'c', 'a'];
-  roles.forEach(r => {
-    const rolePlayers = allBallots.filter(p => p.role && p.role.toLowerCase() === r);
-    for (let i = 0; i < rolePlayers.length; i += 2) {
-      groups.push(rolePlayers.slice(i, i + 2));
-    }
-  });
+function DynamicDetails({ details, color }: { details: any, color: string }) {
+  if (!details) return <div className="text-center text-xs text-gray-500 mb-8">Nessun dato</div>;
 
   return (
     <>
-      {groups.map((group, idx) => {
-        const topPlayer = group[0];
-        const secondPlayer = group[1];
-        
-        return (
-          <div key={idx} className="flex items-center gap-4 mb-6">
-            <DonutChart prob={topPlayer.prob} color="#8b5cf6" />
-            <div className="flex-1">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-bold text-gray-900 dark:text-[#ffffff] flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{backgroundColor: color}}></div>
-                  {topPlayer.name}
-                </span>
-                <span className="text-xs font-bold text-gray-900 dark:text-[#ffffff]">{topPlayer.prob}%</span>
-              </div>
-              {secondPlayer && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full opacity-50" style={{backgroundColor: color}}></div>
-                    {secondPlayer.name}
+      {/* BALLOTTAGGI */}
+      <div className="flex justify-center mb-6">
+        <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
+      </div>
+      {(!details.Ballottaggi || details.Ballottaggi.length === 0) ? (
+        <div className="text-center text-xs text-gray-500 mb-8">Nessun ballottaggio</div>
+      ) : (
+        details.Ballottaggi.map((group: any, idx: number) => {
+          const topPlayer = group[0];
+          const secondPlayer = group[1];
+          return (
+            <div key={idx} className="flex items-center gap-4 mb-6">
+              <DonutChart prob={topPlayer.prob} color="#8b5cf6" />
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: color}}></div>
+                    {topPlayer.name}
                   </span>
-                  <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{secondPlayer.prob}%</span>
+                  <span className="text-xs font-bold text-gray-900">{topPlayer.prob}%</span>
                 </div>
-              )}
+                {secondPlayer && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full opacity-50" style={{backgroundColor: color}}></div>
+                      {secondPlayer.name}
+                    </span>
+                    <span className="text-xs font-bold text-gray-600">{secondPlayer.prob}%</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
+
+      {/* SQUALIFICATI */}
+      <div className="flex justify-center mb-4 mt-8">
+        <span className="bg-red-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Squalificati</span>
+      </div>
+      {(!details.Squalificati || details.Squalificati.length === 0) ? (
+        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+      ) : (
+        <div className="mb-8">
+          {details.Squalificati.map((item: any, idx: number) => (
+            <div key={idx} className="mb-2">
+              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
+              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* DIFFIDATI */}
+      <div className="flex justify-center mb-4">
+        <span className="bg-yellow-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Diffidati</span>
+      </div>
+      {(!details.Diffidati || details.Diffidati.length === 0) ? (
+        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+      ) : (
+        <div className="mb-8">
+          {details.Diffidati.map((item: any, idx: number) => (
+            <div key={idx} className="mb-2">
+              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
+              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* INFORTUNATI */}
+      <div className="flex justify-center mb-4">
+        <span className="bg-orange-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Infortunati</span>
+      </div>
+      {(!details.Infortunati || details.Infortunati.length === 0) ? (
+        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+      ) : (
+        <div className="mb-8">
+          {details.Infortunati.map((item: any, idx: number) => (
+            <div key={idx} className="mb-3">
+              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
+              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* IN DUBBIO */}
+      <div className="flex justify-center mb-4">
+        <span className="bg-cyan-400 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">In dubbio</span>
+      </div>
+      {(!details['In dubbio'] || details['In dubbio'].length === 0) ? (
+        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+      ) : (
+        <div className="mb-4">
+          {details['In dubbio'].map((item: any, idx: number) => (
+            <div key={idx} className="mb-2">
+              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
+              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
+
 
 function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
   const RoleIcon = () => (
@@ -266,11 +329,11 @@ export default function FormazioniPage() {
   const [matchState, setMatchState] = useState(matchData);
   const [homeState, setHomeState] = useState({
     formation: "4-2-3-1",
-    bench: [], starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"]
+    bench: [], starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"], details: null as any
   });
   const [awayState, setAwayState] = useState({
     formation: "3-4-2-1",
-    bench: [], starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"]
+    bench: [], starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"], details: null as any
   });
   
   const fetchLineups = async () => {
@@ -307,7 +370,7 @@ export default function FormazioniPage() {
         const formatData = (d: any) => ({
            formation: d?.formation || 'N/A',
            starters: d?.starters || [],
-           bench: d?.bench || []
+           bench: d?.bench || [], details: null as any
         });
 
         if (isRomaHome) {
@@ -435,44 +498,20 @@ export default function FormazioniPage() {
             <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
               <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
                 
-                {/* Home Details */}
-                <div className="p-6">
-                  {/* Ballottaggi */}
-                  <div className="flex justify-center mb-6">
-                    <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
-                  </div>
-                  <DynamicBallottaggi teamData={homeState} color="#3b82f6" />
+                
+{/* Home Details */}
+<div className="p-6">
+  <DynamicDetails details={homeState?.details} color="#3b82f6" />
+</div>
+{/* Away Details */}
 
-                  {/* Squalificati */}
-                  <div className="flex justify-center mb-4 mt-8">
-                    <span className="bg-red-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Squalificati</span>
-                  </div>
-                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
-
-                  {/* Diffidati */}
-                  <div className="flex justify-center mb-4">
-                    <span className="bg-yellow-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Diffidati</span>
-                  </div>
-                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
-
-                  {/* Infortunati */}
-                  <div className="flex justify-center mb-4">
-                    <span className="bg-orange-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Infortunati</span>
-                  </div>
-                  <div className="mb-4">
-                    <div className="text-sm font-bold text-gray-900 dark:text-[#ffffff] mb-1">Varane</div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">Problema al ginocchio, out.</div>
-                  </div>
-                </div>
-
-                {/* Away Details */}
                 <div className="p-6">
                   {/* Ballottaggi */}
                   <div className="flex justify-center mb-6">
                     <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
                   </div>
                   
-                  <DynamicBallottaggi teamData={awayState} color="#ef4444" />
+                  
 
                   {/* Squalificati */}
                   <div className="flex justify-center mb-4 mt-8">

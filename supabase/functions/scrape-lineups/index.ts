@@ -42,7 +42,7 @@ serve(async (req) => {
                     const formation = formationMatch ? formationMatch[0] : "N/A";
 
                     cardSelector.find('.player-list.starters .pill').each((i, el) => {
-                        const name = $(el).find('.player-name span').text().trim();
+                        const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
                         const prob = parseInt(probText.replace('%', '')) || 100;
                         const role = $(el).find('.role').attr('data-value') || '-';
@@ -52,65 +52,132 @@ serve(async (req) => {
                     });
 
                     cardSelector.find('.player-list.reserves .pill').each((i, el) => {
-                        const name = $(el).find('.player-name span').text().trim();
+                        const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
-                        const prob = parseInt(probText.replace('%', '')) || 100;
+                        const prob = parseInt(probText.replace('%', '')) || 0;
                         const role = $(el).find('.role').attr('data-value') || '-';
                         if (name) {
-                            bench.push({ name, prob, role, ballottaggio: prob < 100 });
+                            bench.push({ name, prob, role, ballottaggio: prob > 0 });
                         }
                     });
 
-                    teamsData.push({
-                        team: teamName,
-                        match_name: `${homeName} - ${awayName}`,
-                        formation: formation,
-                        starters: starters,
-                        bench: bench,
-                        updated_at: new Date().toISOString()
-                    });
+                    return { teamName, formation, starters, bench };
                 };
 
-                parseTeam(homeCard, homeName);
-                parseTeam(awayCard, awayName);
+                const homeTeamData = parseTeam(homeCard, homeName);
+                const awayTeamData = parseTeam(awayCard, awayName);
+
+                // PARSE DETAILS (Injuries, Suspensions, Ballottaggi)
+                const details = {};
+                ['Ballottaggi', 'Squalificati', 'Diffidati', 'Infortunati', 'In dubbio'].forEach(secName => {
+                    let header = $(match).find(`h4:contains("${secName}"), a.label:contains("${secName}")`).last();
+                    if (header.length) {
+                        let siblingRef = header;
+                        if (header[0].tagName === 'a') {
+                            siblingRef = header.closest('div');
+                        }
+                        const nextContents = siblingRef.nextAll('.content');
+                        const homeItems = [];
+                        const awayItems = [];
+                        
+                        if (nextContents.length >= 2) {
+                            const homeContent = $(nextContents[0]);
+                            const awayContent = $(nextContents[1]);
+                            
+                            if (secName === 'Ballottaggi') {
+                               homeContent.find('.ballot').each((i, b) => {
+                                   const pair = [];
+                                   $(b).find('li.dot').each((j, d) => {
+                                       pair.push({
+                                           name: $(d).find('.player-name span').text().trim() || $(d).find('.player-name').text().trim(),
+                                           prob: parseInt($(d).find('.percentage').text().trim())
+                                       });
+                                   });
+                                   if (pair.length > 0) homeItems.push(pair);
+                               });
+                               awayContent.find('.ballot').each((i, b) => {
+                                   const pair = [];
+                                   $(b).find('li.dot').each((j, d) => {
+                                       pair.push({
+                                           name: $(d).find('.player-name span').text().trim() || $(d).find('.player-name').text().trim(),
+                                           prob: parseInt($(d).find('.percentage').text().trim())
+                                       });
+                                   });
+                                   if (pair.length > 0) awayItems.push(pair);
+                               });
+                            } else {
+                               const parseList = (content, items) => {
+                                   content.find('li, .empty-list-message').each((i, li) => {
+                                       let name = $(li).find('.player-name span').text().trim() || $(li).find('.player-name').text().trim();
+                                       let desc = $(li).find('.player-status-note').text().trim() || $(li).find('.description').text().trim() || '';
+                                       let text = $(li).text().replace(/\s+/g, ' ').trim();
+                                       
+                                       if (text && text !== 'Nessun calciatore') {
+                                           if (name) {
+                                               items.push({ name, desc });
+                                           } else {
+                                               items.push({ name: text, desc: '' });
+                                           }
+                                       }
+                                   });
+                               };
+                               parseList(homeContent, homeItems);
+                               parseList(awayContent, awayItems);
+                            }
+                        }
+                        details[secName] = { home: homeItems, away: awayItems };
+                    }
+                });
+
+                teamsData.push({
+                    home_team: homeName,
+                    away_team: awayName,
+                    home_formation: homeTeamData.formation,
+                    away_formation: awayTeamData.formation,
+                    home_starters: homeTeamData.starters,
+                    away_starters: awayTeamData.starters,
+                    bench: { home: homeTeamData.bench, away: awayTeamData.bench },
+                    details: details
+                });
             }
         });
 
         if (teamsData.length === 0) {
-            return new Response(JSON.stringify({ error: "Partita della Roma non trovata." }), {
-                headers: { 'Content-Type': 'application/json' },
-                status: 404,
-            });
+             console.log("Nessuna partita della Roma trovata.");
         }
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         
-        for (const t of teamsData) {
+        for (const data of teamsData) {
             const { error } = await supabase
                 .from('lineups')
                 .upsert(
                     { 
-                        team: t.team, 
-                        match_name: t.match_name, 
-                        formation: t.formation, 
-                        starters: t.starters, 
-                        bench: t.bench,
-                        updated_at: t.updated_at 
+                        home_team: data.home_team, 
+                        away_team: data.away_team, 
+                        home_formation: data.home_formation,
+                        away_formation: data.away_formation,
+                        home_starters: data.home_starters,
+                        away_starters: data.away_starters,
+                        bench: data.bench,
+                        details: data.details,
+                        updated_at: new Date().toISOString()
                     },
-                    { onConflict: 'team' }
+                    { onConflict: 'home_team,away_team' }
                 );
-            if (error) throw error;
+
+            if (error) {
+                console.error("Error upserting:", error);
+            } else {
+                console.log(`Upserted data for ${data.home_team} vs ${data.away_team}`);
+            }
         }
 
-        return new Response(JSON.stringify({ success: true, data: teamsData }), {
-            headers: { 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ success: true, teamsData }), {
+            headers: { "Content-Type": "application/json" },
         });
-
     } catch (error) {
-        console.error("Errore nello scraping:", error);
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { 'Content-Type': 'application/json' },
-            status: 500,
-        });
+        console.error(error);
+        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     }
-})
+});

@@ -414,7 +414,7 @@ export default function Home() {
             </div>
 
             {/* COLONNA DESTRA: Widget e Utility */}
-            <aside className="w-full lg:w-[35%] xl:w-[30%] flex flex-col gap-6 order-1 lg:order-2 mb-2 lg:mb-0">
+            <aside className="w-full lg:w-[35%] xl:w-[30%] flex flex-col gap-6 order-1 lg:order-2 mb-2 lg:mb-0 lg:sticky lg:top-24 lg:h-fit">
               {nextMatch && (
                 <div className="rounded-2xl overflow-hidden ring-1 ring-border shadow-lg">
                   <NextMatchWidget 

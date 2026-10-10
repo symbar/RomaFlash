@@ -11,12 +11,10 @@ export default function GlobalRightSidebar() {
   useEffect(() => {
     const fetchNextMatch = async () => {
       const { data } = await supabase
-        .from('matches')
+        .from('next_match')
         .select('*')
-        .gt('match_date', new Date().toISOString())
-        .order('match_date', { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
       
       if (data) setNextMatch(data);
     };
@@ -40,7 +38,7 @@ export default function GlobalRightSidebar() {
         <ClassificaWidget />
       </div>
       
-      <div className="hidden lg:block bg-card/50 rounded-2xl p-6 border border-border mt-auto">
+      <div className="hidden lg:block bg-card/50 rounded-2xl p-6 border border-border mt-6">
         <div className="flex items-center gap-2 mb-2">
           <WolfLogo className="w-5 h-5 text-gray-400" />
           <span className="text-sm font-bold text-gray-400">RomaFlash</span>

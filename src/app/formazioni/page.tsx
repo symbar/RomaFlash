@@ -252,7 +252,7 @@ export default function FormazioniPage() {
           awayTeam: teams[1]
         }));
         
-        const formatData = (d) => ({
+        const formatData = (d: any) => ({
            formation: d?.formation || 'N/A',
            starters: d?.starters || [],
            bench: d?.bench || []

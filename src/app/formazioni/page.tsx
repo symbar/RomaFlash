@@ -1,5 +1,7 @@
 
 'use client';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 import GlobalHeader from '@/components/GlobalHeader';
 import PullToRefresh from '@/components/PullToRefresh';
@@ -143,6 +145,36 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
   );
 }
 
+
+function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: any[], formationStr: string, isAway?: boolean }) {
+  const pattern = [1, ...formationStr.split('-').map(Number)];
+  let currentIndex = 0;
+  const columns = pattern.map(count => {
+    const playersInColumn = starters.slice(currentIndex, currentIndex + count);
+    currentIndex += count;
+    return playersInColumn;
+  });
+
+  const colHeight = (count: number) => {
+    if (count === 1) return 'h-[70%] justify-center';
+    if (count === 2) return 'h-[60%] justify-around';
+    if (count === 3) return 'h-[75%] justify-around';
+    return 'h-full justify-around';
+  };
+
+  return (
+    <div className={`flex-1 flex ${isAway ? 'flex-row-reverse pl-2 md:pl-4' : 'pr-2 md:pr-4'} items-center justify-between relative z-10`} style={{ transformStyle: 'preserve-3d' }}>
+      {columns.map((colPlayers, colIdx) => (
+        <div key={colIdx} className={`flex flex-col w-1/5 ${colHeight(colPlayers.length)}`} style={{ transformStyle: 'preserve-3d' }}>
+          {colPlayers.map((player, pIdx) => (
+            <PlayerDot key={pIdx} name={player.name || player} isAway={isAway} ballottaggio={player.ballottaggio} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
   // -45deg totally cancels the floor's 45deg rotation, making the names face perfectly flat to the screen for maximum legibility!
   return (
@@ -182,8 +214,52 @@ function DonutChart({ prob, color, size = 48 }: { prob: number, color: string, s
 }
 
 export default function FormazioniPage() {
+  const [matchState, setMatchState] = useState(matchData);
+  const [homeState, setHomeState] = useState({
+    formation: "4-2-3-1",
+    starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"]
+  });
+  const [awayState, setAwayState] = useState({
+    formation: "3-4-2-1",
+    starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"]
+  });
+  
+  const fetchLineups = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('lineups')
+        .select('*')
+        .eq('team', 'Roma')
+        .single();
+        
+      if (data && !error) {
+        const dateObj = new Date(data.updated_at);
+        const dateStr = dateObj.toLocaleDateString('it-IT') + ' - ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        
+        setMatchState(prev => ({
+          ...prev,
+          lastUpdate: dateStr,
+          stadium: data.match_name // Fallback per far vedere che è live
+        }));
+        
+        const isHome = data.match_name.startsWith('Roma');
+        if (isHome) {
+          setHomeState({ formation: data.formation, starters: data.starters });
+        } else {
+          setAwayState({ formation: data.formation, starters: data.starters });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchLineups();
+  }, []);
+
   return (
-    <PullToRefresh onRefresh={async () => await new Promise(r => setTimeout(r, 1000))}>
+    <PullToRefresh onRefresh={fetchLineups}>
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32">
         <GlobalHeader title="Probabili Formazioni" />
 
@@ -196,13 +272,13 @@ export default function FormazioniPage() {
           <div className="flex flex-col items-center justify-center pt-4">
             <div className="flex items-center justify-center gap-6 md:gap-16">
               <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-border">
-                <span className="font-bold text-sm md:text-xl text-gray-900 dark:text-[#ffffff]">{matchData.homeTeam}</span>
-                <img src={matchData.homeLogo} alt={matchData.homeTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain bg-[#ffffff] rounded-md p-1" />
+                <span className="font-bold text-sm md:text-xl text-gray-900 dark:text-[#ffffff]">{matchState.homeTeam}</span>
+                <img src={matchState.homeLogo} alt={matchState.homeTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain bg-[#ffffff] rounded-md p-1" />
               </div>
               <div className="text-xl font-bold text-gray-400">VS</div>
               <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-primary/20">
-                <img src={matchData.awayLogo} alt={matchData.awayTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
-                <span className="font-bold text-sm md:text-xl text-primary">{matchData.awayTeam}</span>
+                <img src={matchState.awayLogo} alt={matchState.awayTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
+                <span className="font-bold text-sm md:text-xl text-primary">{matchState.awayTeam}</span>
               </div>
             </div>
           </div>
@@ -239,68 +315,32 @@ export default function FormazioniPage() {
 
                {/* --- PLAYERS GRID (On the 3D floor) --- */}
                <div className="absolute inset-10 flex px-2 py-4 md:py-12 z-10" style={{ transformStyle: 'preserve-3d' }}>
-                 {/* Home (Left - Como) */}
-                 <div className="flex-1 flex items-center justify-between pr-2 md:pr-4 relative z-10" style={{ transformStyle: 'preserve-3d' }}>
-                    <div className="flex flex-col h-[70%] justify-center w-1/5" style={{ transformStyle: 'preserve-3d' }}><PlayerDot name="Audero" /></div>
-                    <div className="flex flex-col h-full justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Iovine" />
-                      <PlayerDot name="Kempf" />
-                      <PlayerDot name="Dossena" />
-                      <PlayerDot name="Moreno" />
-                    </div>
-                    <div className="flex flex-col h-[70%] justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Sergi R." />
-                      <PlayerDot name="Perrone" />
-                    </div>
-                    <div className="flex flex-col h-[85%] justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Strefezza" />
-                      <PlayerDot name="Paz" ballottaggio />
-                      <PlayerDot name="Fadera" ballottaggio />
-                    </div>
-                    <div className="flex flex-col h-[70%] justify-center w-1/5" style={{ transformStyle: 'preserve-3d' }}><PlayerDot name="Cutrone" /></div>
-                 </div>
+                 {/* Home (Left) */}
+                 <DynamicFormationGrid starters={homeState.starters} formationStr={homeState.formation} />
 
-                 {/* Away (Right - Roma) */}
-                 <div className="flex-1 flex flex-row-reverse items-center justify-between pl-2 md:pl-4 relative z-10" style={{ transformStyle: 'preserve-3d' }}>
-                    <div className="flex flex-col h-[70%] justify-center w-1/5" style={{ transformStyle: 'preserve-3d' }}><PlayerDot name="Svilar" isAway /></div>
-                    <div className="flex flex-col h-[75%] justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Mancini" isAway />
-                      <PlayerDot name="Ndicka" isAway />
-                      <PlayerDot name="Hermoso" ballottaggio isAway />
-                    </div>
-                    <div className="flex flex-col h-full justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Celik" isAway />
-                      <PlayerDot name="Cristante" isAway />
-                      <PlayerDot name="Kone" isAway />
-                      <PlayerDot name="Angelino" isAway />
-                    </div>
-                    <div className="flex flex-col h-[60%] justify-around w-1/5" style={{ transformStyle: 'preserve-3d' }}>
-                      <PlayerDot name="Dybala" ballottaggio isAway />
-                      <PlayerDot name="Pellegrini" isAway />
-                    </div>
-                    <div className="flex flex-col h-[70%] justify-center w-1/5" style={{ transformStyle: 'preserve-3d' }}><PlayerDot name="Dovbyk" isAway /></div>
-                 </div>
+                 {/* Away (Right) */}
+                 <DynamicFormationGrid starters={awayState.starters} formationStr={awayState.formation} isAway />
                </div>
             </div>
             
             {/* Info Bar Overlay (Top Left/Right) */}
             <div className="absolute top-4 left-6 text-[11px] md:text-sm font-bold text-[#ffffff] uppercase tracking-widest drop-shadow-md z-20">
-              {matchData.date}
+              {matchState.date}
             </div>
             <div className="absolute top-4 right-6 text-[11px] md:text-sm font-bold text-[#ffffff] uppercase tracking-widest drop-shadow-md z-20">
-              {matchData.stadium}
+              {matchState.stadium}
             </div>
           </div>
 
           {/* TWO COLUMNS LISTS */}
           <div className="flex flex-col md:flex-row gap-4 mt-6">
-            <TeamList teamName={matchData.homeTeam} formation={homeLineup.formation} players={homeLineup} isAway={false} />
-            <TeamList teamName={matchData.awayTeam} formation={awayLineup.formation} players={awayLineup} isAway={true} />
+            <TeamList teamName={matchState.homeTeam} formation={homeLineup.formation} players={homeLineup} isAway={false} />
+            <TeamList teamName={matchState.awayTeam} formation={awayLineup.formation} players={awayLineup} isAway={true} />
           </div>
           
           <div className="text-center py-2">
             <span className="inline-block bg-card border border-border text-gray-500 text-[10px] font-mono px-4 py-1.5 rounded-full shadow-sm">
-              Ultimo aggiornamento: {matchData.lastUpdate}
+              Ultimo aggiornamento: {matchState.lastUpdate}
             </span>
           </div>
 
@@ -309,11 +349,11 @@ export default function FormazioniPage() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-[#ffffff] mb-4 pl-1">Presentazione squadre</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-[#ffffff] mb-2">{matchData.homeTeam}</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-[#ffffff] mb-2">{matchState.homeTeam}</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{analysis.home}</p>
               </div>
               <div className="bg-card border border-primary/20 rounded-xl p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-primary mb-2">{matchData.awayTeam}</h3>
+                <h3 className="text-sm font-bold text-primary mb-2">{matchState.awayTeam}</h3>
                 <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{analysis.away}</p>
               </div>
             </div>

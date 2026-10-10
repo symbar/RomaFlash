@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 // --- MOCK DATA ---
 const matchData = {
   homeTeam: "Como",
-  homeLogo: "https://media.api-sports.io/football/teams/853.png",
+  homeLogo: "https://img.legaseriea.it/vimages/668bb1dcd0693/como.png",
   awayTeam: "Roma",
   awayLogo: "https://media.api-sports.io/football/teams/497.png",
   date: "Domenica 11 Ottobre, 12:30",
@@ -193,87 +193,91 @@ export default function FormazioniPage() {
           {/* Match Header */}
           <div className="flex flex-col items-center justify-center pt-4">
             <div className="flex items-center justify-center gap-6 md:gap-16">
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-lg md:text-xl text-gray-900 dark:text-white">{matchData.homeTeam}</span>
-                <img src={matchData.homeLogo} alt={matchData.homeTeam} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+              <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-border">
+                <span className="font-bold text-sm md:text-xl text-gray-900 dark:text-white">{matchData.homeTeam}</span>
+                <img src={matchData.homeLogo} alt={matchData.homeTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain bg-white rounded-md p-1" />
               </div>
               <div className="text-xl font-bold text-gray-400">VS</div>
-              <div className="flex items-center gap-3">
-                <img src={matchData.awayLogo} alt={matchData.awayTeam} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
-                <span className="font-bold text-lg md:text-xl text-primary">{matchData.awayTeam}</span>
+              <div className="flex items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-primary/20">
+                <img src={matchData.awayLogo} alt={matchData.awayTeam} className="w-8 h-8 md:w-12 md:h-12 object-contain" />
+                <span className="font-bold text-sm md:text-xl text-primary">{matchData.awayTeam}</span>
               </div>
             </div>
           </div>
 
-          {/* THE PITCH - BOTH TEAMS VERTICAL FULL PITCH */}
-          <div className="w-full h-[600px] rounded-2xl bg-gradient-to-b from-green-800 to-green-700 border-4 border-white/20 shadow-xl relative overflow-hidden flex flex-col justify-between py-4" style={{ perspective: 'none' }}>
-             
-             {/* Pitch Lines */}
-             <div className="absolute inset-4 border-2 border-white/30 pointer-events-none"></div>
-             {/* Midfield line */}
-             <div className="absolute inset-x-4 top-1/2 border-t-2 border-white/30 pointer-events-none"></div>
-             {/* Center Circle */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/30 rounded-full pointer-events-none"></div>
-             {/* Center Dot */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/50 rounded-full pointer-events-none"></div>
-             
-             {/* Home Penalty Area */}
-             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-24 border-x-2 border-b-2 border-white/30 pointer-events-none"></div>
-             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-8 border-x-2 border-b-2 border-white/30 pointer-events-none"></div>
-             <div className="absolute top-[100px] left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/30 rounded-b-full pointer-events-none"></div>
+          {/* HORIZONTAL 3D PITCH */}
+          <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-t from-green-800 to-green-600 border-4 border-card mb-8">
+            
+            {/* 3D Field Lines */}
+            <div className="absolute inset-0 origin-bottom" style={{ transform: 'perspective(600px) rotateX(45deg) scale(1.15) translateY(-5%)' }}>
+               {/* Field Boundary */}
+               <div className="absolute inset-x-4 inset-y-4 border-2 border-white/40"></div>
+               {/* Center Line */}
+               <div className="absolute inset-y-4 left-1/2 border-l-2 border-white/40"></div>
+               {/* Center Circle */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 md:w-32 md:h-32 border-2 border-white/40 rounded-full"></div>
+               {/* Left Goal Area */}
+               <div className="absolute top-1/4 bottom-1/4 left-4 w-12 md:w-20 border-r-2 border-y-2 border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] left-4 w-6 md:w-10 border-r-2 border-y-2 border-white/40"></div>
+               {/* Right Goal Area */}
+               <div className="absolute top-1/4 bottom-1/4 right-4 w-12 md:w-20 border-l-2 border-y-2 border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] right-4 w-6 md:w-10 border-l-2 border-y-2 border-white/40"></div>
+            </div>
 
-             {/* Away Penalty Area */}
-             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 h-24 border-x-2 border-t-2 border-white/30 pointer-events-none"></div>
-             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-24 h-8 border-x-2 border-t-2 border-white/30 pointer-events-none"></div>
-             <div className="absolute bottom-[100px] left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/30 rounded-t-full pointer-events-none"></div>
-
-             {/* HOME TEAM (Como 4-2-3-1) - Top Half */}
-             <div className="relative z-10 w-full flex flex-col h-1/2 justify-between pb-4">
-                <div className="w-full flex justify-center mt-2">
-                   <PlayerDot name="Audero" />
-                </div>
-                <div className="w-full flex justify-center gap-4 md:gap-10 mt-2">
-                   <PlayerDot name="Moreno" />
-                   <PlayerDot name="Dossena" />
-                   <PlayerDot name="Kempf" />
+            {/* Players Overlay (No 3D distortion, perfectly horizontal) */}
+            <div className="absolute inset-0 flex p-2 md:p-6 pb-8 md:pb-12">
+              
+              {/* Home (Left - Como) */}
+              <div className="flex-1 flex items-center justify-between pr-2 md:pr-4">
+                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Audero" /></div>
+                 
+                 <div className="flex flex-col h-full justify-around py-4 md:py-8">
                    <PlayerDot name="Iovine" />
-                </div>
-                <div className="w-full flex justify-center gap-12 mt-2">
-                   <PlayerDot name="Perrone" />
+                   <PlayerDot name="Kempf" />
+                   <PlayerDot name="Dossena" />
+                   <PlayerDot name="Moreno" />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-around py-12 md:py-24">
                    <PlayerDot name="Sergi Roberto" />
-                </div>
-                <div className="w-full flex justify-center gap-6 mt-2">
-                   <PlayerDot name="Paz" ballottaggio />
-                   <PlayerDot name="Cutrone" />
+                   <PlayerDot name="Perrone" />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-around py-8 md:py-16">
                    <PlayerDot name="Strefezza" />
-                </div>
-             </div>
+                   <PlayerDot name="Paz" ballottaggio />
+                   <PlayerDot name="Fadera" ballottaggio />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Cutrone" /></div>
+              </div>
 
-             {/* AWAY TEAM (Roma 3-4-2-1) - Bottom Half */}
-             <div className="relative z-10 w-full flex flex-col h-1/2 justify-between flex-col-reverse pt-4">
-                <div className="w-full flex justify-center mb-2">
-                   <PlayerDot name="Svilar" isAway />
-                </div>
-                <div className="w-full flex justify-center gap-8 md:gap-16 mb-2">
-                   <PlayerDot name="Hermoso" ballottaggio isAway />
-                   <PlayerDot name="Ndicka" isAway />
+              {/* Away (Right - Roma) */}
+              <div className="flex-1 flex flex-row-reverse items-center justify-between pl-2 md:pl-4">
+                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Svilar" isAway /></div>
+                 
+                 <div className="flex flex-col h-full justify-around py-8 md:py-16">
                    <PlayerDot name="Mancini" isAway />
-                </div>
-                <div className="w-full flex justify-center gap-4 md:gap-8 mb-2">
-                   <PlayerDot name="Angelino" isAway />
-                   <PlayerDot name="Kone" isAway />
-                   <PlayerDot name="Cristante" isAway />
+                   <PlayerDot name="Ndicka" isAway />
+                   <PlayerDot name="Hermoso" ballottaggio isAway />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-around py-4 md:py-8">
                    <PlayerDot name="Celik" isAway />
-                </div>
-                <div className="w-full flex justify-center gap-8 mb-2">
-                   <PlayerDot name="Pellegrini" isAway />
+                   <PlayerDot name="Cristante" isAway />
+                   <PlayerDot name="Kone" isAway />
+                   <PlayerDot name="Angelino" isAway />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-around py-12 md:py-24">
                    <PlayerDot name="Dybala" ballottaggio isAway />
-                </div>
-                <div className="w-full flex justify-center mb-2">
-                   <PlayerDot name="Dovbyk" isAway />
-                </div>
-             </div>
-             
+                   <PlayerDot name="Pellegrini" isAway />
+                 </div>
+                 
+                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Dovbyk" isAway /></div>
+              </div>
+
+            </div>
           </div>
 
           {/* TWO COLUMNS LISTS */}

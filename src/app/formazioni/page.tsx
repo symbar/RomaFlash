@@ -146,7 +146,7 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
   // -45deg totally cancels the floor's 45deg rotation, making the names face perfectly flat to the screen for maximum legibility!
   return (
-    <div className="flex flex-col items-center justify-center gap-1.5 z-10 w-full" style={{ transform: 'rotateX(-45deg) scale(1.15)' }}>
+    <div className="flex flex-col items-center justify-center gap-1.5 z-10 w-full" style={{ transform: 'translateZ(30px) rotateX(-45deg) scale(1.15)', transformOrigin: 'bottom center' }}>
       {/* SHADOW FOR 3D EFFECT */}
       <div className="absolute -bottom-1.5 w-8 h-2.5 bg-[#000000]/60 blur-[3px] rounded-[100%] pointer-events-none"></div>
       
@@ -208,11 +208,11 @@ export default function FormazioniPage() {
           </div>
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
-          {/* bg-green-900 prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
-          <div className="relative w-full h-80 md:h-[450px] rounded-3xl overflow-hidden shadow-2xl bg-green-900 border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          {/* bg-[#15803d] prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
+          <div className="relative w-full h-80 md:h-[450px] rounded-3xl overflow-hidden shadow-2xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) - Made wider (120%) so it doesn't cut corners! */}
-            <div className="absolute w-[120%] h-[120%] bg-gradient-to-t from-green-700 to-green-600 flex" 
+            <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex" 
                  style={{ transform: 'rotateX(45deg) translateY(0%)', transformStyle: 'preserve-3d' }}>
                
                {/* --- FIELD LINES (Pure white #FFFFFF) --- */}

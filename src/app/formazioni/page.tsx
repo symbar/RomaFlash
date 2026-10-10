@@ -94,6 +94,58 @@ function ProgressBar({ prob }: { prob: number }) {
   );
 }
 
+
+function DynamicBallottaggi({ teamData, color }: { teamData: any, color: string }) {
+  if (!teamData || !teamData.starters) return <div className="text-center text-xs text-gray-500 mb-8">Nessun dato</div>;
+  const allBallots = [...teamData.starters, ...teamData.bench].filter(p => p.ballottaggio && p.prob > 0 && p.prob < 100).sort((a, b) => b.prob - a.prob);
+  
+  if (allBallots.length === 0) {
+    return <div className="text-center text-xs text-gray-500 mb-8">Nessun ballottaggio</div>;
+  }
+
+  const groups: any[] = [];
+  const roles = ['p', 'd', 'c', 'a'];
+  roles.forEach(r => {
+    const rolePlayers = allBallots.filter(p => p.role && p.role.toLowerCase() === r);
+    for (let i = 0; i < rolePlayers.length; i += 2) {
+      groups.push(rolePlayers.slice(i, i + 2));
+    }
+  });
+
+  return (
+    <>
+      {groups.map((group, idx) => {
+        const topPlayer = group[0];
+        const secondPlayer = group[1];
+        
+        return (
+          <div key={idx} className="flex items-center gap-4 mb-6">
+            <DonutChart prob={topPlayer.prob} color="#8b5cf6" />
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-bold text-gray-900 dark:text-[#ffffff] flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{backgroundColor: color}}></div>
+                  {topPlayer.name}
+                </span>
+                <span className="text-xs font-bold text-gray-900 dark:text-[#ffffff]">{topPlayer.prob}%</span>
+              </div>
+              {secondPlayer && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full opacity-50" style={{backgroundColor: color}}></div>
+                    {secondPlayer.name}
+                  </span>
+                  <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{secondPlayer.prob}%</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
   const RoleIcon = () => (
     <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-[#ffffff] shrink-0
@@ -389,13 +441,7 @@ export default function FormazioniPage() {
                   <div className="flex justify-center mb-6">
                     <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
                   </div>
-                  <div className="flex items-center gap-4 mb-8">
-                    <DonutChart prob={60} color="#8b5cf6" />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-[#ffffff] flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div>Paz</span><span className="text-xs font-bold text-gray-900 dark:text-[#ffffff]">60%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 opacity-50"></div>Fadera</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">40%</span></div>
-                    </div>
-                  </div>
+                  <DynamicBallottaggi teamData={homeState} color="#3b82f6" />
 
                   {/* Squalificati */}
                   <div className="flex justify-center mb-4 mt-8">
@@ -426,21 +472,7 @@ export default function FormazioniPage() {
                     <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
                   </div>
                   
-                  <div className="flex items-center gap-4 mb-4">
-                    <DonutChart prob={55} color="#8b5cf6" />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-[#ffffff] flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary"></div>Dybala</span><span className="text-xs font-bold text-gray-900 dark:text-[#ffffff]">55%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary opacity-50"></div>Soulé</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">45%</span></div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 mb-8">
-                    <DonutChart prob={60} color="#8b5cf6" />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-[#ffffff] flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div>Hermoso</span><span className="text-xs font-bold text-gray-900 dark:text-[#ffffff]">60%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500 opacity-50"></div>Hummels</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">40%</span></div>
-                    </div>
-                  </div>
+                  <DynamicBallottaggi teamData={awayState} color="#ef4444" />
 
                   {/* Squalificati */}
                   <div className="flex justify-center mb-4 mt-8">

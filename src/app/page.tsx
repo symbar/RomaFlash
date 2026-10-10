@@ -99,18 +99,24 @@ export default function Home() {
     setLoadingMore(false);
   };
 
-  const lastArticleRef = useCallback((node: HTMLDivElement) => {
-    if (loadingMore) return;
-    if (observerRef.current) observerRef.current.disconnect();
-    
-    observerRef.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        loadMoreArticles();
-      }
-    }, { rootMargin: '200px' }); // Carica leggermente prima che l'utente arrivi in fondo
-    
-    if (node) observerRef.current.observe(node);
-  }, [loadingMore, hasMore, articles]);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreArticles();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, articles.length, categoryFilter]); // Trigger re-bind when these change
 
   const [newArticlesCount, setNewArticlesCount] = useState(0);
 
@@ -209,7 +215,13 @@ export default function Home() {
             </article>
           ))}
         </section>
-      </main>
+          
+          {hasMore && filteredArticles.length > 0 && (
+            <div ref={loadMoreRef} className="h-10 w-full mt-4 flex items-center justify-center">
+              {/* Invisible trigger div for infinite scroll */}
+            </div>
+          )}
+        </main>
     );
   }
 
@@ -280,7 +292,7 @@ export default function Home() {
             </div>
           )}
           {filteredArticles?.map((article, index) => {
-            const isLast = index === filteredArticles.length - 1;
+            
             return (
                 <motion.article 
                   initial={{ opacity: 0, y: 30 }}
@@ -288,7 +300,7 @@ export default function Home() {
                   transition={{ duration: 0.4, delay: (index % 15) * 0.05, ease: 'easeOut' }}
                   whileHover={{ scale: 0.98 }} whileTap={{ scale: 0.94 }}
                   key={article.id} 
-                  ref={isLast ? lastArticleRef : null}
+                  
                   className={`relative overflow-hidden group cursor-pointer transition-all duration-300 flex flex-col ${
                     index === 0 ? 'md:col-span-2 lg:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
                   } bg-card border border-border rounded-2xl`}

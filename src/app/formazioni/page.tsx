@@ -145,15 +145,15 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 z-10 w-full" style={{ transform: 'rotateX(-50deg)' }}>
+    <div className="flex flex-col items-center justify-center gap-1.5 z-10 w-full" style={{ transform: 'rotateX(-25deg) scale(1.1)' }}>
       {/* SHADOW FOR 3D EFFECT */}
-      <div className="absolute -bottom-2 w-6 h-2 bg-black/40 blur-[2px] rounded-[100%] pointer-events-none"></div>
+      <div className="absolute -bottom-1.5 w-7 h-2.5 bg-black/50 blur-[3px] rounded-[100%] pointer-events-none"></div>
       
-      <div className={`relative w-8 h-8 md:w-10 md:h-10 rounded-full border-[3px] shadow-lg flex items-center justify-center overflow-hidden
+      <div className={`relative w-9 h-9 md:w-11 md:h-11 rounded-full border-[3px] shadow-xl flex items-center justify-center overflow-hidden
         ${ballottaggio ? 'border-yellow-400 border-dashed animate-pulse' : 'border-white'} ${isAway ? 'bg-red-800' : 'bg-blue-800'}`}>
-        <span className="text-[12px] font-bold text-white/90 drop-shadow-md">{name.charAt(0)}</span>
+        <span className="text-[14px] md:text-[16px] font-bold text-white/90 drop-shadow-md">{name.charAt(0)}</span>
       </div>
-      <span className="text-[9px] md:text-[11px] font-bold text-white bg-black/80 px-1.5 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
+      <span className="text-[10px] md:text-[12px] font-bold text-white bg-black/90 px-2 py-0.5 rounded-md backdrop-blur-md whitespace-nowrap shadow-xl border border-white/20">
         {name}
       </span>
     </div>
@@ -207,32 +207,37 @@ export default function FormazioniPage() {
           </div>
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
-          <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl bg-black border-4 border-card mb-8" style={{ perspective: '800px' }}>
+          <div className="relative w-full h-80 md:h-96 rounded-3xl overflow-hidden shadow-2xl bg-black border-4 border-card mb-8" style={{ perspective: '800px' }}>
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) */}
             <div className="absolute inset-0 bg-gradient-to-t from-green-800 to-green-600 origin-bottom flex" 
-                 style={{ transform: 'rotateX(50deg) scale(1.15) translateY(-10%)' }}>
+                 style={{ transform: 'rotateX(45deg) scale(1.15) translateY(-5%)' }}>
                
                {/* --- FIELD LINES --- */}
-               <div className="absolute inset-4 border-[3px] border-white/40"></div>
+               <div className="absolute inset-6 border-[3px] border-white/90 z-0"></div>
                {/* Center Line */}
-               <div className="absolute inset-y-4 left-1/2 border-l-[3px] border-white/40"></div>
+               <div className="absolute inset-y-6 left-1/2 border-l-[3px] border-white/90 z-0"></div>
                {/* Center Circle */}
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 border-[3px] border-white/40 rounded-full"></div>
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/60 rounded-full"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 border-[3px] border-white/90 rounded-full z-0"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full z-0"></div>
                {/* Left Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 left-4 w-16 md:w-24 border-r-[3px] border-y-[3px] border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] left-4 w-8 md:w-12 border-r-[3px] border-y-[3px] border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] left-16 md:left-24 w-8 md:w-12 border-r-[3px] border-white/40 rounded-r-[100%]"></div>
+               <div className="absolute top-1/4 bottom-1/4 left-6 w-16 md:w-24 border-r-[3px] border-y-[3px] border-white/90 z-0"></div>
+               <div className="absolute top-[40%] bottom-[40%] left-6 w-8 md:w-12 border-r-[3px] border-y-[3px] border-white/90 z-0"></div>
+               <div className="absolute top-[40%] bottom-[40%] left-[88px] md:left-[120px] w-8 md:w-12 border-r-[3px] border-white/90 rounded-r-[100%] z-0"></div>
+               {/* Left GOAL NET (Outside pitch) */}
+               <div className="absolute top-[42%] bottom-[42%] left-2 w-4 border-[3px] border-white/90 z-0"></div>
+               
                {/* Right Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 right-4 w-16 md:w-24 border-l-[3px] border-y-[3px] border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] right-4 w-8 md:w-12 border-l-[3px] border-y-[3px] border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] right-16 md:right-24 w-8 md:w-12 border-l-[3px] border-white/40 rounded-l-[100%]"></div>
+               <div className="absolute top-1/4 bottom-1/4 right-6 w-16 md:w-24 border-l-[3px] border-y-[3px] border-white/90 z-0"></div>
+               <div className="absolute top-[40%] bottom-[40%] right-6 w-8 md:w-12 border-l-[3px] border-y-[3px] border-white/90 z-0"></div>
+               <div className="absolute top-[40%] bottom-[40%] right-[88px] md:right-[120px] w-8 md:w-12 border-l-[3px] border-white/90 rounded-l-[100%] z-0"></div>
+               {/* Right GOAL NET (Outside pitch) */}
+               <div className="absolute top-[42%] bottom-[42%] right-2 w-4 border-[3px] border-white/90 z-0"></div>
 
                {/* --- PLAYERS GRID (On the 3D floor) --- */}
                {/* Home (Left - Como) */}
                <div className="flex-1 flex items-center justify-between pr-2 md:pr-4 py-8 relative z-10">
-                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Audero" /></div>
+                  <div className="flex flex-col h-[70%] justify-center w-1/5"><PlayerDot name="Audero" /></div>
                   <div className="flex flex-col h-full justify-around w-1/5">
                     <PlayerDot name="Iovine" />
                     <PlayerDot name="Kempf" />
@@ -248,12 +253,12 @@ export default function FormazioniPage() {
                     <PlayerDot name="Paz" ballottaggio />
                     <PlayerDot name="Fadera" ballottaggio />
                   </div>
-                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Cutrone" /></div>
+                  <div className="flex flex-col h-[70%] justify-center w-1/5"><PlayerDot name="Cutrone" /></div>
                </div>
 
                {/* Away (Right - Roma) */}
                <div className="flex-1 flex flex-row-reverse items-center justify-between pl-2 md:pl-4 py-8 relative z-10">
-                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Svilar" isAway /></div>
+                  <div className="flex flex-col h-[70%] justify-center w-1/5"><PlayerDot name="Svilar" isAway /></div>
                   <div className="flex flex-col h-[75%] justify-around w-1/5">
                     <PlayerDot name="Mancini" isAway />
                     <PlayerDot name="Ndicka" isAway />
@@ -269,15 +274,15 @@ export default function FormazioniPage() {
                     <PlayerDot name="Dybala" ballottaggio isAway />
                     <PlayerDot name="Pellegrini" isAway />
                   </div>
-                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Dovbyk" isAway /></div>
+                  <div className="flex flex-col h-[70%] justify-center w-1/5"><PlayerDot name="Dovbyk" isAway /></div>
                </div>
             </div>
             
             {/* Info Bar Overlay (Top Left/Right) */}
-            <div className="absolute top-2 left-4 text-[10px] font-bold text-white/80 uppercase tracking-widest drop-shadow-md z-20">
+            <div className="absolute top-3 left-6 text-[10px] md:text-xs font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
               {matchData.date}
             </div>
-            <div className="absolute top-2 right-4 text-[10px] font-bold text-white/80 uppercase tracking-widest drop-shadow-md z-20">
+            <div className="absolute top-3 right-6 text-[10px] md:text-xs font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
               {matchData.stadium}
             </div>
           </div>

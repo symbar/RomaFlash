@@ -11,6 +11,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.117.2",
+    "cheerio": "^1.2.0",
     "dotenv": "^18.0.4",
     "framer-motion": "^13.4.4",
     "lucide-react": "^1.48.0",
@@ -33,5 +34,19 @@
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "fetch-test.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/symbar/RomaFlash.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/symbar/RomaFlash/issues"
+  },
+  "homepage": "https://github.com/symbar/RomaFlash#readme"
 }

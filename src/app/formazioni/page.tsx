@@ -107,7 +107,7 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
     <div className="flex items-center justify-between py-2 border-b border-border last:border-0 hover:bg-black/5 dark:hover:bg-white/5 transition-colors px-1">
       <div className={`flex items-center gap-2 ${isAway ? 'order-2 flex-row-reverse text-right' : 'order-1'}`}>
         <RoleIcon />
-        <span className={`font-semibold text-sm ${player.ballottaggio ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+        <span className={`font-semibold text-sm ${player.ballottaggio ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
           {player.name}
         </span>
       </div>
@@ -143,16 +143,16 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
   );
 }
 
-function PlayerDot({ name, ballottaggio }: { name: string, ballottaggio?: boolean }) {
+function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1">
-      <div className={`w-8 h-8 rounded-full border-2 shadow-md flex items-center justify-center overflow-hidden
-        ${ballottaggio ? 'border-primary border-dashed animate-pulse' : 'border-white/50'} bg-black/60`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+    <div className="flex flex-col items-center justify-center gap-0.5">
+      <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 shadow-md flex items-center justify-center overflow-hidden
+        ${ballottaggio ? 'border-primary border-dashed animate-pulse' : 'border-white/50'} ${isAway ? 'bg-red-800' : 'bg-blue-800'}`}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
           <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
         </svg>
       </div>
-      <span className="text-[9px] font-bold text-white bg-black/70 px-1.5 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
+      <span className="text-[8px] md:text-[9px] font-bold text-white bg-black/70 px-1 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
         {name}
       </span>
     </div>
@@ -205,42 +205,75 @@ export default function FormazioniPage() {
             </div>
           </div>
 
-          {/* THE PITCH - RomaFlash Style */}
-          <div className="w-full rounded-2xl bg-gradient-to-b from-green-800 to-green-950 border border-border shadow-xl relative overflow-hidden flex flex-col py-6 pb-2" style={{ perspective: '1000px' }}>
+          {/* THE PITCH - BOTH TEAMS VERTICAL FULL PITCH */}
+          <div className="w-full h-[600px] rounded-2xl bg-gradient-to-b from-green-800 to-green-700 border-4 border-white/20 shadow-xl relative overflow-hidden flex flex-col justify-between py-4" style={{ perspective: 'none' }}>
              
              {/* Pitch Lines */}
-             <div className="absolute inset-x-8 top-12 bottom-12 border-2 border-white/20 rounded-sm pointer-events-none transform rotateX-[30deg]"></div>
-             <div className="absolute inset-x-0 top-1/2 border-t-2 border-white/20 pointer-events-none transform rotateX-[30deg]"></div>
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/20 rounded-full pointer-events-none transform rotateX-[30deg] scale-y-75"></div>
+             <div className="absolute inset-4 border-2 border-white/30 pointer-events-none"></div>
+             {/* Midfield line */}
+             <div className="absolute inset-x-4 top-1/2 border-t-2 border-white/30 pointer-events-none"></div>
+             {/* Center Circle */}
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/30 rounded-full pointer-events-none"></div>
+             {/* Center Dot */}
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/50 rounded-full pointer-events-none"></div>
              
-             {/* AWAY TEAM (Roma) - Top Half */}
-             <div className="w-full flex justify-center gap-4 z-10 mt-2">
-                <PlayerDot name="Dovbyk" />
+             {/* Home Penalty Area */}
+             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-48 h-24 border-x-2 border-b-2 border-white/30 pointer-events-none"></div>
+             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-8 border-x-2 border-b-2 border-white/30 pointer-events-none"></div>
+             <div className="absolute top-[100px] left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-white/30 rounded-b-full pointer-events-none"></div>
+
+             {/* Away Penalty Area */}
+             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 h-24 border-x-2 border-t-2 border-white/30 pointer-events-none"></div>
+             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-24 h-8 border-x-2 border-t-2 border-white/30 pointer-events-none"></div>
+             <div className="absolute bottom-[100px] left-1/2 -translate-x-1/2 w-16 h-8 border-t-2 border-white/30 rounded-t-full pointer-events-none"></div>
+
+             {/* HOME TEAM (Como 4-2-3-1) - Top Half */}
+             <div className="relative z-10 w-full flex flex-col h-1/2 justify-between pb-4">
+                <div className="w-full flex justify-center mt-2">
+                   <PlayerDot name="Audero" />
+                </div>
+                <div className="w-full flex justify-center gap-4 md:gap-10 mt-2">
+                   <PlayerDot name="Moreno" />
+                   <PlayerDot name="Dossena" />
+                   <PlayerDot name="Kempf" />
+                   <PlayerDot name="Iovine" />
+                </div>
+                <div className="w-full flex justify-center gap-12 mt-2">
+                   <PlayerDot name="Perrone" />
+                   <PlayerDot name="Sergi Roberto" />
+                </div>
+                <div className="w-full flex justify-center gap-6 mt-2">
+                   <PlayerDot name="Paz" ballottaggio />
+                   <PlayerDot name="Cutrone" />
+                   <PlayerDot name="Strefezza" />
+                </div>
              </div>
-             <div className="w-full flex justify-center gap-12 z-10 mt-6">
-                <PlayerDot name="Pellegrini" />
-                <PlayerDot name="Dybala" ballottaggio />
-             </div>
-             <div className="w-full flex justify-center gap-8 z-10 mt-8">
-                <PlayerDot name="Angelino" />
-                <PlayerDot name="Cristante" />
-                <PlayerDot name="Kone" />
-                <PlayerDot name="Celik" />
-             </div>
-             <div className="w-full flex justify-center gap-16 z-10 mt-8">
-                <PlayerDot name="Ndicka" />
-                <PlayerDot name="Hermoso" ballottaggio />
-                <PlayerDot name="Mancini" />
-             </div>
-             <div className="w-full flex justify-center gap-4 z-10 mt-6 border-b border-white/10 pb-4">
-                <PlayerDot name="Svilar" />
+
+             {/* AWAY TEAM (Roma 3-4-2-1) - Bottom Half */}
+             <div className="relative z-10 w-full flex flex-col h-1/2 justify-between flex-col-reverse pt-4">
+                <div className="w-full flex justify-center mb-2">
+                   <PlayerDot name="Svilar" isAway />
+                </div>
+                <div className="w-full flex justify-center gap-8 md:gap-16 mb-2">
+                   <PlayerDot name="Hermoso" ballottaggio isAway />
+                   <PlayerDot name="Ndicka" isAway />
+                   <PlayerDot name="Mancini" isAway />
+                </div>
+                <div className="w-full flex justify-center gap-4 md:gap-8 mb-2">
+                   <PlayerDot name="Angelino" isAway />
+                   <PlayerDot name="Kone" isAway />
+                   <PlayerDot name="Cristante" isAway />
+                   <PlayerDot name="Celik" isAway />
+                </div>
+                <div className="w-full flex justify-center gap-8 mb-2">
+                   <PlayerDot name="Pellegrini" isAway />
+                   <PlayerDot name="Dybala" ballottaggio isAway />
+                </div>
+                <div className="w-full flex justify-center mb-2">
+                   <PlayerDot name="Dovbyk" isAway />
+                </div>
              </div>
              
-             {/* Info Bar */}
-             <div className="flex justify-between items-center w-full px-4 pt-2 mt-4 text-[10px] font-bold text-white/50 uppercase tracking-widest">
-               <span>{matchData.date}</span>
-               <span>{matchData.stadium}</span>
-             </div>
           </div>
 
           {/* TWO COLUMNS LISTS */}
@@ -287,7 +320,7 @@ export default function FormazioniPage() {
                     <DonutChart prob={60} color="#8b5cf6" />
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div>Paz</span><span className="text-xs font-bold text-gray-900 dark:text-white">60%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-500 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 opacity-50"></div>Fadera</span><span className="text-xs font-bold text-gray-500">40%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 opacity-50"></div>Fadera</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">40%</span></div>
                     </div>
                   </div>
 
@@ -309,7 +342,7 @@ export default function FormazioniPage() {
                   </div>
                   <div className="mb-4">
                     <div className="text-sm font-bold text-gray-900 dark:text-white mb-1">Varane</div>
-                    <div className="text-xs text-gray-500">Problema al ginocchio, out.</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Problema al ginocchio, out.</div>
                   </div>
                 </div>
 
@@ -324,7 +357,7 @@ export default function FormazioniPage() {
                     <DonutChart prob={55} color="#8b5cf6" />
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary"></div>Dybala</span><span className="text-xs font-bold text-gray-900 dark:text-white">55%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-500 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary opacity-50"></div>Soulé</span><span className="text-xs font-bold text-gray-500">45%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary opacity-50"></div>Soulé</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">45%</span></div>
                     </div>
                   </div>
 
@@ -332,7 +365,7 @@ export default function FormazioniPage() {
                     <DonutChart prob={60} color="#8b5cf6" />
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div>Hermoso</span><span className="text-xs font-bold text-gray-900 dark:text-white">60%</span></div>
-                      <div className="flex justify-between items-center"><span className="text-sm text-gray-500 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500 opacity-50"></div>Hummels</span><span className="text-xs font-bold text-gray-500">40%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500 opacity-50"></div>Hummels</span><span className="text-xs font-bold text-gray-600 dark:text-gray-400">40%</span></div>
                     </div>
                   </div>
 
@@ -354,7 +387,7 @@ export default function FormazioniPage() {
                   </div>
                   <div className="mb-4">
                     <div className="text-sm font-bold text-gray-900 dark:text-white mb-1">Saelemaekers</div>
-                    <div className="text-xs text-gray-500">Frattura al malleolo, rientro a Novembre.</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Frattura al malleolo, rientro a Novembre.</div>
                   </div>
                 </div>
 

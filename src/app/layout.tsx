@@ -27,7 +27,6 @@ export const metadata: Metadata = {
 };
 
 import TabBar from '@/components/TabBar';
-import { ThemeProvider } from '@/components/ThemeProvider';
 
 export default function RootLayout({
   children,
@@ -41,8 +40,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-screen">
-        <ThemeProvider>
-            <InstallPrompt />
+        <InstallPrompt />
             <div className="flex min-h-screen max-w-[1600px] mx-auto">
               <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
                 {children}
@@ -50,7 +48,6 @@ export default function RootLayout({
             </div>
             <TabBar />
 
-        </ThemeProvider>
         {/* Cloudflare Web Analytics */}
         <Script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9ec688eb17b641bd998e97d1651c6cde"}'></Script>
       </body>

@@ -1,6 +1,5 @@
 ﻿import Link from 'next/link';
 import { WolfLogo } from '@/components/Icons';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import PushNotificationManager from '@/components/PushNotificationManager';
 import { LegalModal } from '@/components/LegalModal';
 
@@ -33,7 +32,6 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
       
       {/* Utilities only on the right side of the header */}
       <div className="flex items-center gap-3">
-        <ThemeToggle />
         <PushNotificationManager />
         <LegalModal />
       </div>

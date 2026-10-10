@@ -13,7 +13,9 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
   const [isRefreshing, setIsRefreshing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
+  const startX = useRef(0);
   const currentY = useRef(0);
+  const isScrollingHorizontally = useRef(false);
   
   const MAX_PULL = 100;
   const THRESHOLD = 70;
@@ -25,13 +27,29 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
     const handleTouchStart = (e: TouchEvent) => {
       if (window.scrollY === 0) {
         startY.current = e.touches[0].clientY;
+        startX.current = e.touches[0].clientX;
+        isScrollingHorizontally.current = false;
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (startY.current === 0 || isRefreshing) return;
 
+      const currentX = e.touches[0].clientX;
       currentY.current = e.touches[0].clientY;
+      
+      const deltaX = Math.abs(currentX - startX.current);
+      const deltaY = Math.abs(currentY.current - startY.current);
+
+      // Se l'utente si sta muovendo più in orizzontale che in verticale, è uno scroll orizzontale (es. filtri)
+      if (deltaX > deltaY && deltaX > 5) {
+        isScrollingHorizontally.current = true;
+      }
+
+      if (isScrollingHorizontally.current) {
+        return; // Non interferire con lo scroll orizzontale nativo
+      }
+
       const distance = currentY.current - startY.current;
 
       if (distance > 0 && window.scrollY === 0) {
@@ -42,7 +60,7 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
     };
 
     const handleTouchEnd = async () => {
-      if (pullDistance >= THRESHOLD && !isRefreshing) {
+      if (pullDistance >= THRESHOLD && !isRefreshing && !isScrollingHorizontally.current) {
         setIsRefreshing(true);
         setPullDistance(THRESHOLD); // Hold position
         await onRefresh();
@@ -50,7 +68,9 @@ export default function PullToRefresh({ onRefresh, children }: PullToRefreshProp
       }
       setPullDistance(0);
       startY.current = 0;
+      startX.current = 0;
       currentY.current = 0;
+      isScrollingHorizontally.current = false;
     };
 
     container.addEventListener('touchstart', handleTouchStart, { passive: true });

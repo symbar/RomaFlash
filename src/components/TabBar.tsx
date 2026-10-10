@@ -22,7 +22,7 @@ export default function TabBar() {
         </Link>
         
         
-        <Link href="/formazioni" className={`flex flex-col items-center gap-1 w-16 ${pathname === '/formazioni' ? 'text-primary' : 'text-gray-500 hover:text-gray-400'}`}>
+        <Link href="/formazioni" className={`flex flex-col items-center gap-1 justify-center w-full h-full ${pathname === '/formazioni' ? 'text-secondary' : 'text-gray-500'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 ${pathname === '/formazioni' ? 'drop-shadow-[0_0_8px_rgba(255,165,0,0.8)]' : ''}`}>
             <rect width="18" height="12" x="3" y="6" rx="2" ry="2"/>
             <path d="M3 12h18"/>

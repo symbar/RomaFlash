@@ -1,3 +1,4 @@
+
 'use client';
 
 import GlobalHeader from '@/components/GlobalHeader';
@@ -7,9 +8,9 @@ import { motion } from 'framer-motion';
 // --- MOCK DATA ---
 const matchData = {
   homeTeam: "Como",
-  homeLogo: "https://media.api-sports.io/football/teams/853.png",
+  homeLogo: "https://upload.wikimedia.org/wikipedia/it/thumb/a/a2/Como_1907_logo.svg/120px-Como_1907_logo.svg.png",
   awayTeam: "Roma",
-  awayLogo: "https://media.api-sports.io/football/teams/497.png",
+  awayLogo: "https://upload.wikimedia.org/wikipedia/it/thumb/1/1c/AS_Roma_logo_%282017%29.svg/120px-AS_Roma_logo_%282017%29.svg.png",
   date: "Domenica 11 Ottobre, 12:30",
   stadium: "Giuseppe Sinigaglia",
   lastUpdate: "10/10/2026 - 19:04"
@@ -85,7 +86,7 @@ function ProgressBar({ prob }: { prob: number }) {
   };
   
   return (
-    <div className="w-12 md:w-16 h-1.5 bg-white/10 rounded-full overflow-hidden flex-shrink-0">
+    <div className="w-16 h-1.5 bg-[#1e2a3b] rounded-full overflow-hidden flex-shrink-0">
       <div className={`h-full ${getColor()} rounded-full`} style={{ width: `${prob}%` }} />
     </div>
   );
@@ -94,10 +95,10 @@ function ProgressBar({ prob }: { prob: number }) {
 function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
   const RoleIcon = () => (
     <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-white shrink-0
-      ${player.role === 'P' ? 'bg-yellow-600' : 
-        player.role === 'D' ? 'bg-green-600' : 
-        player.role === 'C' ? 'bg-blue-600' : 
-        player.role === 'A' ? 'bg-red-600' : 'bg-gray-600'}`}>
+      ${player.role === 'P' ? 'bg-yellow-500' : 
+        player.role === 'D' ? 'bg-green-500' : 
+        player.role === 'C' ? 'bg-blue-500' : 
+        player.role === 'A' ? 'bg-red-500' : 'bg-gray-600'}`}>
       {player.role || '-'}
     </span>
   );
@@ -111,8 +112,8 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
         </span>
       </div>
       <div className={`flex items-center gap-2 ${isAway ? 'order-1' : 'order-2'}`}>
-        <ProgressBar prob={player.prob} />
         <span className="text-xs font-mono text-gray-500 w-8 text-center">{player.prob}%</span>
+        <ProgressBar prob={player.prob} />
       </div>
     </div>
   );
@@ -120,29 +121,60 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
 
 function TeamList({ teamName, formation, players, isAway }: { teamName: string, formation: string, players: any, isAway: boolean }) {
   return (
-    <div className="flex-1 bg-card/40 border border-border rounded-xl overflow-hidden backdrop-blur-sm">
-      {/* Header List */}
-      <div className={`px-4 py-2 flex justify-between items-center ${isAway ? 'bg-primary/20 border-b border-primary/30' : 'bg-black/40 border-b border-border'}`}>
-        <span className={`font-bold text-sm ${isAway ? 'text-primary' : 'text-white'}`}>{teamName}</span>
+    <div className="flex-1 bg-[#151c27] border border-[#2a364a] rounded-xl overflow-hidden shadow-lg">
+      <div className="bg-[#1e2a3b] px-4 py-2 border-b border-[#2a364a] flex justify-between items-center">
+        <span className="font-bold text-sm text-white">{teamName}</span>
         <span className="text-xs font-mono text-gray-400 font-bold">{formation}</span>
       </div>
-      
-      {/* Starters */}
       <div className="p-3">
         {players.starters.map((p: any, i: number) => (
           <PlayerRow key={i} player={p} isAway={isAway} />
         ))}
       </div>
-
-      {/* Bench */}
-      <div className="bg-black/20 px-4 py-2 border-y border-border text-center">
-        <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Panchina</span>
+      <div className="bg-[#1e2a3b] px-4 py-2 border-y border-[#2a364a] text-center">
+        <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest bg-[#151c27] px-3 py-1 rounded-full border border-[#2a364a]">Panchina</span>
       </div>
       <div className="p-3 opacity-70">
         {players.bench.map((p: any, i: number) => (
           <PlayerRow key={i} player={p} isAway={isAway} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function PlayerDot({ name, ballottaggio }: { name: string, ballottaggio?: boolean }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-1">
+      <div className={`w-8 h-8 rounded-full border-2 shadow-lg flex items-center justify-center overflow-hidden
+        ${ballottaggio ? 'border-orange-500 border-dashed animate-pulse' : 'border-gray-300'} bg-gray-800`}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+          <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+      <span className="text-[9px] font-bold text-white bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
+        {name}
+      </span>
+    </div>
+  );
+}
+
+function DonutChart({ prob, color, size = 48 }: { prob: number, color: string, size?: number }) {
+  const strokeWidth = 4;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (prob / 100) * circumference;
+  
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg className="transform -rotate-90" width={size} height={size}>
+        <circle cx={size/2} cy={size/2} r={radius} fill="transparent" stroke="#1e2a3b" strokeWidth={strokeWidth} />
+        <circle 
+          cx={size/2} cy={size/2} r={radius} fill="transparent" stroke={color} strokeWidth={strokeWidth} 
+          strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" 
+        />
+      </svg>
+      <span className="absolute text-[10px] font-bold text-white">{prob}%</span>
     </div>
   );
 }
@@ -159,116 +191,173 @@ export default function FormazioniPage() {
           className="max-w-4xl mx-auto space-y-6"
         >
           {/* Match Header */}
-          <div className="flex flex-col items-center text-center space-y-2 mb-8 mt-4">
-            <div className="flex items-center justify-center gap-4 md:gap-8">
-              <div className="flex flex-col items-center gap-2">
-                <img src={matchData.homeLogo} alt={matchData.homeTeam} className="w-14 h-14 md:w-20 md:h-20 drop-shadow-lg" />
-                <span className="font-bold text-lg md:text-xl">{matchData.homeTeam}</span>
+          <div className="flex flex-col items-center justify-center pt-4">
+            <div className="flex items-center justify-center gap-6 md:gap-16">
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-lg md:text-xl text-white">{matchData.homeTeam}</span>
+                <img src={matchData.homeLogo} alt={matchData.homeTeam} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
               </div>
-              <div className="text-2xl md:text-3xl font-black text-gray-600">VS</div>
-              <div className="flex flex-col items-center gap-2">
-                <img src={matchData.awayLogo} alt={matchData.awayTeam} className="w-14 h-14 md:w-20 md:h-20 drop-shadow-lg" />
-                <span className="font-bold text-lg md:text-xl text-primary">{matchData.awayTeam}</span>
+              <div className="text-xl font-bold text-gray-500">VS</div>
+              <div className="flex items-center gap-3">
+                <img src={matchData.awayLogo} alt={matchData.awayTeam} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+                <span className="font-bold text-lg md:text-xl text-white">{matchData.awayTeam}</span>
               </div>
-            </div>
-            <div className="text-xs md:text-sm font-semibold text-gray-400 mt-4">
-              {matchData.date} <span className="mx-2">•</span> {matchData.stadium}
             </div>
           </div>
 
-          {/* LAST UPDATE */}
-          <div className="text-center pb-4">
-            <span className="inline-block bg-black/40 border border-border text-gray-400 text-[10px] uppercase font-bold tracking-widest px-4 py-1.5 rounded-full">
-              Ultimo aggiornamento: {matchData.lastUpdate}
-            </span>
+          {/* THE PITCH - Fantacalcio Style */}
+          <div className="w-full rounded-2xl bg-gradient-to-b from-[#1c2c42] to-[#0f172a] border border-[#2a364a] shadow-2xl relative overflow-hidden flex flex-col py-6 pb-2" style={{ perspective: '1000px' }}>
+             
+             {/* Pitch Lines */}
+             <div className="absolute inset-x-8 top-12 bottom-12 border-2 border-white/10 rounded-sm pointer-events-none transform rotateX-[30deg]"></div>
+             <div className="absolute inset-x-0 top-1/2 border-t-2 border-white/10 pointer-events-none transform rotateX-[30deg]"></div>
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-white/10 rounded-full pointer-events-none transform rotateX-[30deg] scale-y-75"></div>
+             
+             {/* AWAY TEAM (Roma) - Top Half */}
+             <div className="w-full flex justify-center gap-4 z-10 mt-2">
+                <PlayerDot name="Dovbyk" />
+             </div>
+             <div className="w-full flex justify-center gap-12 z-10 mt-6">
+                <PlayerDot name="Pellegrini" />
+                <PlayerDot name="Dybala" ballottaggio />
+             </div>
+             <div className="w-full flex justify-center gap-8 z-10 mt-8">
+                <PlayerDot name="Angelino" />
+                <PlayerDot name="Cristante" />
+                <PlayerDot name="Kone" />
+                <PlayerDot name="Celik" />
+             </div>
+             <div className="w-full flex justify-center gap-16 z-10 mt-8">
+                <PlayerDot name="Ndicka" />
+                <PlayerDot name="Hermoso" ballottaggio />
+                <PlayerDot name="Mancini" />
+             </div>
+             <div className="w-full flex justify-center gap-4 z-10 mt-6 border-b border-white/5 pb-4">
+                <PlayerDot name="Svilar" />
+             </div>
+             
+             {/* Info Bar */}
+             <div className="flex justify-between items-center w-full px-4 pt-2 mt-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+               <span>{matchData.date}</span>
+               <span>{matchData.stadium}</span>
+             </div>
           </div>
 
           {/* TWO COLUMNS LISTS */}
-          <div className="flex flex-col md:flex-row gap-4 mt-8">
+          <div className="flex flex-col md:flex-row gap-4 mt-6">
             <TeamList teamName={matchData.homeTeam} formation={homeLineup.formation} players={homeLineup} isAway={false} />
             <TeamList teamName={matchData.awayTeam} formation={awayLineup.formation} players={awayLineup} isAway={true} />
           </div>
           
+          <div className="text-center py-2">
+            <span className="inline-block bg-[#151c27] border border-[#2a364a] text-gray-400 text-[10px] font-mono px-4 py-1.5 rounded-full shadow-lg">
+              Ultimo aggiornamento: {matchData.lastUpdate}
+            </span>
+          </div>
+
           {/* PRESENTAZIONE SQUADRE (AI Text) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div className="bg-card/30 border border-border rounded-xl p-5">
-              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                <img src={matchData.homeLogo} className="w-5 h-5" /> Analisi {matchData.homeTeam}
-              </h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{analysis.home}</p>
-            </div>
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-5">
-              <h3 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
-                <img src={matchData.awayLogo} className="w-5 h-5" /> Analisi {matchData.awayTeam}
-              </h3>
-              <p className="text-sm text-gray-300 leading-relaxed">{analysis.away}</p>
+          <div className="mt-2">
+            <h2 className="text-lg font-bold text-white mb-4 pl-1">Presentazione squadre</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-[#151c27] border border-[#2a364a] rounded-xl p-5 shadow-lg">
+                <h3 className="text-sm font-bold text-white mb-2">{matchData.homeTeam}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{analysis.home}</p>
+              </div>
+              <div className="bg-[#151c27] border border-[#2a364a] rounded-xl p-5 shadow-lg">
+                <h3 className="text-sm font-bold text-white mb-2">{matchData.awayTeam}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{analysis.away}</p>
+              </div>
             </div>
           </div>
 
           {/* BALLOTTAGGI & DETTAGLI CALCIATORI */}
-          <div className="mt-8 bg-card/50 border border-border rounded-2xl p-6">
-            <h2 className="text-center text-lg font-bold text-white mb-6 uppercase tracking-widest">Dettaglio Calciatori</h2>
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-white mb-4 pl-1">Dettaglio calciatori</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-border">
-              {/* Home Details */}
-              <div className="space-y-6 pt-4 md:pt-0 pr-0 md:pr-4">
-                <div className="text-center">
-                  <span className="bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Ballottaggi</span>
-                </div>
-                <div className="flex items-center justify-center gap-4 bg-black/20 p-3 rounded-lg border border-border">
-                  {/* Fake Donut Chart */}
-                  <div className="relative w-12 h-12 rounded-full border-4 border-orange-500/30">
-                    <div className="absolute inset-[-4px] rounded-full border-4 border-orange-500 border-r-transparent border-b-transparent transform rotate-45"></div>
-                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">60%</div>
+            <div className="bg-[#151c27] border border-[#2a364a] rounded-xl overflow-hidden shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#2a364a]">
+                
+                {/* Home Details */}
+                <div className="p-6">
+                  {/* Ballottaggi */}
+                  <div className="flex justify-center mb-6">
+                    <span className="bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Ballottaggi</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between w-32 mb-1"><span className="text-sm font-bold text-white">Paz</span></div>
-                    <div className="flex justify-between w-32"><span className="text-sm text-gray-400">Fadera</span></div>
+                  <div className="flex items-center gap-4 mb-8">
+                    <DonutChart prob={60} color="#8b5cf6" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div>Paz</span><span className="text-xs font-bold text-white">60%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 opacity-50"></div>Fadera</span><span className="text-xs font-bold text-gray-400">40%</span></div>
+                    </div>
+                  </div>
+
+                  {/* Squalificati */}
+                  <div className="flex justify-center mb-4 mt-8">
+                    <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Squalificati</span>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+
+                  {/* Diffidati */}
+                  <div className="flex justify-center mb-4">
+                    <span className="bg-yellow-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Diffidati</span>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+
+                  {/* Infortunati */}
+                  <div className="flex justify-center mb-4">
+                    <span className="bg-orange-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Infortunati</span>
+                  </div>
+                  <div className="mb-4">
+                    <div className="text-sm font-bold text-white mb-1">Varane</div>
+                    <div className="text-xs text-gray-400">Problema al ginocchio, out.</div>
                   </div>
                 </div>
 
-                <div className="text-center mt-6">
-                  <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Infortunati</span>
-                </div>
-                <div className="text-center text-sm text-gray-400 bg-black/20 p-3 rounded-lg border border-border">
-                  <span className="font-bold text-white">Varane</span><br/>Problema al ginocchio, out.
-                </div>
-              </div>
-
-              {/* Away Details */}
-              <div className="space-y-6 pt-6 md:pt-0 pl-0 md:pl-4">
-                <div className="text-center">
-                  <span className="bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Ballottaggi</span>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-center gap-4 bg-black/20 p-3 rounded-lg border border-primary/20">
-                    <div className="relative w-12 h-12 rounded-full border-4 border-orange-500/30">
-                      <div className="absolute inset-[-4px] rounded-full border-4 border-orange-500 border-r-transparent border-b-transparent transform rotate-12"></div>
-                      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">55%</div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between w-32 mb-1"><span className="text-sm font-bold text-white">Dybala</span></div>
-                      <div className="flex justify-between w-32"><span className="text-sm text-gray-400">Soulé</span></div>
+                {/* Away Details */}
+                <div className="p-6">
+                  {/* Ballottaggi */}
+                  <div className="flex justify-center mb-6">
+                    <span className="bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Ballottaggi</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mb-4">
+                    <DonutChart prob={55} color="#8b5cf6" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500"></div>Dybala</span><span className="text-xs font-bold text-white">55%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500 opacity-50"></div>Soulé</span><span className="text-xs font-bold text-gray-400">45%</span></div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-4 bg-black/20 p-3 rounded-lg border border-primary/20">
-                    <div className="relative w-12 h-12 rounded-full border-4 border-green-500/30">
-                      <div className="absolute inset-[-4px] rounded-full border-4 border-green-500 border-b-transparent transform rotate-45"></div>
-                      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">60%</div>
+
+                  <div className="flex items-center gap-4 mb-8">
+                    <DonutChart prob={60} color="#8b5cf6" />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1"><span className="text-sm font-bold text-white flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div>Hermoso</span><span className="text-xs font-bold text-white">60%</span></div>
+                      <div className="flex justify-between items-center"><span className="text-sm text-gray-400 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500 opacity-50"></div>Hummels</span><span className="text-xs font-bold text-gray-400">40%</span></div>
                     </div>
-                    <div>
-                      <div className="flex justify-between w-32 mb-1"><span className="text-sm font-bold text-white">Hermoso</span></div>
-                      <div className="flex justify-between w-32"><span className="text-sm text-gray-400">Hummels</span></div>
-                    </div>
+                  </div>
+
+                  {/* Squalificati */}
+                  <div className="flex justify-center mb-4 mt-8">
+                    <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Squalificati</span>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+
+                  {/* Diffidati */}
+                  <div className="flex justify-center mb-4">
+                    <span className="bg-yellow-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Diffidati</span>
+                  </div>
+                  <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+
+                  {/* Infortunati */}
+                  <div className="flex justify-center mb-4">
+                    <span className="bg-orange-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">Infortunati</span>
+                  </div>
+                  <div className="mb-4">
+                    <div className="text-sm font-bold text-white mb-1">Saelemaekers</div>
+                    <div className="text-xs text-gray-400">Frattura al malleolo, rientro a Novembre.</div>
                   </div>
                 </div>
 
-                <div className="text-center mt-6">
-                  <span className="bg-orange-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Infortunati</span>
-                </div>
-                <div className="text-center text-sm text-gray-400 bg-black/20 p-3 rounded-lg border border-border">
-                  <span className="font-bold text-white">Saelemaekers</span><br/>Frattura al malleolo, rientro a Novembre.
-                </div>
               </div>
             </div>
           </div>

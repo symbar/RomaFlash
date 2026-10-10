@@ -145,14 +145,15 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5">
-      <div className={`w-6 h-6 md:w-8 md:h-8 rounded-full border-2 shadow-md flex items-center justify-center overflow-hidden
-        ${ballottaggio ? 'border-primary border-dashed animate-pulse' : 'border-white/50'} ${isAway ? 'bg-red-800' : 'bg-blue-800'}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
-          <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
-        </svg>
+    <div className="flex flex-col items-center justify-center gap-1 z-10 w-full" style={{ transform: 'rotateX(-50deg)' }}>
+      {/* SHADOW FOR 3D EFFECT */}
+      <div className="absolute -bottom-2 w-6 h-2 bg-black/40 blur-[2px] rounded-[100%] pointer-events-none"></div>
+      
+      <div className={`relative w-8 h-8 md:w-10 md:h-10 rounded-full border-[3px] shadow-lg flex items-center justify-center overflow-hidden
+        ${ballottaggio ? 'border-yellow-400 border-dashed animate-pulse' : 'border-white'} ${isAway ? 'bg-red-800' : 'bg-blue-800'}`}>
+        <span className="text-[12px] font-bold text-white/90 drop-shadow-md">{name.charAt(0)}</span>
       </div>
-      <span className="text-[8px] md:text-[9px] font-bold text-white bg-black/70 px-1 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
+      <span className="text-[9px] md:text-[11px] font-bold text-white bg-black/80 px-1.5 py-0.5 rounded backdrop-blur-sm whitespace-nowrap shadow-sm">
         {name}
       </span>
     </div>
@@ -205,78 +206,79 @@ export default function FormazioniPage() {
             </div>
           </div>
 
-          {/* HORIZONTAL 3D PITCH */}
-          <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-t from-green-800 to-green-600 border-4 border-card mb-8">
+          {/* THE PITCH - TRUE 3D HORIZONTAL */}
+          <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl bg-black border-4 border-card mb-8" style={{ perspective: '800px' }}>
             
-            {/* 3D Field Lines */}
-            <div className="absolute inset-0 origin-bottom" style={{ transform: 'perspective(600px) rotateX(45deg) scale(1.15) translateY(-5%)' }}>
-               {/* Field Boundary */}
-               <div className="absolute inset-x-4 inset-y-4 border-2 border-white/40"></div>
+            {/* The 3D Floor (Contains Grass, Lines AND Players) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-green-800 to-green-600 origin-bottom flex" 
+                 style={{ transform: 'rotateX(50deg) scale(1.15) translateY(-10%)' }}>
+               
+               {/* --- FIELD LINES --- */}
+               <div className="absolute inset-4 border-[3px] border-white/40"></div>
                {/* Center Line */}
-               <div className="absolute inset-y-4 left-1/2 border-l-2 border-white/40"></div>
+               <div className="absolute inset-y-4 left-1/2 border-l-[3px] border-white/40"></div>
                {/* Center Circle */}
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 md:w-32 md:h-32 border-2 border-white/40 rounded-full"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 border-[3px] border-white/40 rounded-full"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/60 rounded-full"></div>
                {/* Left Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 left-4 w-12 md:w-20 border-r-2 border-y-2 border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] left-4 w-6 md:w-10 border-r-2 border-y-2 border-white/40"></div>
+               <div className="absolute top-1/4 bottom-1/4 left-4 w-16 md:w-24 border-r-[3px] border-y-[3px] border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] left-4 w-8 md:w-12 border-r-[3px] border-y-[3px] border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] left-16 md:left-24 w-8 md:w-12 border-r-[3px] border-white/40 rounded-r-[100%]"></div>
                {/* Right Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 right-4 w-12 md:w-20 border-l-2 border-y-2 border-white/40"></div>
-               <div className="absolute top-[40%] bottom-[40%] right-4 w-6 md:w-10 border-l-2 border-y-2 border-white/40"></div>
+               <div className="absolute top-1/4 bottom-1/4 right-4 w-16 md:w-24 border-l-[3px] border-y-[3px] border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] right-4 w-8 md:w-12 border-l-[3px] border-y-[3px] border-white/40"></div>
+               <div className="absolute top-[40%] bottom-[40%] right-16 md:right-24 w-8 md:w-12 border-l-[3px] border-white/40 rounded-l-[100%]"></div>
+
+               {/* --- PLAYERS GRID (On the 3D floor) --- */}
+               {/* Home (Left - Como) */}
+               <div className="flex-1 flex items-center justify-between pr-2 md:pr-4 py-8 relative z-10">
+                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Audero" /></div>
+                  <div className="flex flex-col h-full justify-around w-1/5">
+                    <PlayerDot name="Iovine" />
+                    <PlayerDot name="Kempf" />
+                    <PlayerDot name="Dossena" />
+                    <PlayerDot name="Moreno" />
+                  </div>
+                  <div className="flex flex-col h-[70%] justify-around w-1/5">
+                    <PlayerDot name="Sergi R." />
+                    <PlayerDot name="Perrone" />
+                  </div>
+                  <div className="flex flex-col h-[85%] justify-around w-1/5">
+                    <PlayerDot name="Strefezza" />
+                    <PlayerDot name="Paz" ballottaggio />
+                    <PlayerDot name="Fadera" ballottaggio />
+                  </div>
+                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Cutrone" /></div>
+               </div>
+
+               {/* Away (Right - Roma) */}
+               <div className="flex-1 flex flex-row-reverse items-center justify-between pl-2 md:pl-4 py-8 relative z-10">
+                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Svilar" isAway /></div>
+                  <div className="flex flex-col h-[75%] justify-around w-1/5">
+                    <PlayerDot name="Mancini" isAway />
+                    <PlayerDot name="Ndicka" isAway />
+                    <PlayerDot name="Hermoso" ballottaggio isAway />
+                  </div>
+                  <div className="flex flex-col h-full justify-around w-1/5">
+                    <PlayerDot name="Celik" isAway />
+                    <PlayerDot name="Cristante" isAway />
+                    <PlayerDot name="Kone" isAway />
+                    <PlayerDot name="Angelino" isAway />
+                  </div>
+                  <div className="flex flex-col h-[60%] justify-around w-1/5">
+                    <PlayerDot name="Dybala" ballottaggio isAway />
+                    <PlayerDot name="Pellegrini" isAway />
+                  </div>
+                  <div className="flex flex-col h-full justify-center w-1/5"><PlayerDot name="Dovbyk" isAway /></div>
+               </div>
             </div>
-
-            {/* Players Overlay (No 3D distortion, perfectly horizontal) */}
-            <div className="absolute inset-0 flex p-2 md:p-6 pb-8 md:pb-12">
-              
-              {/* Home (Left - Como) */}
-              <div className="flex-1 flex items-center justify-between pr-2 md:pr-4">
-                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Audero" /></div>
-                 
-                 <div className="flex flex-col h-full justify-around py-4 md:py-8">
-                   <PlayerDot name="Iovine" />
-                   <PlayerDot name="Kempf" />
-                   <PlayerDot name="Dossena" />
-                   <PlayerDot name="Moreno" />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-around py-12 md:py-24">
-                   <PlayerDot name="Sergi Roberto" />
-                   <PlayerDot name="Perrone" />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-around py-8 md:py-16">
-                   <PlayerDot name="Strefezza" />
-                   <PlayerDot name="Paz" ballottaggio />
-                   <PlayerDot name="Fadera" ballottaggio />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Cutrone" /></div>
-              </div>
-
-              {/* Away (Right - Roma) */}
-              <div className="flex-1 flex flex-row-reverse items-center justify-between pl-2 md:pl-4">
-                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Svilar" isAway /></div>
-                 
-                 <div className="flex flex-col h-full justify-around py-8 md:py-16">
-                   <PlayerDot name="Mancini" isAway />
-                   <PlayerDot name="Ndicka" isAway />
-                   <PlayerDot name="Hermoso" ballottaggio isAway />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-around py-4 md:py-8">
-                   <PlayerDot name="Celik" isAway />
-                   <PlayerDot name="Cristante" isAway />
-                   <PlayerDot name="Kone" isAway />
-                   <PlayerDot name="Angelino" isAway />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-around py-12 md:py-24">
-                   <PlayerDot name="Dybala" ballottaggio isAway />
-                   <PlayerDot name="Pellegrini" isAway />
-                 </div>
-                 
-                 <div className="flex flex-col h-full justify-center"><PlayerDot name="Dovbyk" isAway /></div>
-              </div>
-
+            
+            {/* Info Bar Overlay (Top Left/Right) */}
+            <div className="absolute top-2 left-4 text-[10px] font-bold text-white/80 uppercase tracking-widest drop-shadow-md z-20">
+              {matchData.date}
+            </div>
+            <div className="absolute top-2 right-4 text-[10px] font-bold text-white/80 uppercase tracking-widest drop-shadow-md z-20">
+              {matchData.stadium}
             </div>
           </div>
 

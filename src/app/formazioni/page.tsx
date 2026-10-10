@@ -18,7 +18,7 @@ const matchData = {
   lastUpdate: "10/10/2026 - 19:04"
 };
 
-const homeLineup = {
+const homeState = {
   formation: "4-2-3-1",
   starters: [
     { name: "Audero", role: "P", prob: 95 },
@@ -45,7 +45,7 @@ const homeLineup = {
   ]
 };
 
-const awayLineup = {
+const awayState = {
   formation: "3-4-2-1",
   starters: [
     { name: "Svilar", role: "P", prob: 99 },
@@ -180,12 +180,9 @@ function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?
   return (
     <div className="flex flex-col items-center justify-center gap-1.5 z-10 w-full" style={{ transform: 'translateZ(30px) rotateX(-45deg) scale(1.15)', transformOrigin: 'bottom center' }}>
       {/* SHADOW FOR 3D EFFECT */}
-      <div className="absolute -bottom-1.5 w-8 h-2.5 bg-[#000000]/60 blur-[3px] rounded-[100%] pointer-events-none"></div>
       
-      <div className={`relative w-10 h-10 md:w-12 md:h-12 rounded-full border-[3px] shadow-2xl flex items-center justify-center overflow-hidden
-        ${ballottaggio ? 'border-yellow-400 border-dashed animate-pulse' : 'border-[#ffffff]'} ${isAway ? 'bg-red-800' : 'bg-blue-800'}`}>
-        <span className="text-[16px] md:text-[18px] font-bold text-[#ffffff] drop-shadow-md">{name.charAt(0)}</span>
-      </div>
+      
+      
       <span className="text-[11px] md:text-[13px] font-bold text-[#ffffff] bg-[#000000]/90 px-2.5 py-0.5 rounded-md backdrop-blur-md whitespace-nowrap shadow-xl border border-[#ffffff]/30">
         {name}
       </span>
@@ -217,36 +214,56 @@ export default function FormazioniPage() {
   const [matchState, setMatchState] = useState(matchData);
   const [homeState, setHomeState] = useState({
     formation: "4-2-3-1",
-    starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"]
+    bench: [], starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"]
   });
   const [awayState, setAwayState] = useState({
     formation: "3-4-2-1",
-    starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"]
+    bench: [], starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"]
   });
   
   const fetchLineups = async () => {
     try {
-      const { data, error } = await supabase
+      // 1. Fetch Roma first to know the match
+      const { data: romaData, error } = await supabase
         .from('lineups')
         .select('*')
         .eq('team', 'Roma')
         .single();
         
-      if (data && !error) {
-        const dateObj = new Date(data.updated_at);
+      if (romaData && !error) {
+        const teams = romaData.match_name.split(' - ');
+        const isRomaHome = teams[0] === 'Roma';
+        const opponentName = isRomaHome ? teams[1] : teams[0];
+        
+        // 2. Fetch opponent
+        const { data: oppData } = await supabase
+          .from('lineups')
+          .select('*')
+          .eq('team', opponentName)
+          .single();
+        
+        const dateObj = new Date(romaData.updated_at);
         const dateStr = dateObj.toLocaleDateString('it-IT') + ' - ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
         
         setMatchState(prev => ({
           ...prev,
           lastUpdate: dateStr,
-          stadium: data.match_name // Fallback per far vedere che è live
+          homeTeam: teams[0],
+          awayTeam: teams[1]
         }));
         
-        const isHome = data.match_name.startsWith('Roma');
-        if (isHome) {
-          setHomeState({ formation: data.formation, starters: data.starters });
+        const formatData = (d) => ({
+           formation: d?.formation || 'N/A',
+           starters: d?.starters || [],
+           bench: d?.bench || []
+        });
+
+        if (isRomaHome) {
+          setHomeState(formatData(romaData));
+          if (oppData) setAwayState(formatData(oppData));
         } else {
-          setAwayState({ formation: data.formation, starters: data.starters });
+          setAwayState(formatData(romaData));
+          if (oppData) setHomeState(formatData(oppData));
         }
       }
     } catch (e) {
@@ -334,8 +351,8 @@ export default function FormazioniPage() {
 
           {/* TWO COLUMNS LISTS */}
           <div className="flex flex-col md:flex-row gap-4 mt-6">
-            <TeamList teamName={matchState.homeTeam} formation={homeLineup.formation} players={homeLineup} isAway={false} />
-            <TeamList teamName={matchState.awayTeam} formation={awayLineup.formation} players={awayLineup} isAway={true} />
+            <TeamList teamName={matchState.homeTeam} formation={homeState.formation} players={homeState} isAway={false} />
+            <TeamList teamName={matchState.awayTeam} formation={awayState.formation} players={awayState} isAway={true} />
           </div>
           
           <div className="text-center py-2">

@@ -102,33 +102,33 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
   return (
     <>
       {/* BALLOTTAGGI */}
-      <div className="flex justify-center mb-6">
-        <span className="bg-purple-600 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Ballottaggi</span>
+      <div className="flex justify-center mb-4 md:mb-6">
+        <span className="bg-purple-600 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Ballottaggi</span>
       </div>
       {(!details.Ballottaggi || details.Ballottaggi.length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">Nessun ballottaggio</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun ballottaggio</div>
       ) : (
         details.Ballottaggi.map((group: any, idx: number) => {
           const topPlayer = group[0];
           const secondPlayer = group[1];
           return (
-            <div key={idx} className="flex items-center gap-4 mb-6">
+            <div key={idx} className="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
               <DonutChart prob={topPlayer.prob} color="#8b5cf6" />
-              <div className="flex-1">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: color}}></div>
-                    {topPlayer.name}
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className="text-xs md:text-sm font-bold text-gray-900 flex items-center gap-1.5 truncate">
+                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0" style={{backgroundColor: color}}></div>
+                    <span className="truncate">{topPlayer.name}</span>
                   </span>
-                  <span className="text-xs font-bold text-gray-900">{topPlayer.prob}%</span>
+                  <span className="text-[10px] md:text-xs font-bold text-gray-900 ml-1 shrink-0">{topPlayer.prob}%</span>
                 </div>
                 {secondPlayer && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full opacity-50" style={{backgroundColor: color}}></div>
-                      {secondPlayer.name}
+                    <span className="text-[11px] md:text-sm text-gray-600 flex items-center gap-1.5 truncate">
+                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full shrink-0 opacity-50" style={{backgroundColor: color}}></div>
+                      <span className="truncate">{secondPlayer.name}</span>
                     </span>
-                    <span className="text-xs font-bold text-gray-600">{secondPlayer.prob}%</span>
+                    <span className="text-[10px] md:text-xs font-bold text-gray-600 ml-1 shrink-0">{secondPlayer.prob}%</span>
                   </div>
                 )}
               </div>
@@ -138,51 +138,51 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
       )}
 
       {/* SQUALIFICATI */}
-      <div className="flex justify-center mb-4 mt-8">
-        <span className="bg-red-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Squalificati</span>
+      <div className="flex justify-center mb-3 md:mb-4 mt-6 md:mt-8">
+        <span className="bg-red-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Squalificati</span>
       </div>
       {(!details.Squalificati || details.Squalificati.length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
       ) : (
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           {details.Squalificati.map((item: any, idx: number) => (
             <div key={idx} className="mb-2">
-              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
-              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+              <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
             </div>
           ))}
         </div>
       )}
 
       {/* DIFFIDATI */}
-      <div className="flex justify-center mb-4">
-        <span className="bg-yellow-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Diffidati</span>
+      <div className="flex justify-center mb-3 md:mb-4">
+        <span className="bg-yellow-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Diffidati</span>
       </div>
       {(!details.Diffidati || details.Diffidati.length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
       ) : (
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           {details.Diffidati.map((item: any, idx: number) => (
             <div key={idx} className="mb-2">
-              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
-              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+              <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
             </div>
           ))}
         </div>
       )}
 
       {/* INFORTUNATI */}
-      <div className="flex justify-center mb-4">
-        <span className="bg-orange-500 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">Infortunati</span>
+      <div className="flex justify-center mb-3 md:mb-4">
+        <span className="bg-orange-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Infortunati</span>
       </div>
       {(!details.Infortunati || details.Infortunati.length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
       ) : (
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           {details.Infortunati.map((item: any, idx: number) => (
-            <div key={idx} className="mb-3">
-              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
-              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            <div key={idx} className="mb-2.5">
+              <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
             </div>
           ))}
         </div>
@@ -485,33 +485,32 @@ export default function FormazioniPage() {
           {/* PRESENTAZIONE SQUADRE */}
           <div className="mt-2">
             <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">Presentazione squadre</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-900 mb-2">{matchState.homeTeam}</h3>
-                <p className="text-xs text-gray-700 leading-relaxed">{homeState?.details?.commentary || analysis.home}</p>
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="bg-white border border-border rounded-xl p-3 md:p-5 shadow-sm">
+                <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-1.5">{matchState.homeTeam}</h3>
+                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{homeState?.details?.commentary || analysis.home}</p>
               </div>
-              <div className="bg-card border border-primary/20 rounded-xl p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-primary mb-2">{matchState.awayTeam}</h3>
-                <p className="text-xs text-gray-700 leading-relaxed">{awayState?.details?.commentary || analysis.away}</p>
+              <div className="bg-white border border-primary/20 rounded-xl p-3 md:p-5 shadow-sm">
+                <h3 className="text-xs md:text-sm font-bold text-primary mb-1.5">{matchState.awayTeam}</h3>
+                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{awayState?.details?.commentary || analysis.away}</p>
               </div>
             </div>
           </div>
 
           {/* BALLOTTAGGI & DETTAGLI CALCIATORI */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-[#ffffff] mb-4 pl-1">Dettaglio calciatori</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">Dettaglio calciatori</h2>
             
-            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
-                
+            <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+              <div className="grid grid-cols-2 divide-x divide-border">
                 
                 {/* Home Details */}
-                <div className="p-6">
+                <div className="p-2.5 md:p-6">
                   <DynamicDetails details={homeState?.details} color="#3b82f6" />
                 </div>
 
                 {/* Away Details */}
-                <div className="p-6">
+                <div className="p-2.5 md:p-6">
                   <DynamicDetails details={awayState?.details} color="#ef4444" />
                 </div>
 

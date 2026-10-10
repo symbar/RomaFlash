@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import GlobalHeader from '@/components/GlobalHeader';
+import GlobalRightSidebar from '@/components/GlobalRightSidebar';
 import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
@@ -131,21 +133,10 @@ function ArticleContent() {
     <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32">
       <div className="bg-background">
 
-      <header className="flex items-center justify-between py-6 mb-4 border-b border-border relative z-50">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl font-bold tracking-tight text-white">Roma<span className="text-primary">Flash</span></h1>
-          </Link>
-          <div className="hidden md:block mx-4 h-6 w-px bg-border"></div>
-          <h2 className="hidden md:block text-sm font-semibold text-gray-400">Notizia</h2>
-          <nav className="hidden md:flex items-center gap-6 ml-8 text-sm font-semibold text-gray-500 dark:text-gray-400">
-            <Link href="/" className="flex items-center gap-2 hover:text-primary transition-colors text-primary">Le Ultime</Link>
-            <Link href="/calendario" className="flex items-center gap-2 hover:text-primary transition-colors text-gray-500 dark:text-gray-400">Calendario</Link>
-          </nav>
-        </div>
-      </header>
+      <GlobalHeader title="Notizia" />
 
-      <div className="max-w-3xl mx-auto">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div className="flex-1 lg:w-[65%] xl:w-[70%] order-2 lg:order-1 flex flex-col">
       <header className="py-4 mb-6 border-b border-border/50">
         <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-secondary hover:text-secondary/80 font-semibold mb-6 transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -278,6 +269,8 @@ function ArticleContent() {
         </section>
       )}
       </div>
+      </div>
+        <GlobalRightSidebar />
       </div>
       </main>
   );

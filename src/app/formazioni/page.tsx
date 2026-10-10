@@ -88,7 +88,7 @@ function ProgressBar({ prob }: { prob: number }) {
   };
   
   return (
-    <div className="w-12 md:w-16 h-1.5 bg-gray-200 dark:bg-[#ffffff]/10 rounded-full overflow-hidden flex-shrink-0">
+    <div className="w-5 md:w-14 h-1.5 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
       <div className={`h-full ${getColor()} rounded-full`} style={{ width: `${prob}%` }} />
     </div>
   );
@@ -211,7 +211,7 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
 
 function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
   const RoleIcon = () => (
-    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-[#ffffff] shrink-0
+    <span className={`flex items-center justify-center w-3.5 h-3.5 md:w-4 md:h-4 rounded-full text-[8px] md:text-[9px] font-bold text-white shrink-0
       ${player.role === 'P' ? 'bg-yellow-500' : 
         player.role === 'D' ? 'bg-green-500' : 
         player.role === 'C' ? 'bg-blue-500' : 
@@ -221,15 +221,15 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
   );
 
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border last:border-0 hover:bg-[#000000]/5 dark:hover:bg-[#ffffff]/5 transition-colors px-1">
-      <div className={`flex items-center gap-2 ${isAway ? 'order-2 flex-row-reverse text-right' : 'order-1'}`}>
+    <div className="flex items-center justify-between py-1.5 md:py-2 border-b border-border/50 last:border-0 hover:bg-gray-50 transition-colors px-1 gap-1">
+      <div className={`flex items-center gap-1 md:gap-2 min-w-0 ${isAway ? 'order-2 flex-row-reverse text-right' : 'order-1'}`}>
         <RoleIcon />
-        <span className={`font-semibold text-sm ${player.ballottaggio ? 'text-gray-900 dark:text-[#ffffff]' : 'text-gray-600 dark:text-gray-400'}`}>
+        <span className={`font-semibold text-[11px] md:text-sm truncate ${player.ballottaggio ? 'text-gray-900 font-bold' : 'text-gray-700'}`}>
           {player.name}
         </span>
       </div>
-      <div className={`flex items-center gap-2 ${isAway ? 'order-1' : 'order-2'}`}>
-        <span className="text-xs font-mono text-gray-500 w-8 text-center">{player.prob}%</span>
+      <div className={`flex items-center gap-1 md:gap-2 shrink-0 ${isAway ? 'order-1' : 'order-2'}`}>
+        <span className="text-[10px] md:text-xs font-mono text-gray-500 w-6 md:w-8 text-center">{player.prob}%</span>
         <ProgressBar prob={player.prob} />
       </div>
     </div>
@@ -238,20 +238,20 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
 
 function TeamList({ teamName, formation, players, isAway }: { teamName: string, formation: string, players: any, isAway: boolean }) {
   return (
-    <div className="flex-1 bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-      <div className={`px-4 py-2 border-b border-border flex justify-between items-center ${isAway ? 'bg-primary/10' : 'bg-gray-100 dark:bg-[#000000]/40'}`}>
-        <span className={`font-bold text-sm ${isAway ? 'text-primary' : 'text-gray-900 dark:text-[#ffffff]'}`}>{teamName}</span>
-        <span className="text-xs font-mono text-gray-500 font-bold">{formation}</span>
+    <div className="w-full bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+      <div className={`px-2.5 md:px-4 py-2 border-b border-border flex justify-between items-center ${isAway ? 'bg-primary/10' : 'bg-gray-100'}`}>
+        <span className={`font-bold text-xs md:text-sm truncate ${isAway ? 'text-primary' : 'text-gray-900'}`}>{teamName}</span>
+        <span className="text-[10px] md:text-xs font-mono text-gray-500 font-bold shrink-0">{formation}</span>
       </div>
-      <div className="p-3">
+      <div className="p-1 md:p-3">
         {players.starters.map((p: any, i: number) => (
           <PlayerRow key={i} player={p} isAway={isAway} />
         ))}
       </div>
-      <div className="bg-gray-50 dark:bg-[#000000]/20 px-4 py-2 border-y border-border text-center">
-        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest bg-card px-3 py-1 rounded-full border border-border">Panchina</span>
+      <div className="bg-gray-50 px-2 md:px-4 py-1.5 border-y border-border text-center">
+        <span className="text-[9px] md:text-[10px] font-semibold text-gray-500 uppercase tracking-widest bg-white px-2.5 py-0.5 rounded-full border border-border shadow-2xs">Panchina</span>
       </div>
-      <div className="p-3 opacity-70">
+      <div className="p-1 md:p-3 opacity-75">
         {players.bench.map((p: any, i: number) => (
           <PlayerRow key={i} player={p} isAway={isAway} />
         ))}
@@ -291,14 +291,10 @@ function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: an
 }
 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
-  // -45deg totally cancels the floor's 45deg rotation, making the names face perfectly flat to the screen for maximum legibility!
+  // -45deg cancels the floor's 45deg rotation for flat legibility
   return (
-    <div className="flex flex-col items-center justify-center gap-1.5 z-10 w-full" style={{ transform: 'translateZ(30px) rotateX(-45deg) scale(1.15)', transformOrigin: 'bottom center' }}>
-      {/* SHADOW FOR 3D EFFECT */}
-      
-      
-      
-      <span className="text-[11px] md:text-[13px] font-bold text-[#ffffff] bg-[#000000]/90 px-2.5 py-0.5 rounded-md backdrop-blur-md whitespace-nowrap shadow-xl border border-[#ffffff]/30">
+    <div className="flex flex-col items-center justify-center z-10 w-full" style={{ transform: 'translateZ(15px) rotateX(-45deg)', transformOrigin: 'bottom center' }}>
+      <span className="text-[9px] md:text-[13px] font-bold text-white bg-black/85 px-1 py-0.5 md:px-2.5 md:py-0.5 rounded md:rounded-md backdrop-blur-md whitespace-nowrap shadow-lg border border-white/25 max-w-[58px] md:max-w-none truncate block text-center">
         {name}
       </span>
     </div>
@@ -430,36 +426,32 @@ export default function FormazioniPage() {
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
           {/* bg-[#15803d] prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
-          <div className="relative w-full h-[460px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          <div className="relative w-full h-[280px] md:h-[460px] rounded-3xl overflow-hidden shadow-xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
             
-            {/* The 3D Floor (Contains Grass, Lines AND Players) - Made wider (120%) so it doesn't cut corners! */}
+            {/* The 3D Floor (Contains Grass, Lines AND Players) */}
             <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex" 
                  style={{ transform: 'rotateX(45deg) translateY(0%)', transformStyle: 'preserve-3d' }}>
                
                {/* --- FIELD LINES (Pure white #FFFFFF) --- */}
-               <div className="absolute inset-10 border-4 border-[#ffffff] z-0 shadow-sm"></div>
+               <div className="absolute inset-2 md:inset-8 border-2 md:border-4 border-white/90 z-0 shadow-sm"></div>
                {/* Center Line */}
-               <div className="absolute inset-y-10 left-1/2 border-l-4 border-[#ffffff] z-0 shadow-sm"></div>
+               <div className="absolute inset-y-2 md:inset-y-8 left-1/2 border-l-2 md:border-l-4 border-white/90 z-0 shadow-sm"></div>
                {/* Center Circle */}
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-48 md:h-48 border-4 border-[#ffffff] rounded-full z-0 shadow-sm"></div>
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#ffffff] rounded-full z-0 shadow-sm"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 md:w-44 md:h-44 border-2 md:border-4 border-white/90 rounded-full z-0 shadow-sm"></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 md:w-3 md:h-3 bg-white rounded-full z-0 shadow-sm"></div>
                
                {/* Left Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 left-10 w-24 md:w-32 border-r-4 border-y-4 border-[#ffffff] z-0 shadow-sm"></div>
-               <div className="absolute top-[38%] bottom-[38%] left-10 w-12 md:w-16 border-r-4 border-y-4 border-[#ffffff] z-0 shadow-sm"></div>
-               <div className="absolute top-[38%] bottom-[38%] left-[106px] md:left-[138px] w-12 md:w-16 border-r-4 border-[#ffffff] rounded-r-[100%] z-0 opacity-80"></div>
-               {/* Left GOAL NET (Outside pitch) */}
-               <div className="absolute top-[42%] bottom-[42%] left-6 w-4 border-4 border-[#ffffff] z-0"></div>
+               <div className="absolute top-1/4 bottom-1/4 left-2 md:left-8 w-12 md:w-28 border-r-2 md:border-r-4 border-y-2 md:border-y-4 border-white/90 z-0 shadow-sm"></div>
+               <div className="absolute top-[38%] bottom-[38%] left-2 md:left-8 w-6 md:w-14 border-r-2 md:border-r-4 border-y-2 md:border-y-4 border-white/90 z-0 shadow-sm"></div>
+               <div className="absolute top-[38%] bottom-[38%] left-[54px] md:left-[118px] w-6 md:w-14 border-r-2 md:border-r-4 border-white/90 rounded-r-[100%] z-0 opacity-80"></div>
                
                {/* Right Goal Area */}
-               <div className="absolute top-1/4 bottom-1/4 right-10 w-24 md:w-32 border-l-4 border-y-4 border-[#ffffff] z-0 shadow-sm"></div>
-               <div className="absolute top-[38%] bottom-[38%] right-10 w-12 md:w-16 border-l-4 border-y-4 border-[#ffffff] z-0 shadow-sm"></div>
-               <div className="absolute top-[38%] bottom-[38%] right-[106px] md:right-[138px] w-12 md:w-16 border-l-4 border-[#ffffff] rounded-l-[100%] z-0 opacity-80"></div>
-               {/* Right GOAL NET (Outside pitch) */}
-               <div className="absolute top-[42%] bottom-[42%] right-6 w-4 border-4 border-[#ffffff] z-0"></div>
+               <div className="absolute top-1/4 bottom-1/4 right-2 md:right-8 w-12 md:w-28 border-l-2 md:border-l-4 border-y-2 md:border-y-4 border-white/90 z-0 shadow-sm"></div>
+               <div className="absolute top-[38%] bottom-[38%] right-2 md:right-8 w-6 md:w-14 border-l-2 md:border-l-4 border-y-2 md:border-y-4 border-white/90 z-0 shadow-sm"></div>
+               <div className="absolute top-[38%] bottom-[38%] right-[54px] md:right-[118px] w-6 md:w-14 border-l-2 md:border-l-4 border-white/90 rounded-l-[100%] z-0 opacity-80"></div>
 
                {/* --- PLAYERS GRID (On the 3D floor) --- */}
-               <div className="absolute inset-10 flex px-2 py-4 md:py-12 z-10" style={{ transformStyle: 'preserve-3d' }}>
+               <div className="absolute inset-2 md:inset-8 flex px-1 py-1 md:py-8 z-10" style={{ transformStyle: 'preserve-3d' }}>
                  {/* Home (Left) */}
                  <DynamicFormationGrid starters={homeState.starters} formationStr={homeState.formation} />
 
@@ -469,19 +461,18 @@ export default function FormazioniPage() {
             </div>
             
             {/* Info Bar Overlay (Top Left/Right) */}
-            <div className="absolute top-4 left-6 text-[11px] md:text-sm font-bold text-[#ffffff] uppercase tracking-widest drop-shadow-md z-20">
+            <div className="absolute top-3 left-4 md:top-4 md:left-6 text-[10px] md:text-sm font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
               {matchState.date}
             </div>
-            <div className="absolute top-4 right-6 text-[11px] md:text-sm font-bold text-[#ffffff] uppercase tracking-widest drop-shadow-md z-20">
+            <div className="absolute top-3 right-4 md:top-4 md:right-6 text-[10px] md:text-sm font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
               {matchState.stadium}
             </div>
           </div>
 
           {/* TWO COLUMNS LISTS */}
-          <div className="flex flex-col md:flex-row gap-4 mt-6 relative items-start">
+          <div className="grid grid-cols-2 gap-1.5 md:gap-4 mt-6 relative items-start">
             <TeamList teamName={matchState.homeTeam} formation={homeState.formation} players={homeState} isAway={false} />
-            <div className="hidden md:flex absolute left-1/2 top-[18px] -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md pointer-events-none">VS</div>
-            <div className="flex md:hidden mx-auto -my-2 z-10 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black shadow-md">VS</div>
+            <div className="absolute left-1/2 top-[16px] md:top-[18px] -translate-x-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#f0b516] border-2 border-white flex items-center justify-center text-[9px] md:text-xs font-black text-black z-20 shadow-md pointer-events-none">VS</div>
             <TeamList teamName={matchState.awayTeam} formation={awayState.formation} players={awayState} isAway={true} />
           </div>
           

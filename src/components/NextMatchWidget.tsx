@@ -68,18 +68,18 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
   if (!timeLeft) return null; // Nascondi il widget se non c'è una partita imminente
 
   return (
-    <div className="bg-gradient-to-r from-primary to-secondary p-[1px] shadow-lg overflow-hidden">
-      <div className="bg-black px-4 py-2 flex items-center justify-between text-xs md:text-sm">
+    <div className="bg-gradient-to-r from-primary to-secondary p-[1px] shadow-sm overflow-hidden rounded-xl">
+      <div className="bg-white px-4 py-2.5 flex items-center justify-between text-xs md:text-sm">
         
         {/* Info Partita */}
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <span className="text-gray-400 flex items-center text-[10px] uppercase font-bold tracking-wider">
+            <span className="text-gray-500 flex items-center text-[10px] uppercase font-bold tracking-wider">
               <CompetitionIcon competition={competition} />
               {competition}
             </span>
-            <span className="font-bold text-white uppercase tracking-wide">
-              {homeTeam} <span className="text-yellow-500 font-normal mx-1">vs</span> {awayTeam}
+            <span className="font-bold text-gray-900 uppercase tracking-wide">
+              {homeTeam} <span className="text-yellow-600 font-normal mx-1">vs</span> {awayTeam}
             </span>
           </div>
         </div>
@@ -91,23 +91,23 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
           </div>
           <div className="flex gap-1 md:gap-2 text-center font-mono">
             <div className="flex flex-col">
-              <span className="text-white font-bold text-sm md:text-base bg-white/10 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.days}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-400 uppercase">G</span>
+              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.days}</span>
+              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">G</span>
             </div>
-            <span className="text-gray-600 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-1">:</span>
             <div className="flex flex-col">
-              <span className="text-white font-bold text-sm md:text-base bg-white/10 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.hours.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-400 uppercase">O</span>
+              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.hours.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">O</span>
             </div>
-            <span className="text-gray-600 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-1">:</span>
             <div className="flex flex-col">
-              <span className="text-white font-bold text-sm md:text-base bg-white/10 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.minutes.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-400 uppercase">M</span>
+              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.minutes.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">M</span>
             </div>
-            <span className="text-gray-600 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-1">:</span>
             <div className="flex flex-col">
-              <span className="text-yellow-500 font-bold text-sm md:text-base bg-yellow-500/10 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.seconds.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-yellow-500/70 uppercase">S</span>
+              <span className="text-amber-600 font-bold text-sm md:text-base bg-amber-50 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.seconds.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[10px] text-amber-600 uppercase">S</span>
             </div>
           </div>
         </div>

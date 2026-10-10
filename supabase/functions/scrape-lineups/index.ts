@@ -128,6 +128,16 @@ serve(async (req) => {
                     }
                 });
 
+                // PARSE PRESENTAZIONE SQUADRE (Commentary)
+                let homeCommentary = "";
+                let awayCommentary = "";
+                $(match).find('.col').each((i: number, col: any) => {
+                    const colTeam = $(col).find('h4').text().trim();
+                    const comment = $(col).find('.comment p').text().replace(/\s+/g, ' ').trim();
+                    if (colTeam === homeName) homeCommentary = comment;
+                    if (colTeam === awayName) awayCommentary = comment;
+                });
+
                 const match_name = `${homeName} - ${awayName}`;
 
                 recordsToUpsert.push({
@@ -137,6 +147,7 @@ serve(async (req) => {
                     starters: homeTeamData.starters,
                     bench: homeTeamData.bench,
                     details: {
+                        commentary: homeCommentary,
                         Ballottaggi: details.Ballottaggi?.home || [],
                         Squalificati: details.Squalificati?.home || [],
                         Diffidati: details.Diffidati?.home || [],
@@ -153,6 +164,7 @@ serve(async (req) => {
                     starters: awayTeamData.starters,
                     bench: awayTeamData.bench,
                     details: {
+                        commentary: awayCommentary,
                         Ballottaggi: details.Ballottaggi?.away || [],
                         Squalificati: details.Squalificati?.away || [],
                         Diffidati: details.Diffidati?.away || [],

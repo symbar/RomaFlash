@@ -10,9 +10,9 @@ import { motion } from 'framer-motion';
 // --- MOCK DATA ---
 const matchData = {
   homeTeam: "Como",
-  homeLogo: "https://img.legaseriea.it/vimages/668bb1dcd0693/como.png",
+  homeLogo: "https://crests.football-data.org/7397.png",
   awayTeam: "Roma",
-  awayLogo: "https://media.api-sports.io/football/teams/497.png",
+  awayLogo: "https://crests.football-data.org/100.png",
   date: "Domenica 11 Ottobre, 12:30",
   stadium: "Giuseppe Sinigaglia",
   lastUpdate: "10/10/2026 - 19:04"
@@ -356,6 +356,16 @@ export default function FormazioniPage() {
           .select('*')
           .eq('team', opponentName)
           .single();
+
+        // 3. Fetch team logos from standings
+        const { data: standingsData } = await supabase
+          .from('standings')
+          .select('team_name, team_logo');
+
+        const findLogo = (name: string, fallback: string) => {
+          const match = standingsData?.find((s: any) => s.team_name.toLowerCase().includes(name.toLowerCase()));
+          return match?.team_logo || fallback;
+        };
         
         const dateObj = new Date(romaData.updated_at);
         const dateStr = dateObj.toLocaleDateString('it-IT') + ' - ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -364,7 +374,9 @@ export default function FormazioniPage() {
           ...prev,
           lastUpdate: dateStr,
           homeTeam: teams[0],
-          awayTeam: teams[1]
+          awayTeam: teams[1],
+          homeLogo: findLogo(teams[0], prev.homeLogo),
+          awayLogo: findLogo(teams[1], prev.awayLogo)
         }));
         
         const formatData = (d: any) => ({
@@ -405,13 +417,13 @@ export default function FormazioniPage() {
           <div className="flex flex-col items-center justify-center pt-4">
             <div className="flex items-center justify-center gap-4 md:gap-8">
               <div className="flex items-center gap-2">
+                <img src={matchState.homeLogo} alt={matchState.homeTeam} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 <span className={`font-bold text-lg md:text-2xl ${matchState.homeTeam === 'Roma' ? 'text-primary' : 'text-gray-900'}`}>{matchState.homeTeam}</span>
-                {matchState.homeTeam === 'Roma' && <img src={matchState.homeLogo} alt="Roma" className="w-8 h-8 md:w-10 md:h-10 object-contain" />}
               </div>
-              <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gray-100 border border-gray-300 flex items-center justify-center text-[11px] md:text-xs font-bold text-gray-500 shadow-sm">VS</div>
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#f0b516] border-2 border-white flex items-center justify-center text-xs font-black text-black shadow-md">VS</div>
               <div className="flex items-center gap-2">
-                {matchState.awayTeam === 'Roma' && <img src={matchState.awayLogo} alt="Roma" className="w-8 h-8 md:w-10 md:h-10 object-contain" />}
                 <span className={`font-bold text-lg md:text-2xl ${matchState.awayTeam === 'Roma' ? 'text-primary' : 'text-gray-900'}`}>{matchState.awayTeam}</span>
+                <img src={matchState.awayLogo} alt={matchState.awayTeam} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               </div>
             </div>
           </div>
@@ -466,9 +478,10 @@ export default function FormazioniPage() {
           </div>
 
           {/* TWO COLUMNS LISTS */}
-          <div className="flex flex-col md:flex-row gap-4 mt-6 relative">
+          <div className="flex flex-col md:flex-row gap-4 mt-6 relative items-center">
             <TeamList teamName={matchState.homeTeam} formation={homeState.formation} players={homeState} isAway={false} />
-            <div className="hidden md:flex absolute left-1/2 top-2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#ffffff] border border-border items-center justify-center text-[10px] font-bold text-gray-500 z-20 shadow-sm">VS</div>
+            <div className="hidden md:flex absolute left-1/2 top-1.5 -translate-x-1/2 w-9 h-9 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md">VS</div>
+            <div className="md:hidden flex my-1 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md">VS</div>
             <TeamList teamName={matchState.awayTeam} formation={awayState.formation} players={awayState} isAway={true} />
           </div>
           
@@ -478,17 +491,17 @@ export default function FormazioniPage() {
             </span>
           </div>
 
-          {/* PRESENTAZIONE SQUADRE (AI Text) */}
+          {/* PRESENTAZIONE SQUADRE */}
           <div className="mt-2">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-[#ffffff] mb-4 pl-1">Presentazione squadre</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">Presentazione squadre</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-card border border-border rounded-xl p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-[#ffffff] mb-2">{matchState.homeTeam}</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{analysis.home}</p>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">{matchState.homeTeam}</h3>
+                <p className="text-xs text-gray-700 leading-relaxed">{homeState?.details?.commentary || analysis.home}</p>
               </div>
               <div className="bg-card border border-primary/20 rounded-xl p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-primary mb-2">{matchState.awayTeam}</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{analysis.away}</p>
+                <p className="text-xs text-gray-700 leading-relaxed">{awayState?.details?.commentary || analysis.away}</p>
               </div>
             </div>
           </div>

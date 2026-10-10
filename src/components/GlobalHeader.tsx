@@ -21,6 +21,10 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
           <Link href="/" className={`flex items-center gap-2 hover:text-primary transition-colors ${title === 'Le Ultime' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
             Le Ultime
           </Link>
+          
+          <Link href="/formazioni" className={`flex items-center gap-2 hover:text-primary transition-colors ${title === 'Probabili Formazioni' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
+            Formazioni
+          </Link>
           <Link href="/calendario" className={`flex items-center gap-2 hover:text-primary transition-colors ${title === 'Calendario Stagione' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
             Calendario
           </Link>

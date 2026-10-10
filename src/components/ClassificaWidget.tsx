@@ -32,22 +32,34 @@ export default function ClassificaWidget() {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs text-left">
-          <thead className="bg-black/50 text-gray-500 uppercase">
+                    <thead className="bg-black/50 text-gray-500 text-[10px] font-bold">
             <tr>
-              <th className="px-2 py-2 font-semibold w-6 text-center">#</th>
-              <th className="px-2 py-2 font-semibold">Squadra</th>
-              <th className="px-2 py-2 font-semibold text-center">PT</th>
+              <th className="px-1 py-2 text-center w-6">#</th>
+              <th className="px-1 py-2 text-left">SQUADRA</th>
+              <th className="px-1 py-2 text-center w-6 text-white">PT</th>
+              <th className="px-1 py-2 text-center w-6">G</th>
+              <th className="px-1 py-2 text-center w-6">V</th>
+              <th className="px-1 py-2 text-center w-6">N</th>
+              <th className="px-1 py-2 text-center w-6">P</th>
+              <th className="px-1 py-2 text-center w-6">DR</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-border/50 text-[11px]">
             {standings.map((team) => (
               <tr key={team.id} className={`${team.team_name.includes('Roma') && !team.team_name.includes('Lazio') ? 'bg-primary/10' : 'hover:bg-white/5'}`}>
-                <td className="px-2 py-2 text-center font-bold text-gray-500">{team.position}</td>
-                <td className="px-2 py-2 flex items-center gap-2">
-                  <img src={team.team_logo} alt={team.team_name} className="w-4 h-4 object-contain" />
-                  <span className="font-semibold">{team.team_name.substring(0, 12)}</span>
+                <td className="px-1 py-2 text-center font-bold text-gray-500">{team.position}</td>
+                <td className="px-1 py-2">
+                  <div className="flex items-center gap-1.5">
+                    <img src={team.team_logo} alt={team.team_name} className="w-4 h-4 object-contain shrink-0" />
+                    <span className={`font-semibold truncate max-w-[80px] block ${team.team_name.includes('Roma') && !team.team_name.includes('Lazio') ? 'text-primary' : 'text-white'}`}>{team.team_name}</span>
+                  </div>
                 </td>
-                <td className="px-2 py-2 text-center font-bold text-white">{team.points}</td>
+                <td className="px-1 py-2 text-center font-bold text-white">{team.points}</td>
+                <td className="px-1 py-2 text-center text-gray-400">{team.played}</td>
+                <td className="px-1 py-2 text-center text-gray-400">{team.won}</td>
+                <td className="px-1 py-2 text-center text-gray-400">{team.draw}</td>
+                <td className="px-1 py-2 text-center text-gray-400">{team.lost}</td>
+                <td className="px-1 py-2 text-center text-gray-500">{team.goals_for - team.goals_against > 0 ? '+' : ''}{team.goals_for - team.goals_against}</td>
               </tr>
             ))}
           </tbody>

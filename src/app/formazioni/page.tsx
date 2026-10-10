@@ -213,7 +213,7 @@ export default function FormazioniPage() {
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) - Made wider (120%) so it doesn't cut corners! */}
             <div className="absolute w-[120%] h-[120%] bg-gradient-to-t from-green-700 to-green-600 flex" 
-                 style={{ transform: 'rotateX(45deg) translateY(0%)' }}>
+                 style={{ transform: 'rotateX(45deg) translateY(0%)', transformStyle: 'preserve-3d' }}>
                
                {/* --- FIELD LINES (Pure white #FFFFFF) --- */}
                <div className="absolute inset-10 border-4 border-white z-0 shadow-sm"></div>

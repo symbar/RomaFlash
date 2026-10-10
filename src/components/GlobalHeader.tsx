@@ -15,8 +15,6 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
           </h1>
         </Link>
         
-        <div className="hidden md:block mx-4 h-6 w-px bg-border"></div>
-        <h2 className="hidden md:block text-sm font-semibold text-gray-400">{title}</h2>
         
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-6 ml-8 text-sm font-semibold text-gray-500 dark:text-gray-400">

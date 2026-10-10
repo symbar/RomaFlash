@@ -6,7 +6,7 @@ import { Clock, Flame, Snowflake, MessageCircle, ArrowUp } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PushNotificationManager from '@/components/PushNotificationManager';
-import { ThemeToggle } from '@/components/ThemeToggle';
+
 import { LegalModal } from '@/components/LegalModal';
 import { WolfLogo } from '@/components/Icons';
 import PullToRefresh from '@/components/PullToRefresh';

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 

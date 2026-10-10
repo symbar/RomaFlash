@@ -478,10 +478,10 @@ export default function FormazioniPage() {
           </div>
 
           {/* TWO COLUMNS LISTS */}
-          <div className="flex flex-col md:flex-row gap-4 mt-6 relative items-center">
+          <div className="flex flex-col md:flex-row gap-4 mt-6 relative items-start">
             <TeamList teamName={matchState.homeTeam} formation={homeState.formation} players={homeState} isAway={false} />
-            <div className="hidden md:flex absolute left-1/2 top-1.5 -translate-x-1/2 w-9 h-9 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md">VS</div>
-            <div className="md:hidden flex my-1 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md">VS</div>
+            <div className="hidden md:flex absolute left-1/2 top-[18px] -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black z-20 shadow-md pointer-events-none">VS</div>
+            <div className="flex md:hidden mx-auto -my-2 z-10 w-8 h-8 rounded-full bg-[#f0b516] border-2 border-white items-center justify-center text-xs font-black text-black shadow-md">VS</div>
             <TeamList teamName={matchState.awayTeam} formation={awayState.formation} players={awayState} isAway={true} />
           </div>
           

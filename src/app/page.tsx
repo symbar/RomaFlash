@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -294,7 +294,7 @@ export default function Home() {
                   {/* FIRST ITEM HERO LAYOUT */
                   index === 0 ? (
                     <>
-                      <div className="h-56 md:h-72 bg-gradient-to-tr from-black via-black/80 to-primary/40 relative overflow-hidden flex flex-col justify-end p-6">
+                      <div className="h-56 md:h-72 bg-gradient-to-tr from-gray-50 via-white to-primary/10 relative overflow-hidden flex flex-col justify-end p-6 border-b border-border">
                         {article.ai_summary?.youtube_id && (
                            <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" alt="Video" />
                         )}
@@ -309,7 +309,7 @@ export default function Home() {
                               </span>
                             )}
                           </div>
-                          <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
+                          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
                             {article.title}
                           </h2>
                         </div>

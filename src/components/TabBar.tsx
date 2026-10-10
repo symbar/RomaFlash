@@ -8,7 +8,7 @@ export default function TabBar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-0 w-full md:hidden bg-black/80 backdrop-blur-md border-t border-white/10 pb-safe z-50">
+    <div className="fixed bottom-0 w-full md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200 pb-safe z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       <div className="flex justify-around items-center h-16">
         
         <Link href="/" className="flex flex-col items-center justify-center w-full h-full gap-1">

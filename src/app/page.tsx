@@ -385,7 +385,12 @@ export default function Home() {
               Hai raggiunto la fine delle notizie! 🐺
             </div>
           )}
-        </section>
+        
+          {hasMore && filteredArticles.length > 0 && (
+            <div ref={loadMoreRef} className="h-10 w-full mt-4 flex items-center justify-center">
+            </div>
+          )}
+</section>
             </div>
 
             {/* COLONNA DESTRA: Widget e Utility */}

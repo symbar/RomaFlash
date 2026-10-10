@@ -202,7 +202,7 @@ export default function Home() {
           </div>
           <div className="w-12 h-4 bg-gray-200 dark:bg-gray-800 rounded"></div>
         </header>
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <article key={i} className="relative overflow-hidden bg-card/30 border border-border/30 rounded-xl p-5">
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-800/50" />
@@ -244,31 +244,40 @@ export default function Home() {
             </button>
           </div>
         )}
-        <header className="flex items-center justify-between py-6 mb-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <WolfLogo className="w-8 h-8" />
-            <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
-          </div>
-          <div className="flex items-center gap-3">
+        <header className="flex items-center justify-between py-6 mb-4 border-b border-border relative z-50">
+            <div className="flex items-center gap-3">
+              <WolfLogo className="w-8 h-8" />
+              <h1 className="text-2xl font-bold tracking-tight text-secondary">Roma<span className="text-primary">Flash</span></h1>
+              
+              {/* Desktop Navigation Links */}
+              <nav className="hidden md:flex items-center gap-6 ml-8 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                <a href="#" className="flex items-center gap-2 hover:text-primary transition-colors text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  Le Ultime
+                </a>
+                <a href="#" className="flex items-center gap-2 hover:text-primary transition-colors cursor-not-allowed opacity-60" title="Prossimamente">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                  Classifica
+                </a>
+                <a href="#" className="flex items-center gap-2 hover:text-primary transition-colors cursor-not-allowed opacity-60" title="Prossimamente">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                  Calendario
+                </a>
+              </nav>
+            </div>
+            <div className="flex items-center gap-3">
             <ThemeToggle />
               <PushNotificationManager />
               <LegalModal />
           </div>
         </header>
 
-        {/* Widget Prossima Partita - Incassato sotto l'header */}
-        {nextMatch && (
-          <div className="mb-6 rounded-xl overflow-hidden ring-1 ring-border shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <NextMatchWidget 
-              homeTeam={nextMatch.home_team} 
-              awayTeam={nextMatch.away_team} 
-              competition={nextMatch.competition} 
-              matchDate={nextMatch.match_date} 
-            />
-          </div>
-        )}
+        
 
-        {/* Barre dei filtri orizzontale */}
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* COLONNA SINISTRA: Feed Notizie */}
+            <div className="flex-1 lg:w-[65%] xl:w-[70%] order-2 lg:order-1 flex flex-col">
+              {/* Barre dei filtri orizzontale */}
         <div className="flex overflow-x-auto gap-2 pb-4 mb-2 scrollbar-hide">
           {categories.map(cat => (
             <button
@@ -302,7 +311,7 @@ export default function Home() {
                   key={article.id} 
                   
                   className={`relative overflow-hidden group cursor-pointer transition-all duration-300 flex flex-col ${
-                    index === 0 ? 'md:col-span-2 lg:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
+                    index === 0 ? 'md:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
                   } bg-card border border-border rounded-2xl`}
                   onClick={() => router.push(`/article?id=${article.id}`)}
                 >
@@ -402,6 +411,37 @@ export default function Home() {
             </div>
           )}
         </section>
+            </div>
+
+            {/* COLONNA DESTRA: Widget e Utility */}
+            <aside className="w-full lg:w-[35%] xl:w-[30%] flex flex-col gap-6 order-1 lg:order-2 mb-2 lg:mb-0">
+              {nextMatch && (
+                <div className="rounded-2xl overflow-hidden ring-1 ring-border shadow-lg">
+                  <NextMatchWidget 
+                    homeTeam={nextMatch.home_team} 
+                    awayTeam={nextMatch.away_team} 
+                    competition={nextMatch.competition} 
+                    matchDate={nextMatch.match_date} 
+                  />
+                </div>
+              )}
+              
+              <div className="hidden lg:block bg-card/50 rounded-2xl p-6 border border-border mt-auto">
+                <div className="flex items-center gap-2 mb-2">
+                  <WolfLogo className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm font-bold text-gray-400">RomaFlash</span>
+                </div>
+                <p className="text-[10px] text-gray-500 leading-relaxed">
+                  Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. 
+                  Non può considerarsi un prodotto editoriale ai sensi della legge n° 62 del 7.03.2001. 
+                  Non affiliato all'AS Roma.
+                </p>
+                <p className="text-[10px] text-gray-600 mt-2">© 2026 RomaFlash.</p>
+              </div>
+            </aside>
+            
+          </div>
+
       </main>
     </PullToRefresh>
   );

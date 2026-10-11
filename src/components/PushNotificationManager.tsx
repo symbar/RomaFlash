@@ -94,17 +94,17 @@ export default function PushNotificationManager() {
         <button 
           onClick={subscribeToPush}
           title="Attiva Notifiche Push"
-          className="p-2 rounded-full bg-card hover:bg-card/80 border border-border text-primary transition-colors flex items-center justify-center animate-pulse"
+          className="w-8 h-8 rounded-full bg-card hover:bg-card/80 border border-border text-primary transition-colors flex items-center justify-center animate-pulse shrink-0 cursor-pointer"
         >
-          <Bell className="w-5 h-5" />
+          <Bell className="w-4 h-4" />
         </button>
       ) : (
         <button 
           onClick={unsubscribeFromPush}
           title="Disattiva Notifiche"
-          className="p-2 rounded-full bg-card/50 hover:bg-card border border-border text-green-500 hover:text-red-500 transition-colors flex items-center justify-center"
+          className="w-8 h-8 rounded-full bg-card/50 hover:bg-card border border-border text-green-500 hover:text-red-500 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
         >
-          <BellRing className="w-5 h-5" />
+          <BellRing className="w-4 h-4" />
         </button>
       )}
     </>

@@ -50,10 +50,10 @@ export function LegalModal() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="w-10 h-10 md:hidden rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-card/80 transition-colors shadow-sm"
+        className="w-8 h-8 md:hidden rounded-full bg-card border border-border flex items-center justify-center text-gray-600 hover:text-primary hover:bg-card/80 transition-colors shrink-0 cursor-pointer"
         aria-label="Informazioni Legali"
       >
-        <Info className="w-5 h-5" />
+        <Info className="w-4 h-4" />
       </button>
 
       {mounted && typeof document !== 'undefined' && createPortal(modalContent, document.body)}

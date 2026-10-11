@@ -29,16 +29,16 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
   const isCalendar = title === 'Calendario Stagione' || title === 'Season Fixtures';
 
   return (
-    <header className="flex items-center justify-between py-5 mb-5 border-b border-border relative z-30">
+    <header className="flex items-center justify-between gap-2 py-4 md:py-5 mb-5 border-b border-border relative z-30">
       {/* Left: Brand Logo + Slogan */}
-      <div className="flex items-center">
-        <Link href="/" className="flex items-center gap-2.5 hover:opacity-85 transition-opacity">
-          <WolfLogo className="w-8 h-8 md:w-9 md:h-9 shrink-0" />
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight text-secondary leading-none">
+      <div className="flex items-center min-w-0">
+        <Link href="/" className="flex items-center gap-2 md:gap-2.5 hover:opacity-85 transition-opacity min-w-0">
+          <WolfLogo className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 shrink-0" />
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-secondary leading-none">
               Roma<span className="text-primary">Flash</span>
             </h1>
-            <span className="text-[10px] md:text-[11px] font-medium text-gray-500 tracking-tight mt-0.5 leading-tight">
+            <span className="text-[9.5px] sm:text-[10px] md:text-[11px] font-medium text-gray-500 tracking-tight mt-0.5 leading-tight truncate">
               {t('brand.slogan')}
             </span>
           </div>
@@ -46,7 +46,7 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
       </div>
 
       {/* Right: Navigation Tabs + Vertical Dividers + Language Switcher + Utilities (VitePress / RSSHub style) */}
-      <div className="flex items-center">
+      <div className="flex items-center shrink-0">
         {/* Desktop Navigation Links aligned right */}
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
           <Link
@@ -78,20 +78,20 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
         {/* Vertical Divider 1 (between Tabs and Language Selector on Desktop) */}
         <div className="hidden md:block h-5 w-[1px] bg-gray-200 mx-5" />
 
-        {/* Language Selector + Official X Profile Link (same delimited section, visible on Mobile & Desktop) */}
-        <div className="flex items-center gap-1">
+        {/* Language Selector + Official X & TikTok Links (same delimited section, visible on Mobile & Desktop) */}
+        <div className="flex items-center gap-0.5 md:gap-1">
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-gray-700 hover:text-primary hover:bg-gray-100/80 transition-colors cursor-pointer"
+              className="flex items-center gap-1 p-1.5 md:px-2 md:py-1.5 rounded-lg text-gray-700 hover:text-primary hover:bg-gray-100/80 transition-colors cursor-pointer"
               title={lang === 'it' ? 'Cambia lingua / Change language' : 'Change language / Cambia lingua'}
             >
               <Languages className="w-4 h-4" />
               <span className="text-[11px] font-bold uppercase tracking-wider hidden sm:inline">
                 {lang}
               </span>
-              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 hidden sm:block ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {dropdownOpen && (
@@ -150,7 +150,7 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
             title={lang === 'it' ? 'Seguici su X (@romaflashoffici)' : 'Follow us on X (@romaflashoffici)'}
             aria-label="RomaFlash X Profile"
           >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" aria-hidden="true">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
           </a>
@@ -163,17 +163,17 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
             title={lang === 'it' ? 'Seguici su TikTok (@romaflash4)' : 'Follow us on TikTok (@romaflash4)'}
             aria-label="RomaFlash TikTok Profile"
           >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 md:w-4 md:h-4 fill-current" aria-hidden="true">
               <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
             </svg>
           </a>
         </div>
 
         {/* Vertical Divider 2 (between Language/Social section and Utilities) */}
-        <div className="h-5 w-[1px] bg-gray-200 mx-2.5 md:mx-4" />
+        <div className="h-4 md:h-5 w-[1px] bg-gray-200 mx-1.5 md:mx-4" />
 
         {/* Right Utilities */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <PushNotificationManager />
           <LegalModal />
         </div>

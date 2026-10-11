@@ -36,6 +36,8 @@ function ArticleContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let viewTimer: NodeJS.Timeout | null = null;
+
     async function fetchArticle() {
       if (!id) return;
       const { data } = await supabase
@@ -47,18 +49,16 @@ function ArticleContent() {
       if (data) {
         setArticle(data);
 
-        // Tracciamento silenzioso lettura unica (1 per dispositivo/browser)
-        try {
-          const storageKey = 'romaflash_viewed_articles';
-          const viewedRaw = localStorage.getItem(storageKey);
-          const viewedList: string[] = viewedRaw ? JSON.parse(viewedRaw) : [];
-          if (!viewedList.includes(data.id)) {
-            const updatedList = [data.id, ...viewedList].slice(0, 300);
-            localStorage.setItem(storageKey, JSON.stringify(updatedList));
+        // Tracciamento silenzioso di ogni lettura umana (filtro anti-bot + 2s di permanenza reale)
+        const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+        const isBot =
+          (typeof navigator !== 'undefined' && navigator.webdriver) ||
+          /bot|crawl|spider|slurp|headless|lighthouse|pingdom|gtmetrix|facebookexternalhit|whatsapp|telegrambot|twitterbot|perplexity|gptbot|claudebot/i.test(ua);
+
+        if (!isBot) {
+          viewTimer = setTimeout(() => {
             supabase.rpc('increment_article_view', { target_article_id: data.id }).then(() => {});
-          }
-        } catch {
-          // Ignora errori localStorage in modalità navigazione privata
+          }, 2000);
         }
         
         if (data.ai_summary?.category) {
@@ -80,6 +80,10 @@ function ArticleContent() {
       setLoading(false);
     }
     fetchArticle();
+
+    return () => {
+      if (viewTimer) clearTimeout(viewTimer);
+    };
   }, [id]);
 
   const [showSkeleton, setShowSkeleton] = useState(false);

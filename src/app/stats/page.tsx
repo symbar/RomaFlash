@@ -323,7 +323,7 @@ export default function StatsBackofficePage() {
             {metrics.avgViews}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            letture uniche / notizia
+            letture / notizia
           </div>
         </div>
 

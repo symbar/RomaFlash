@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   },
   description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Probabili formazioni, calciomercato, calendario e classifica. Veloce, pulito, senza pubblicità.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon",
+    shortcut: "/icon",
+    apple: "/apple-icon",
+  },
   alternates: {
     canonical: "https://romaflash.app",
   },

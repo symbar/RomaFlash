@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "RF Stats",
   manifest: "/manifest-stats.json",
+  icons: {
+    icon: "/stats/icon",
+    shortcut: "/stats/icon",
+    apple: "/stats/apple-icon",
+  },
   appleWebApp: {
     capable: true,
     title: "RF Stats",

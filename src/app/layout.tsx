@@ -46,6 +46,20 @@ export const metadata: Metadata = {
     siteName: "RomaFlash",
     title: "RomaFlash | L'essenza delle notizie giallorosse",
     description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Veloce, pulito, senza pubblicità.",
+    images: [
+      {
+        url: "https://romaflash.app/icon",
+        width: 512,
+        height: 512,
+        alt: "RomaFlash",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "RomaFlash | L'essenza delle notizie giallorosse",
+    description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Veloce, pulito, senza pubblicità.",
+    images: ["https://romaflash.app/icon"],
   },
 };
 

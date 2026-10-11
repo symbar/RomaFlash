@@ -106,8 +106,13 @@ export async function onRequestGet(context: any) {
       <meta property="og:title" content="${safeOgTitle}" />
       <meta property="og:description" content="${safeDesc}" />
       <meta property="og:url" content="${safeCanonical}" />
+      <meta property="og:image" content="${safeOgImage}" />
       <meta property="article:published_time" content="${escapeHtml(publishedAt)}" />
       <meta property="article:section" content="${safeCategory}" />
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content="${safeOgTitle}" />
+      <meta name="twitter:description" content="${safeDesc}" />
+      <meta name="twitter:image" content="${safeOgImage}" />
       <script type="application/ld+json">${safeJsonLd}</script>
     `;
 
@@ -121,6 +126,11 @@ export async function onRequestGet(context: any) {
       .on('meta[name="description"]', {
         element(el: any) {
           el.setAttribute("content", excerpt);
+        },
+      })
+      .on('link[rel="canonical"], meta[property^="og:"], meta[name^="twitter:"]', {
+        element(el: any) {
+          el.remove();
         },
       })
       .on("head", {

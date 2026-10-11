@@ -244,17 +244,19 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
-8. AUTO-PUBBLICAZIONE X / TWITTER ("is_breaking" e "tweet_text"):
+8. AUTO-PUBBLICAZIONE X / TWITTER ("is_breaking", "tweet_text" e "dynamic_hashtags"):
    Selezioniamo fino a 11 notizie importanti al giorno per il profilo ufficiale X di RomaFlash.
    Imposta "is_breaking": true per tutte le notizie di rilievo (formazioni probabili/ufficiali, infortuni, conferenze stampa, dichiarazioni importanti di allenatore/giocatori/dirigenti, calciomercato, partite, comunicati ufficiali). Imposta "is_breaking": false solo per notizie minori, curiosità secondarie o amarcord.
-   Scrivi in "tweet_text" un post magnetico in italiano per X (massimo 185 caratteri, con 1-2 emoji pertinenti e gli hashtag #ASRoma #RomaFlash in coda, SENZA inserire URL perché il link verrà aggiunto automaticamente dal sistema).
+   Scrivi in "tweet_text" un post magnetico in italiano per X (massimo 170 caratteri, con 1-2 emoji pertinenti, SENZA URL e SENZA hashtag perché verranno aggiunti dal sistema).
+   Scrivi in "dynamic_hashtags" 2 hashtag caldi e pertinenti alla notizia specifica (es. "#ComoRoma #Gasperini", "#Dybala #SerieA", "#RomaRealMadrid #ChampionsLeague", "#Calciomercato #Svilar"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
   "is_duplicate": false, 
   "is_spam": false, 
   "is_breaking": true,
-  "tweet_text": "🚨 Ultime da Trigoria: Dybala torna in gruppo alla vigilia del match! Scelte quasi fatte in attacco 🐺🟡🔴 #ASRoma #RomaFlash",
+  "tweet_text": "🚨 Ultime da Trigoria: Dybala torna in gruppo alla vigilia del match! Scelte quasi fatte in attacco 🐺🟡🔴",
+  "dynamic_hashtags": "#Dybala #SerieA",
   "titolo": "Nuovo titolo", 
   "excerpt": "Breve riassunto", 
   "content": "Testo completo dell'articolo riscritto...", 
@@ -344,7 +346,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 poll: parsed.poll || null,
                 en: parsed.en || null,
                 is_breaking: parsed.is_breaking === true,
-                tweet_text: parsed.tweet_text || null
+                tweet_text: parsed.tweet_text || null,
+                dynamic_hashtags: parsed.dynamic_hashtags || null
               }
               
               // Fallback: se l'articolo PROVIENE direttamente da Twitter/Nitter, forza il social_embed_url
@@ -406,10 +409,14 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             ) {
               const articleUrl = `https://romaflash.app/article?id=${insertedArticle.id}`;
               const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}`)
+                .replace(/#[a-zA-Z0-9_]+/g, '')
+                .trim();
+              const extraTags = (aiSummary.dynamic_hashtags || '')
                 .replace(/#ASRoma/gi, '')
                 .replace(/#RomaFlash/gi, '')
                 .trim();
-              const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n#ASRoma #RomaFlash`;
+              const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`;
+              const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n${hashtagsLine}`;
 
               console.log(`[X AUTO-POST] Pubblicazione tweet (${tweetsTodayCount + 1}/${MAX_NEWS_TWEETS_PER_DAY}): ${newTitle}`);
               const xRes = await postToX(fullTweet);

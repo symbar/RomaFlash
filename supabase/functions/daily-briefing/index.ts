@@ -114,14 +114,15 @@ ${articlesContext}
 Istruzioni per l'output JSON:
 Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
-Includi anche "tweet_text": un post serale accattivante per X (massimo 175 caratteri, con emoji 🌙🐺🟡🔴 e gli hashtag #ASRoma #RomaFlash, SENZA link perché verrà aggiunto dal sistema).
+Includi anche "tweet_text": un post serale accattivante per X (massimo 165 caratteri, con emoji 🌙🐺🟡🔴, SENZA link e SENZA hashtag perché verranno aggiunti dal sistema) e "dynamic_hashtags": 2 hashtag caldi sui temi principali della giornata (es. "#ComoRoma #ChampionsLeague", "#Gasperini #SerieA"), SENZA includere #ASRoma e #RomaFlash.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {
   "excerpt": "Breve frase ad effetto che riassume l'umore generale della giornata (es: 'Giornata frenetica a Trigoria tra infortuni e dichiarazioni infuocate.')",
   "content": "Il testo completo del recap, diviso in paragrafi usando \\n. Includi le notizie più calde raggruppate per argomento.",
   "category": "Il Punto della Giornata",
   "sentiment": "Positivo|Negativo|Neutro",
-  "tweet_text": "🌙🐺 Il Punto della Giornata: tutte le notizie chiave di oggi da Trigoria riassunte in 2 minuti! 🟡🔴 #ASRoma #RomaFlash",
+  "tweet_text": "🌙🐺 Il Punto della Giornata: tutte le notizie chiave di oggi da Trigoria riassunte in 2 minuti! 🟡🔴",
+  "dynamic_hashtags": "#SerieA #Trigoria",
   "en": {
     "title": "Daily Briefing: October 11",
     "excerpt": "Short punchy English summary of the day's mood at Trigoria...",
@@ -194,10 +195,14 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
     if (savedBriefing?.id) {
       const articleUrl = `https://romaflash.app/article?id=${savedBriefing.id}`;
       const cleanBase = (aiSummary.tweet_text || `🌙🐺 ${briefingArticle.title}\n\n${aiSummary.excerpt}`)
+        .replace(/#[a-zA-Z0-9_]+/g, '')
+        .trim();
+      const extraTags = (aiSummary.dynamic_hashtags || '')
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const fullTweet = `${cleanBase}\n\n📖 Leggi il recap completo: ${articleUrl}\n\n#ASRoma #RomaFlash`;
+      const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`;
+      const fullTweet = `${cleanBase}\n\n📖 Leggi il recap completo: ${articleUrl}\n\n${hashtagsLine}`;
 
       console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata su X...`);
       const xRes = await postToX(fullTweet);

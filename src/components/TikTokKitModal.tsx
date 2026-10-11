@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Download, Copy, Check, Share2 } from "lucide-react";
 
 export function TikTokIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
@@ -350,9 +351,15 @@ export default function TikTokKitModal({
     setSlide2Url(renderSlide2Canvas(article));
     setActiveSlide(1);
     setCopied(false);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
   }, [article]);
 
-  if (!article) return null;
+  if (!article || typeof document === "undefined") return null;
 
   const baseText = (
     article.ai_summary?.tweet_text ||
@@ -420,9 +427,15 @@ export default function TikTokKitModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 md:p-6 overflow-y-auto">
-      <div className="bg-white border border-border rounded-2xl max-w-3xl w-full p-4 md:p-6 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 md:p-6"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white border border-border rounded-2xl max-w-3xl w-full p-4 md:p-6 shadow-2xl max-h-[90dvh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Bar */}
         <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-border">
           <div className="flex items-center gap-2">
@@ -480,7 +493,7 @@ export default function TikTokKitModal({
               <img
                 src={activeSlide === 1 ? slide1Url : slide2Url}
                 alt={`Slide ${activeSlide}`}
-                className="w-[230px] md:w-[250px] rounded-2xl shadow-lg border border-gray-200"
+                className="w-[210px] md:w-[240px] rounded-2xl shadow-lg border border-gray-200"
               />
             )}
           </div>
@@ -556,6 +569,7 @@ export default function TikTokKitModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

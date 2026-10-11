@@ -21,9 +21,9 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "RomaFlash | L'essenza delle notizie",
-  description: "Notizie sull'AS Roma riassunte dall'AI. Veloce, pulito e in dark mode.",
+  description: "Notizie sull'AS Roma riassunte dall'AI. Veloce, pulito, senza pubblicità.",
   manifest: "/manifest.json",
-  themeColor: "#000000",
+  themeColor: "#ffffff",
 };
 
 import TabBar from '@/components/TabBar';

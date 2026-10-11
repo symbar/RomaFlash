@@ -17,6 +17,7 @@ interface LanguageContextType {
 
 const translations: Record<Language, Record<string, string>> = {
   it: {
+    'brand.slogan': "L'essenza delle notizie giallorosse",
     'nav.latest': 'Le Ultime',
     'nav.lineups': 'Formazioni',
     'nav.standings': 'Classifica',
@@ -63,6 +64,7 @@ const translations: Record<Language, Record<string, string>> = {
     'disclaimer.text': 'Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. Non può considerarsi un prodotto editoriale ai sensi della legge n° 62 del 7.03.2001. Non affiliato all\'AS Roma.',
   },
   en: {
+    'brand.slogan': 'The essence of Giallorossi news',
     'nav.latest': 'Latest News',
     'nav.lineups': 'Lineups',
     'nav.standings': 'Standings',

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { BarChart3 } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface PollProps {
   articleId: string;
@@ -13,6 +14,7 @@ interface PollProps {
 }
 
 export default function PollWidget({ articleId, poll }: PollProps) {
+  const { t } = useLanguage();
   const [votedOption, setVotedOption] = useState<number | null>(null);
   const [results, setResults] = useState<{ [key: number]: number }>({});
   const [totalVotes, setTotalVotes] = useState(0);
@@ -71,7 +73,7 @@ export default function PollWidget({ articleId, poll }: PollProps) {
       
       <div className="flex items-center gap-2 mb-4 text-primary">
         <BarChart3 className="w-5 h-5" />
-        <h3 className="font-bold text-lg text-gray-900">Sondaggio RomaFlash</h3>
+        <h3 className="font-bold text-lg text-gray-900">{t('poll.title')}</h3>
       </div>
       
       <p className="text-xl font-serif font-bold mb-6 text-gray-900 leading-snug">
@@ -119,7 +121,7 @@ export default function PollWidget({ articleId, poll }: PollProps) {
       
       {votedOption !== null && (
         <p className="text-center text-xs text-gray-500 mt-4">
-          Hanno votato {totalVotes} tifosi
+          {t('poll.voters_Prefix')} {totalVotes} {t('poll.voters_Suffix')}
         </p>
       )}
     </div>

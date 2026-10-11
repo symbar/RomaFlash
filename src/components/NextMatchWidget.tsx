@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trophy, Calendar, Shield } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 
 interface NextMatchProps {
   homeTeam: string;
@@ -41,6 +42,7 @@ function CompetitionIcon({ competition }: { competition: string }) {
 }
 
 export default function NextMatchWidget({ homeTeam, awayTeam, competition, matchDate }: NextMatchProps) {
+  const { t } = useLanguage();
   const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
 
   useEffect(() => {
@@ -92,22 +94,22 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
           <div className="flex gap-1 text-center font-mono">
             <div className="flex flex-col">
               <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.days}</span>
-              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">G</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">{t('countdown.days')}</span>
             </div>
             <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
               <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.hours.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">O</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">{t('countdown.hours')}</span>
             </div>
             <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
               <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.minutes.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">M</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">{t('countdown.minutes')}</span>
             </div>
             <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
               <span className="text-amber-600 font-bold text-xs md:text-sm bg-amber-50 px-1.5 py-0.5 rounded">{timeLeft.seconds.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[9px] text-amber-600 uppercase mt-0.5">S</span>
+              <span className="text-[8px] md:text-[9px] text-amber-600 uppercase mt-0.5">{t('countdown.seconds')}</span>
             </div>
           </div>
         </div>

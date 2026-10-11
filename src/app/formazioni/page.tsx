@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import GlobalHeader from '@/components/GlobalHeader';
 import PullToRefresh from '@/components/PullToRefresh';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/components/LanguageContext';
 
 // --- MOCK DATA ---
 const matchData = {
@@ -97,16 +98,17 @@ function ProgressBar({ prob }: { prob: number }) {
 
 
 function DynamicDetails({ details, color }: { details: any, color: string }) {
-  if (!details) return <div className="text-center text-xs text-gray-500 mb-8">Nessun dato</div>;
+  const { lang, t } = useLanguage();
+  if (!details) return <div className="text-center text-xs text-gray-500 mb-8">{t('lineups.none')}</div>;
 
   return (
     <>
       {/* BALLOTTAGGI */}
       <div className="flex justify-center mb-4 md:mb-6">
-        <span className="bg-purple-600 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Ballottaggi</span>
+        <span className="bg-purple-600 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">{t('lineups.ballottaggi')}</span>
       </div>
       {(!details.Ballottaggi || details.Ballottaggi.length === 0) ? (
-        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun ballottaggio</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none_ballottaggi')}</div>
       ) : (
         details.Ballottaggi.map((group: any, idx: number) => {
           const topPlayer = group[0];
@@ -139,10 +141,10 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
 
       {/* SQUALIFICATI */}
       <div className="flex justify-center mb-3 md:mb-4 mt-6 md:mt-8">
-        <span className="bg-red-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Squalificati</span>
+        <span className="bg-red-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">{t('lineups.squalificati')}</span>
       </div>
       {(!details.Squalificati || details.Squalificati.length === 0) ? (
-        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
         <div className="mb-6 md:mb-8">
           {details.Squalificati.map((item: any, idx: number) => (
@@ -156,10 +158,10 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
 
       {/* DIFFIDATI */}
       <div className="flex justify-center mb-3 md:mb-4">
-        <span className="bg-yellow-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Diffidati</span>
+        <span className="bg-yellow-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">{t('lineups.diffidati')}</span>
       </div>
       {(!details.Diffidati || details.Diffidati.length === 0) ? (
-        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
         <div className="mb-6 md:mb-8">
           {details.Diffidati.map((item: any, idx: number) => (
@@ -173,10 +175,10 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
 
       {/* INFORTUNATI */}
       <div className="flex justify-center mb-3 md:mb-4">
-        <span className="bg-orange-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">Infortunati</span>
+        <span className="bg-orange-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">{t('lineups.infortunati')}</span>
       </div>
       {(!details.Infortunati || details.Infortunati.length === 0) ? (
-        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">Nessun calciatore</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
         <div className="mb-6 md:mb-8">
           {details.Infortunati.map((item: any, idx: number) => (
@@ -190,10 +192,10 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
 
       {/* IN DUBBIO */}
       <div className="flex justify-center mb-4">
-        <span className="bg-cyan-400 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">In dubbio</span>
+        <span className="bg-cyan-400 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">{lang === 'en' ? 'Doubtful' : 'In dubbio'}</span>
       </div>
       {(!details['In dubbio'] || details['In dubbio'].length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">Nessun calciatore</div>
+        <div className="text-center text-xs text-gray-500 mb-8">{t('lineups.none')}</div>
       ) : (
         <div className="mb-4">
           {details['In dubbio'].map((item: any, idx: number) => (
@@ -237,6 +239,7 @@ function PlayerRow({ player, isAway }: { player: any, isAway: boolean }) {
 }
 
 function TeamList({ teamName, formation, players, isAway }: { teamName: string, formation: string, players: any, isAway: boolean }) {
+  const { t } = useLanguage();
   return (
     <div className="w-full bg-white border border-border rounded-xl overflow-hidden shadow-sm">
       <div className={`px-2.5 md:px-4 py-2 border-b border-border flex justify-between items-center ${isAway ? 'bg-primary/10' : 'bg-gray-100'}`}>
@@ -249,7 +252,7 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
         ))}
       </div>
       <div className="bg-gray-50 px-2 md:px-4 py-1.5 border-y border-border text-center">
-        <span className="text-[9px] md:text-[10px] font-semibold text-gray-500 uppercase tracking-widest bg-white px-2.5 py-0.5 rounded-full border border-border shadow-2xs">Panchina</span>
+        <span className="text-[9px] md:text-[10px] font-semibold text-gray-500 uppercase tracking-widest bg-white px-2.5 py-0.5 rounded-full border border-border shadow-2xs">{t('lineups.bench')}</span>
       </div>
       <div className="p-1 md:p-3 opacity-75">
         {players.bench.map((p: any, i: number) => (
@@ -322,6 +325,7 @@ function DonutChart({ prob, color, size = 48 }: { prob: number, color: string, s
 }
 
 export default function FormazioniPage() {
+  const { lang, t } = useLanguage();
   const [matchState, setMatchState] = useState(matchData);
   const [homeState, setHomeState] = useState({
     formation: "4-2-3-1",
@@ -478,13 +482,13 @@ export default function FormazioniPage() {
           
           <div className="text-center py-2">
             <span className="inline-block bg-card border border-border text-gray-500 text-[10px] font-mono px-4 py-1.5 rounded-full shadow-sm">
-              Ultimo aggiornamento: {matchState.lastUpdate}
+              {lang === 'en' ? 'Last updated:' : 'Ultimo aggiornamento:'} {matchState.lastUpdate}
             </span>
           </div>
 
           {/* PRESENTAZIONE SQUADRE */}
           <div className="mt-2">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">Presentazione squadre</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">{t('lineups.team_intro')}</h2>
             <div className="grid grid-cols-2 gap-2 md:gap-4">
               <div className="bg-white border border-border rounded-xl p-3 md:p-5 shadow-sm">
                 <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-1.5">{matchState.homeTeam}</h3>
@@ -499,7 +503,7 @@ export default function FormazioniPage() {
 
           {/* BALLOTTAGGI & DETTAGLI CALCIATORI */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">Dettaglio calciatori</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4 pl-1">{t('lineups.player_details')}</h2>
             
             <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
               <div className="grid grid-cols-2 divide-x divide-border">

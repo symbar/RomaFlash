@@ -1,22 +1,34 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import GlobalHeader from '@/components/GlobalHeader';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageContext';
 
-export const revalidate = 60;
+export default function CalendarioPage() {
+  const { lang, t } = useLanguage();
+  const [matches, setMatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function CalendarioPage() {
-  
-  const { data: matches } = await supabase
-    .from('calendar_matches')
-    .select('*')
-    .order('match_date', { ascending: true });
+  useEffect(() => {
+    const fetchMatches = async () => {
+      const { data } = await supabase
+        .from('calendar_matches')
+        .select('*')
+        .order('match_date', { ascending: true });
+      if (data) setMatches(data);
+      setLoading(false);
+    };
+    fetchMatches();
+  }, []);
 
   const formatDate = (isoString: string) => {
     const d = new Date(isoString);
-    return new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', 
-      weekday: 'short', 
-      day: '2-digit', 
+    return new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'it-IT', {
+      timeZone: 'Europe/Rome',
+      weekday: 'short',
+      day: '2-digit',
       month: 'long',
       hour: '2-digit',
       minute: '2-digit'
@@ -25,15 +37,13 @@ export default async function CalendarioPage() {
 
   const getStatusColor = (status: string) => {
     if (status === 'FINISHED') return 'text-gray-500';
-    if (status === 'IN_PLAY' || status === 'PAUSED') return 'text-green-500 animate-pulse';
+    if (status === 'IN_PLAY' || status === 'PAUSED') return 'text-green-600 animate-pulse';
     return 'text-primary';
   };
 
   return (
     <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-6 pb-32">
-      
       <GlobalHeader title="Calendario Stagione" />
-
 
       <div className="space-y-4 mt-6">
         {matches?.map((match) => {
@@ -50,7 +60,7 @@ export default async function CalendarioPage() {
                 </span>
                 <span className={`text-xs font-bold uppercase flex items-center gap-1 ${getStatusColor(match.status)}`}>
                   <Clock className="w-3 h-3" />
-                  {isFinished ? 'Terminata' : formatDate(match.match_date)}
+                  {isFinished ? t('calendar.finished') : formatDate(match.match_date)}
                 </span>
               </div>
 
@@ -89,9 +99,9 @@ export default async function CalendarioPage() {
           );
         })}
         
-        {!matches || matches.length === 0 && (
+        {!loading && matches.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            Nessun calendario disponibile al momento.
+            {t('calendar.empty')}
           </div>
         )}
       </div>

@@ -1,8 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function ClassificaWidget() {
+  const { lang, t } = useLanguage();
   const [standings, setStandings] = useState<any[]>([]);
 
   useEffect(() => {
@@ -40,13 +42,13 @@ export default function ClassificaWidget() {
           <thead className="bg-gray-100 text-gray-600 text-[10px] font-bold">
             <tr>
               <th className="px-1 py-2 text-center w-6">#</th>
-              <th className="px-1 py-2 text-left">SQUADRA</th>
+              <th className="px-1 py-2 text-left uppercase">{t('standings.team')}</th>
               <th className="px-1 py-2 text-center w-6 text-gray-900 font-extrabold">PT</th>
-              <th className="px-1 py-2 text-center w-6">G</th>
-              <th className="px-1 py-2 text-center w-6">V</th>
-              <th className="px-1 py-2 text-center w-6">N</th>
-              <th className="px-1 py-2 text-center w-6">P</th>
-              <th className="px-1 py-2 text-center w-6">DR</th>
+              <th className="px-1 py-2 text-center w-6">{lang === 'en' ? 'P' : 'G'}</th>
+              <th className="px-1 py-2 text-center w-6">{lang === 'en' ? 'W' : 'V'}</th>
+              <th className="px-1 py-2 text-center w-6">{lang === 'en' ? 'D' : 'N'}</th>
+              <th className="px-1 py-2 text-center w-6">{lang === 'en' ? 'L' : 'P'}</th>
+              <th className="px-1 py-2 text-center w-6">{lang === 'en' ? 'GD' : 'DR'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60 text-[11px]">

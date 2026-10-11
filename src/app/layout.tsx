@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { InstallPrompt } from '@/components/InstallPrompt';
@@ -27,6 +27,7 @@ export const metadata: Metadata = {
 };
 
 import TabBar from '@/components/TabBar';
+import { LanguageProvider } from '@/components/LanguageContext';
 
 export default function RootLayout({
   children,
@@ -40,13 +41,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-screen">
-        <InstallPrompt />
-            <div className="flex min-h-screen max-w-[1600px] mx-auto">
-              <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
-                {children}
-              </div>
+        <LanguageProvider>
+          <InstallPrompt />
+          <div className="flex min-h-screen max-w-[1600px] mx-auto">
+            <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
+              {children}
             </div>
-            <TabBar />
+          </div>
+          <TabBar />
+        </LanguageProvider>
 
         {/* Cloudflare Web Analytics */}
         <Script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "9ec688eb17b641bd998e97d1651c6cde"}'></Script>

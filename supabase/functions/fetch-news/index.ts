@@ -149,12 +149,13 @@ Nel dubbio, imposta SEMPRE "is_duplicate": true!
 2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
-1. Scrivi un nuovo titolo (diverso dall'originale).
-2. Scrivi un breve riassunto di 2 righe (excerpt) per la homepage.
-3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
+1. Scrivi un nuovo titolo in italiano (diverso dall'originale).
+2. Scrivi un breve riassunto di 2 righe (excerpt) in italiano per la homepage.
+3. Riscrivi l'intero articolo in italiano in modo discorsivo, fluido e professionale.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
+7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -176,6 +177,15 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "poll": {
     "question": "Giusto esonerare l'allenatore?",
     "options": ["Sì, era ora", "No, diamogli tempo", "Colpa della società"]
+  },
+  "en": {
+    "title": "English headline...",
+    "excerpt": "Short 2-line English summary...",
+    "content": "Full English article text...",
+    "poll": {
+      "question": "Is it right to sack the manager?",
+      "options": ["Yes, it was time", "No, give him time", "The board is to blame"]
+    }
   }
 }
 Nessuna formattazione markdown, solo il JSON puro. Se non ci sono formazioni o sondaggi, metti i rispettivi campi a null.
@@ -237,7 +247,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 sentiment: parsed.sentiment || "Neutro",
                 formation: parsed.formation || null,
                 social_embed_url: parsed.social_embed_url || null,
-                poll: parsed.poll || null
+                poll: parsed.poll || null,
+                en: parsed.en || null
               }
               
               // Fallback: se l'articolo PROVIENE direttamente da Twitter/Nitter, forza il social_embed_url

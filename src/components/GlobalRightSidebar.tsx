@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabase';
 import NextMatchWidget from '@/components/NextMatchWidget';
 import ClassificaWidget from '@/components/ClassificaWidget';
 import { WolfLogo } from '@/components/Icons';
+import { useLanguage } from '@/components/LanguageContext';
 
 export default function GlobalRightSidebar() {
+  const { t } = useLanguage();
   const [nextMatch, setNextMatch] = useState<any>(null);
 
   useEffect(() => {
@@ -57,9 +59,7 @@ export default function GlobalRightSidebar() {
           <span className="text-sm font-bold text-gray-400">RomaFlash</span>
         </div>
         <p className="text-[10px] text-gray-500 leading-relaxed">
-          Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. 
-          Non può considerarsi un prodotto editoriale ai sensi della legge n° 62 del 7.03.2001. 
-          Non affiliato all'AS Roma.
+          {t('disclaimer.text')}
         </p>
         <p className="text-[10px] text-gray-600 mt-2">© 2026 RomaFlash.</p>
       </div>

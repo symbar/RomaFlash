@@ -51,14 +51,19 @@ Ecco le notizie principali delle ultime 24 ore:
 ${articlesContext}
 
 Istruzioni per l'output JSON:
-Scrivi il briefing giornaliero in italiano. Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
+Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {
   "excerpt": "Breve frase ad effetto che riassume l'umore generale della giornata (es: 'Giornata frenetica a Trigoria tra infortuni e dichiarazioni infuocate.')",
   "content": "Il testo completo del recap, diviso in paragrafi usando \\n. Includi le notizie più calde raggruppate per argomento.",
   "category": "Il Punto della Giornata",
-  "sentiment": "Positivo|Negativo|Neutro" (Scegli quello predominante per la giornata)
+  "sentiment": "Positivo|Negativo|Neutro",
+  "en": {
+    "title": "Daily Briefing: October 11",
+    "excerpt": "Short punchy English summary of the day's mood at Trigoria...",
+    "content": "Full English daily recap divided into paragraphs using \\n..."
+  }
 }
 Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
 `

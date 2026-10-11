@@ -3,11 +3,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import NextMatchWidget from '@/components/NextMatchWidget';
 import ClassificaWidget from '@/components/ClassificaWidget';
-import { WolfLogo } from '@/components/Icons';
-import { useLanguage } from '@/components/LanguageContext';
 
 export default function GlobalRightSidebar() {
-  const { t } = useLanguage();
   const [nextMatch, setNextMatch] = useState<any>(null);
 
   useEffect(() => {
@@ -51,17 +48,6 @@ export default function GlobalRightSidebar() {
       
       <div className="hidden lg:block">
         <ClassificaWidget />
-      </div>
-      
-      <div className="hidden lg:block bg-card/50 rounded-2xl p-6 border border-border mt-6">
-        <div className="flex items-center gap-2 mb-2">
-          <WolfLogo className="w-5 h-5 text-gray-400" />
-          <span className="text-sm font-bold text-gray-400">RomaFlash</span>
-        </div>
-        <p className="text-[10px] text-gray-500 leading-relaxed">
-          {t('disclaimer.text')}
-        </p>
-        <p className="text-[10px] text-gray-600 mt-2">© 2026 RomaFlash.</p>
       </div>
     </aside>
   );

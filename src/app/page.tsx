@@ -100,7 +100,7 @@ export default function Home() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        if (window.innerWidth < 1024 && entries[0].isIntersecting && hasMore && !loadingMore) {
           loadMoreArticles();
         }
       },
@@ -212,7 +212,7 @@ export default function Home() {
 
   return (
     <PullToRefresh onRefresh={fetchArticles}>
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 relative">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12 relative">
         {newArticlesCount > 0 && (
           <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto">
             <button 
@@ -355,23 +355,40 @@ export default function Home() {
                   </motion.article>
                 );
               })}
-              
-              {loadingMore && (
-                <div className="py-6 text-center text-gray-500 text-sm animate-pulse">
-                  {t('home.loading_more')}
-                </div>
-              )}
-              {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
-                <div className="py-8 text-center text-gray-500 text-sm">
-                  {t('home.end_of_news')} 🐺
-                </div>
-              )}
-            
-              {hasMore && filteredArticles.length > 0 && (
-                <div ref={loadMoreRef} className="h-10 w-full mt-4 flex items-center justify-center">
-                </div>
-              )}
             </section>
+
+            {/* PAGINAZIONE: Bottone esplicito su Desktop, Infinite Scroll su Mobile */}
+            {hasMore && filteredArticles.length > 0 && (
+              <>
+                {/* Desktop: Bottone "Carica altre notizie" */}
+                <div className="hidden lg:flex justify-center mt-8">
+                  <button
+                    type="button"
+                    onClick={loadMoreArticles}
+                    disabled={loadingMore}
+                    className="px-6 py-2.5 rounded-full bg-white border border-border text-sm font-semibold text-gray-700 hover:text-primary hover:border-primary/40 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {loadingMore ? t('home.loading_more') : t('home.load_more')}
+                  </button>
+                </div>
+
+                {/* Mobile: Infinite Scroll Sentinel */}
+                <div className="lg:hidden">
+                  {loadingMore && (
+                    <div className="py-6 text-center text-gray-500 text-sm animate-pulse">
+                      {t('home.loading_more')}
+                    </div>
+                  )}
+                  <div ref={loadMoreRef} className="h-10 w-full mt-4 flex items-center justify-center" />
+                </div>
+              </>
+            )}
+
+            {!hasMore && filteredArticles.length > 0 && categoryFilter === 'Tutte' && (
+              <div className="py-8 text-center text-gray-500 text-sm">
+                {t('home.end_of_news')} 🐺
+              </div>
+            )}
           </div>
 
           {/* COLONNA DESTRA: Widget e Utility */}

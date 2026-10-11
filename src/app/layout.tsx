@@ -27,6 +27,7 @@ export const metadata: Metadata = {
 };
 
 import TabBar from '@/components/TabBar';
+import GlobalFooter from '@/components/GlobalFooter';
 import { LanguageProvider } from '@/components/LanguageContext';
 
 export default function RootLayout({
@@ -46,6 +47,7 @@ export default function RootLayout({
           <div className="flex min-h-screen max-w-[1600px] mx-auto">
             <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
               {children}
+              <GlobalFooter />
             </div>
           </div>
           <TabBar />

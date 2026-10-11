@@ -53,6 +53,7 @@ export default function PollWidget({ articleId, poll }: PollProps) {
 
   const handleVote = async (index: number) => {
     if (votedOption !== null) return; // Ha già votato
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return; // Blocca bot automatici
     
     // Ottimistico update
     setVotedOption(index);
@@ -60,10 +61,19 @@ export default function PollWidget({ articleId, poll }: PollProps) {
     setTotalVotes(prev => prev + 1);
     localStorage.setItem(`vote_${articleId}`, index.toString());
 
-    // Salva su Supabase
+    let voterToken = localStorage.getItem('romaflash_voter_token');
+    if (!voterToken) {
+      voterToken = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem('romaflash_voter_token', voterToken);
+    }
+
+    // Salva su Supabase con vincolo UNIQUE (article_id, voter_token)
     await supabase.from('poll_votes').insert({
       article_id: articleId,
-      option_index: index
+      option_index: index,
+      voter_token: voterToken,
     });
   };
 

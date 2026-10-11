@@ -471,6 +471,17 @@ export default function StatsBackofficePage() {
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700 truncate">
                     {category}
                   </span>
+                  {art.ai_summary?.x_tweet_id && (
+                    <a
+                      href={`https://x.com/i/web/status/${art.ai_summary.x_tweet_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0"
+                      title="Pubblicato automaticamente su X"
+                    >
+                      𝕏
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -575,13 +586,26 @@ export default function StatsBackofficePage() {
                       {idx + 1}
                     </td>
                     <td className="py-3 px-4 max-w-md">
-                      <Link
-                        href={`/article?id=${art.id}`}
-                        className="font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1 inline-flex items-center gap-1.5"
-                      >
-                        <span>{art.title}</span>
-                        <ExternalLink className="w-3 h-3 text-gray-400 shrink-0" />
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        {art.ai_summary?.x_tweet_id && (
+                          <a
+                            href={`https://x.com/i/web/status/${art.ai_summary.x_tweet_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0 hover:bg-gray-800"
+                            title="Pubblicato automaticamente su X (clicca per aprire il tweet)"
+                          >
+                            𝕏
+                          </a>
+                        )}
+                        <Link
+                          href={`/article?id=${art.id}`}
+                          className="font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1 inline-flex items-center gap-1.5"
+                        >
+                          <span>{art.title}</span>
+                          <ExternalLink className="w-3 h-3 text-gray-400 shrink-0" />
+                        </Link>
+                      </div>
                       <div className="text-[11px] text-gray-400 mt-0.5">
                         Fonte: {sourceName}
                       </div>

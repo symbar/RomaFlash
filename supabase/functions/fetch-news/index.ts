@@ -8,6 +8,81 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function rfc3986Encode(str: string): string {
+  return encodeURIComponent(str).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase())
+}
+
+async function postToX(tweetText: string): Promise<{ id?: string; error?: string }> {
+  const apiKey = Deno.env.get('X_API_KEY')
+  const apiSecret = Deno.env.get('X_API_SECRET')
+  const accessToken = Deno.env.get('X_ACCESS_TOKEN')
+  const accessSecret = Deno.env.get('X_ACCESS_TOKEN_SECRET')
+
+  if (!apiKey || !apiSecret || !accessToken || !accessSecret) {
+    return { error: 'Credenziali X_API non configurate su Supabase' }
+  }
+
+  const url = 'https://api.twitter.com/2/tweets'
+  const method = 'POST'
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: apiKey,
+    oauth_nonce: crypto.randomUUID().replace(/-/g, ''),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_token: accessToken,
+    oauth_version: '1.0',
+  }
+
+  const sortedParamStr = Object.keys(oauthParams)
+    .sort()
+    .map((k) => `${rfc3986Encode(k)}=${rfc3986Encode(oauthParams[k])}`)
+    .join('&')
+
+  const baseString = `${method}&${rfc3986Encode(url)}&${rfc3986Encode(sortedParamStr)}`
+  const signingKey = `${rfc3986Encode(apiSecret)}&${rfc3986Encode(accessSecret)}`
+
+  const encoder = new TextEncoder()
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(signingKey),
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  )
+  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(baseString))
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)))
+
+  oauthParams.oauth_signature = signatureBase64
+
+  const authHeader =
+    'OAuth ' +
+    Object.keys(oauthParams)
+      .sort()
+      .map((k) => `${rfc3986Encode(k)}="${rfc3986Encode(oauthParams[k])}"`)
+      .join(', ')
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        Authorization: authHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: tweetText }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      console.error('Errore API X:', res.status, data)
+      return { error: JSON.stringify(data) }
+    }
+    return { id: data?.data?.id }
+  } catch (err: any) {
+    console.error('Errore di rete verso X:', err)
+    return { error: err?.message || String(err) }
+  }
+}
+
 serve(async (req) => {
   // Gestione CORS per poter testare la funzione anche dal frontend se serve
   if (req.method === 'OPTIONS') {
@@ -37,7 +112,7 @@ serve(async (req) => {
       })
     }
 
-    // 2b. Recupera i titoli e riassunti recenti per la deduplicazione (ultime 36 ore)
+    // 2b. Recupera i titoli e riassunti recenti per la deduplicazione e il conteggio tweet X (ultime 36 ore)
     const thirtySixHoursAgo = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
@@ -49,6 +124,33 @@ serve(async (req) => {
     const latestPublishedAt = recentArticles && recentArticles.length > 0 
       ? new Date(recentArticles[0].published_at).getTime() 
       : 0;
+
+    // Calcolo quota giornaliera X (max 11 notizie standard + 1 Punto della Giornata = 12 post/giorno)
+    const MAX_NEWS_TWEETS_PER_DAY = 11;
+    const MIN_TWEET_COOLDOWN_MS = 25 * 60 * 1000; // Minimo 25 minuti tra due tweet automatici
+    const getRomeDateStr = (d: Date) =>
+      new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(d);
+    const todayRome = getRomeDateStr(new Date());
+
+    let tweetsTodayCount = 0;
+    let lastTweetTimeMs = 0;
+    let hasTweetedThisRun = false;
+
+    if (recentArticles) {
+      for (const art of recentArticles) {
+        const postedAt = art.ai_summary?.x_posted_at;
+        if (postedAt) {
+          const postedDate = new Date(postedAt);
+          if (getRomeDateStr(postedDate) === todayRome) {
+            tweetsTodayCount++;
+          }
+          if (postedDate.getTime() > lastTweetTimeMs) {
+            lastTweetTimeMs = postedDate.getTime();
+          }
+        }
+      }
+    }
+    console.log(`[X AUTO-POST] Tweet notizie pubblicati oggi (${todayRome}): ${tweetsTodayCount}/${MAX_NEWS_TWEETS_PER_DAY}`);
 
     // Funzione deterministica anti-duplicato: normalizza testo rimuovendo punteggiatura e stop-words
     const stopWords = new Set(['como', 'roma', 'della', 'delle', 'degli', 'dello', 'nella', 'nelle', 'negli', 'sulla', 'sulle', 'sugli', 'contro', 'verso', 'prima', 'dopo', 'anche', 'sono', 'stato', 'stata', 'questo', 'questa', 'quello', 'quella', 'tutto', 'tutti', 'tutte', 'molto', 'solo', 'fare', 'fatto', 'essere', 'avere', 'hanno', 'alla', 'alle', 'agli', 'dalla', 'dalle', 'dagli', 'con', 'per', 'tra', 'fra', 'che', 'non', 'piu', 'suo', 'sua', 'suoi', 'sue', 'loro', 'gli', 'una', 'uno', 'dei', 'del', 'dal', 'nel', 'sul', 'col']);
@@ -156,11 +258,17 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
+8. AUTO-PUBBLICAZIONE X / TWITTER ("is_breaking" e "tweet_text"):
+   Selezioniamo fino a 11 notizie importanti al giorno per il profilo ufficiale X di RomaFlash.
+   Imposta "is_breaking": true per tutte le notizie di rilievo (formazioni probabili/ufficiali, infortuni, conferenze stampa, dichiarazioni importanti di allenatore/giocatori/dirigenti, calciomercato, partite, comunicati ufficiali). Imposta "is_breaking": false solo per notizie minori, curiosità secondarie o amarcord.
+   Scrivi in "tweet_text" un post magnetico in italiano per X (massimo 185 caratteri, con 1-2 emoji pertinenti e gli hashtag #ASRoma #RomaFlash in coda, SENZA inserire URL perché il link verrà aggiunto automaticamente dal sistema).
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
   "is_duplicate": false, 
   "is_spam": false, 
+  "is_breaking": true,
+  "tweet_text": "🚨 Ultime da Trigoria: Dybala torna in gruppo alla vigilia del match! Scelte quasi fatte in attacco 🐺🟡🔴 #ASRoma #RomaFlash",
   "titolo": "Nuovo titolo", 
   "excerpt": "Breve riassunto", 
   "content": "Testo completo dell'articolo riscritto...", 
@@ -209,7 +317,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
 
           const geminiData = await geminiResponse.json()
           
-          let aiSummary = {}
+          let aiSummary: any = {}
           let newTitle = item.title
 
           try {
@@ -248,7 +356,9 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 formation: parsed.formation || null,
                 social_embed_url: parsed.social_embed_url || null,
                 poll: parsed.poll || null,
-                en: parsed.en || null
+                en: parsed.en || null,
+                is_breaking: parsed.is_breaking === true,
+                tweet_text: parsed.tweet_text || null
               }
               
               // Fallback: se l'articolo PROVIENE direttamente da Twitter/Nitter, forza il social_embed_url
@@ -277,8 +387,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             finalPublishedAt = new Date().toISOString()
           }
 
-          // 6. Salva su Supabase
-          const { error: insertError } = await supabase
+          // 6. Salva su Supabase e recupera l'ID generato
+          const { data: insertedArticle, error: insertError } = await supabase
             .from('articles')
             .insert({
               source_id: source.id,
@@ -288,6 +398,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               ai_summary: aiSummary,
               published_at: finalPublishedAt
             })
+            .select('id')
+            .single()
 
           if (insertError) {
             console.error(`Errore inserimento in DB per: ${item.title}`, insertError)
@@ -295,6 +407,38 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             processedCount++;
             existingTitlesArray.push(newTitle);
             recentTitlesList += `\n- ${newTitle} (${aiSummary.excerpt || ''})`;
+
+            // 6b. Auto-Pubblicazione su X (Max 11 notizie importanti al giorno + cooldown 25 min)
+            const nowMs = Date.now();
+            const cooldownElapsed = (nowMs - lastTweetTimeMs) >= MIN_TWEET_COOLDOWN_MS;
+            if (
+              insertedArticle?.id &&
+              aiSummary.is_breaking === true &&
+              tweetsTodayCount < MAX_NEWS_TWEETS_PER_DAY &&
+              !hasTweetedThisRun &&
+              cooldownElapsed
+            ) {
+              const articleUrl = `https://romaflash.app/article?id=${insertedArticle.id}`;
+              const baseTweet = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}\n\n#ASRoma #RomaFlash`).trim();
+              const fullTweet = `${baseTweet}\n\n👉 ${articleUrl}`;
+
+              console.log(`[X AUTO-POST] Pubblicazione tweet (${tweetsTodayCount + 1}/${MAX_NEWS_TWEETS_PER_DAY}): ${newTitle}`);
+              const xRes = await postToX(fullTweet);
+              if (xRes.id) {
+                console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
+                hasTweetedThisRun = true;
+                tweetsTodayCount++;
+                lastTweetTimeMs = nowMs;
+                aiSummary.x_tweet_id = xRes.id;
+                aiSummary.x_posted_at = new Date().toISOString();
+                await supabase
+                  .from('articles')
+                  .update({ ai_summary: aiSummary })
+                  .eq('id', insertedArticle.id);
+              } else {
+                console.error(`[X AUTO-POST] Errore pubblicazione su X:`, xRes.error);
+              }
+            }
             
             // Invia notifica push
             const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')
@@ -308,7 +452,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 const payload = JSON.stringify({
                   title: newTitle,
                   body: aiSummary.excerpt || "Nuovo articolo su RomaFlash",
-                  url: `/?refresh=1`
+                  url: insertedArticle?.id ? `/article?id=${insertedArticle.id}` : `/?refresh=1`
                 })
                 
                 console.log(`Invio notifica a ${subs.length} iscritti...`)
@@ -334,7 +478,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: `Elaborazione completata. Nuovi articoli aggiunti: ${processedCount}` 
+      message: `Elaborazione completata. Nuovi articoli aggiunti: ${processedCount}`,
+      tweets_today: tweetsTodayCount
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

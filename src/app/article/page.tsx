@@ -82,10 +82,10 @@ function ArticleContent() {
 
   if (loading) {
     if (!showSkeleton) {
-      return <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 pb-32"></main>;
+      return <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12"></main>;
     }
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 animate-pulse">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12 animate-pulse">
         <div className="w-24 h-6 bg-gray-200 rounded mb-8"></div>
         <div className="w-3/4 h-10 bg-gray-300 rounded mb-6"></div>
         <div className="space-y-4">
@@ -99,7 +99,7 @@ function ArticleContent() {
 
   if (!article) {
     return (
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4 md:p-6 pb-32 text-center">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12 text-center">
         <h1 className="text-2xl font-bold mb-4">{t('article.not_found')}</h1>
         <Link href="/" className="text-primary hover:underline">{t('article.back_home')}</Link>
       </main>
@@ -135,7 +135,7 @@ function ArticleContent() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32">
+    <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12">
       <div className="bg-background">
         <GlobalHeader title="Notizia" />
 

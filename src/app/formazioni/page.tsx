@@ -405,13 +405,13 @@ export default function FormazioniPage() {
 
   return (
     <PullToRefresh onRefresh={fetchLineups}>
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32">
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12">
         <GlobalHeader title="Probabili Formazioni" />
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto space-y-6"
+          className="space-y-6"
         >
           {/* Match Header */}
           <div className="flex flex-col items-center justify-center pt-4">

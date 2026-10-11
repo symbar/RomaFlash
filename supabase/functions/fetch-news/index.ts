@@ -405,8 +405,11 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               cooldownElapsed
             ) {
               const articleUrl = `https://romaflash.app/article?id=${insertedArticle.id}`;
-              const baseTweet = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}\n\n#ASRoma #RomaFlash`).trim();
-              const fullTweet = `${baseTweet}\n\n👉 ${articleUrl}`;
+              const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}`)
+                .replace(/#ASRoma/gi, '')
+                .replace(/#RomaFlash/gi, '')
+                .trim();
+              const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n#ASRoma #RomaFlash`;
 
               console.log(`[X AUTO-POST] Pubblicazione tweet (${tweetsTodayCount + 1}/${MAX_NEWS_TWEETS_PER_DAY}): ${newTitle}`);
               const xRes = await postToX(fullTweet);

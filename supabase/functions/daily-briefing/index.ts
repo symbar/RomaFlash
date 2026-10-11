@@ -193,8 +193,11 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
     let xTweetId: string | undefined = undefined;
     if (savedBriefing?.id) {
       const articleUrl = `https://romaflash.app/article?id=${savedBriefing.id}`;
-      const baseTweet = (aiSummary.tweet_text || `🌙🐺 ${briefingArticle.title}\n\n${aiSummary.excerpt}\n\n#ASRoma #RomaFlash`).trim();
-      const fullTweet = `${baseTweet}\n\n📖 Leggi il recap completo:\n👉 ${articleUrl}`;
+      const cleanBase = (aiSummary.tweet_text || `🌙🐺 ${briefingArticle.title}\n\n${aiSummary.excerpt}`)
+        .replace(/#ASRoma/gi, '')
+        .replace(/#RomaFlash/gi, '')
+        .trim();
+      const fullTweet = `${cleanBase}\n\n📖 Leggi il recap completo: ${articleUrl}\n\n#ASRoma #RomaFlash`;
 
       console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata su X...`);
       const xRes = await postToX(fullTweet);

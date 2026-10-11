@@ -46,6 +46,20 @@ function ArticleContent() {
       
       if (data) {
         setArticle(data);
+
+        // Tracciamento silenzioso lettura unica (1 per dispositivo/browser)
+        try {
+          const storageKey = 'romaflash_viewed_articles';
+          const viewedRaw = localStorage.getItem(storageKey);
+          const viewedList: string[] = viewedRaw ? JSON.parse(viewedRaw) : [];
+          if (!viewedList.includes(data.id)) {
+            const updatedList = [data.id, ...viewedList].slice(0, 300);
+            localStorage.setItem(storageKey, JSON.stringify(updatedList));
+            supabase.rpc('increment_article_view', { target_article_id: data.id }).then(() => {});
+          }
+        } catch {
+          // Ignora errori localStorage in modalità navigazione privata
+        }
         
         if (data.ai_summary?.category) {
           const { data: recentData } = await supabase

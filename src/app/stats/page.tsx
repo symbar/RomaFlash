@@ -1,0 +1,559 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import GlobalHeader from "@/components/GlobalHeader";
+import {
+  Eye,
+  Flame,
+  Snowflake,
+  Clock,
+  BarChart3,
+  Trash2,
+  RefreshCw,
+  Lock,
+  LogOut,
+  ExternalLink,
+  FileText,
+  Vote,
+  TrendingUp,
+} from "lucide-react";
+
+const ADMIN_PIN = "1927";
+const STORAGE_PIN_KEY = "romaflash_admin_unlocked_pin";
+
+type SortMode = "most_read" | "least_read" | "recent" | "most_voted";
+
+export default function StatsBackofficePage() {
+  const [pinInput, setPinInput] = useState("");
+  const [unlockedPin, setUnlockedPin] = useState<string | null>(null);
+  const [pinError, setPinError] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [articles, setArticles] = useState<any[]>([]);
+  const [pollVotesMap, setPollVotesMap] = useState<Record<string, number>>({});
+  const [totalPollVotes, setTotalPollVotes] = useState(0);
+  const [loadingData, setLoadingData] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>("most_read");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_PIN_KEY);
+      if (saved === ADMIN_PIN) {
+        setUnlockedPin(saved);
+      }
+    } catch {
+      // ignore
+    }
+    setCheckingAuth(false);
+  }, []);
+
+  const fetchBackofficeData = async () => {
+    setLoadingData(true);
+    try {
+      const [articlesRes, votesRes] = await Promise.all([
+        supabase
+          .from("articles")
+          .select("id, title, published_at, views, ai_summary, sources(name)")
+          .order("published_at", { ascending: false })
+          .limit(200),
+        supabase.from("poll_votes").select("article_id"),
+      ]);
+
+      if (articlesRes.data) {
+        setArticles(articlesRes.data);
+      }
+
+      if (votesRes.data) {
+        const counts: Record<string, number> = {};
+        for (const v of votesRes.data) {
+          counts[v.article_id] = (counts[v.article_id] || 0) + 1;
+        }
+        setPollVotesMap(counts);
+        setTotalPollVotes(votesRes.data.length);
+      }
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (unlockedPin === ADMIN_PIN) {
+      fetchBackofficeData();
+    }
+  }, [unlockedPin]);
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput.trim() === ADMIN_PIN) {
+      setUnlockedPin(ADMIN_PIN);
+      setPinError(false);
+      try {
+        localStorage.setItem(STORAGE_PIN_KEY, ADMIN_PIN);
+      } catch {
+        // ignore
+      }
+    } else {
+      setPinError(true);
+    }
+  };
+
+  const handleLock = () => {
+    setUnlockedPin(null);
+    setPinInput("");
+    try {
+      localStorage.removeItem(STORAGE_PIN_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleDeleteArticle = async (articleId: string, title: string) => {
+    if (!unlockedPin) return;
+    const confirmed = window.confirm(
+      `Vuoi eliminare definitivamente questo articolo?\n\n"${title}"`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(articleId);
+    const { error } = await supabase.rpc("admin_delete_article", {
+      target_article_id: articleId,
+      admin_pin: unlockedPin,
+    });
+
+    if (error) {
+      alert("Errore durante l'eliminazione: " + error.message);
+    } else {
+      setArticles((prev) => prev.filter((a) => a.id !== articleId));
+    }
+    setDeletingId(null);
+  };
+
+  const metrics = useMemo(() => {
+    const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const articles24h = articles.filter(
+      (a) => now - new Date(a.published_at).getTime() <= oneDayMs
+    );
+    const views24h = articles24h.reduce((sum, a) => sum + (a.views || 0), 0);
+    const avgViews =
+      articles.length > 0 ? (totalViews / articles.length).toFixed(1) : "0";
+
+    // Raggruppamento per categoria
+    const byCategory: Record<string, { count: number; views: number }> = {};
+    for (const a of articles) {
+      const cat = a.ai_summary?.category || "Altro";
+      if (!byCategory[cat]) byCategory[cat] = { count: 0, views: 0 };
+      byCategory[cat].count += 1;
+      byCategory[cat].views += a.views || 0;
+    }
+
+    const categoryStats = Object.entries(byCategory)
+      .map(([category, stats]) => ({
+        category,
+        count: stats.count,
+        views: stats.views,
+        avg: stats.count > 0 ? +(stats.views / stats.count).toFixed(1) : 0,
+      }))
+      .sort((a, b) => b.views - a.views);
+
+    return {
+      totalViews,
+      views24h,
+      articlesCount: articles.length,
+      articles24hCount: articles24h.length,
+      avgViews,
+      categoryStats,
+    };
+  }, [articles]);
+
+  const sortedArticles = useMemo(() => {
+    const copy = [...articles];
+    if (sortMode === "most_read") {
+      return copy.sort(
+        (a, b) =>
+          (b.views || 0) - (a.views || 0) ||
+          new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
+    }
+    if (sortMode === "least_read") {
+      return copy.sort(
+        (a, b) =>
+          (a.views || 0) - (b.views || 0) ||
+          new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+      );
+    }
+    if (sortMode === "most_voted") {
+      return copy.sort(
+        (a, b) =>
+          (pollVotesMap[b.id] || 0) - (pollVotesMap[a.id] || 0) ||
+          (b.views || 0) - (a.views || 0)
+      );
+    }
+    return copy.sort(
+      (a, b) =>
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+    );
+  }, [articles, sortMode, pollVotesMap]);
+
+  if (checkingAuth) {
+    return (
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12" />
+    );
+  }
+
+  // SCHERMATA DI SBLOCCO PIN (Zero dati esposti nel DOM statico)
+  if (unlockedPin !== ADMIN_PIN) {
+    return (
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12 flex flex-col">
+        <GlobalHeader title="Backoffice" />
+        <div className="flex-1 flex items-center justify-center py-16">
+          <form
+            onSubmit={handleUnlock}
+            className="w-full max-w-sm bg-white border border-border rounded-2xl p-6 shadow-sm text-center"
+          >
+            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h1 className="text-lg font-bold text-gray-900 mb-1">
+              Backoffice RomaFlash
+            </h1>
+            <p className="text-xs text-gray-500 mb-5">
+              Area privata non indicizzata. Inserisci il PIN per visualizzare le
+              statistiche.
+            </p>
+            <input
+              type="password"
+              inputMode="numeric"
+              value={pinInput}
+              onChange={(e) => {
+                setPinInput(e.target.value);
+                setPinError(false);
+              }}
+              placeholder="PIN di accesso"
+              className="w-full px-4 py-2.5 text-center tracking-widest font-bold text-lg rounded-xl border border-border bg-gray-50 focus:bg-white focus:outline-none focus:border-primary mb-3"
+              autoFocus
+            />
+            {pinError && (
+              <p className="text-xs text-red-600 font-semibold mb-3">
+                PIN errato. Riprova.
+              </p>
+            )}
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:opacity-95 transition-opacity cursor-pointer"
+            >
+              Sblocca Dashboard
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12">
+      <GlobalHeader title="Backoffice" />
+
+      {/* Header Backoffice */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+              Privato • No-Index
+            </span>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+              Statistiche & Letture Articoli
+            </h1>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Monitoraggio in tempo reale degli articoli più e meno letti (ultimi{" "}
+            {articles.length} articoli).
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchBackofficeData}
+            disabled={loadingData}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-border text-xs font-semibold text-gray-700 hover:text-primary hover:border-primary/40 transition-colors cursor-pointer"
+          >
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loadingData ? "animate-spin text-primary" : ""}`}
+            />
+            Aggiorna
+          </button>
+          <button
+            type="button"
+            onClick={handleLock}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-border text-xs font-semibold text-gray-500 hover:text-red-600 hover:border-red-200 transition-colors cursor-pointer"
+            title="Blocca sessione"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Blocca
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
+            <span>Letture Totali</span>
+            <Eye className="w-4 h-4 text-primary" />
+          </div>
+          <div className="text-2xl md:text-3xl font-black text-gray-900">
+            {metrics.totalViews}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            +{metrics.views24h} nelle ultime 24h
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
+            <span>Media per Articolo</span>
+            <TrendingUp className="w-4 h-4 text-orange-500" />
+          </div>
+          <div className="text-2xl md:text-3xl font-black text-gray-900">
+            {metrics.avgViews}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            letture uniche / notizia
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
+            <span>Voti Sondaggi</span>
+            <Vote className="w-4 h-4 text-green-600" />
+          </div>
+          <div className="text-2xl md:text-3xl font-black text-gray-900">
+            {totalPollVotes}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            interazioni totali ai poll
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
+            <span>Articoli in DB</span>
+            <FileText className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="text-2xl md:text-3xl font-black text-gray-900">
+            {metrics.articlesCount}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            {metrics.articles24hCount} pubblicati nelle ultime 24h
+          </div>
+        </div>
+      </div>
+
+      {/* Rendimento per Categoria */}
+      <div className="bg-white border border-border rounded-2xl p-4 md:p-5 mb-6 shadow-xs">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 flex items-center gap-1.5">
+          <BarChart3 className="w-4 h-4 text-primary" />
+          Rendimento per Categoria
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {metrics.categoryStats.map((cat) => (
+            <div
+              key={cat.category}
+              className="p-3 rounded-xl bg-gray-50 border border-border/60 flex flex-col justify-between"
+            >
+              <span className="text-xs font-bold text-gray-800 truncate">
+                {cat.category}
+              </span>
+              <div className="mt-2 flex items-baseline justify-between">
+                <span className="text-lg font-black text-primary">
+                  {cat.views}{" "}
+                  <span className="text-[10px] font-normal text-gray-500">
+                    views
+                  </span>
+                </span>
+                <span className="text-[10px] font-semibold text-gray-500">
+                  {cat.count} art. (μ {cat.avg})
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filtri di ordinamento */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex overflow-x-auto gap-2 scrollbar-hide">
+          <button
+            type="button"
+            onClick={() => setSortMode("most_read")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "most_read"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5" />
+            Più Letti
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSortMode("least_read")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "least_read"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <Snowflake className="w-3.5 h-3.5" />
+            Meno Letti
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSortMode("most_voted")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "most_voted"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <Vote className="w-3.5 h-3.5" />
+            Più Votati (Sondaggi)
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSortMode("recent")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "recent"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            Più Recenti
+          </button>
+        </div>
+      </div>
+
+      {/* Tabella Articoli */}
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 border-b border-border text-[11px] font-bold uppercase text-gray-500">
+              <tr>
+                <th className="py-3 px-3 w-10 text-center">#</th>
+                <th className="py-3 px-4">Articolo</th>
+                <th className="py-3 px-3 text-center">Categoria</th>
+                <th className="py-3 px-3 text-center">Letture</th>
+                <th className="py-3 px-3 text-center">Voti Poll</th>
+                <th className="py-3 px-3 text-right">Data</th>
+                <th className="py-3 px-3 w-12 text-center">Azioni</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {sortedArticles.map((art, idx) => {
+                const views = art.views || 0;
+                const votes = pollVotesMap[art.id] || 0;
+                const category = art.ai_summary?.category || "Altro";
+                const sourceName = art.sources?.name || "RomaFlash";
+                const pubDate = new Date(art.published_at).toLocaleString(
+                  "it-IT",
+                  {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: "Europe/Rome",
+                  }
+                );
+
+                return (
+                  <tr
+                    key={art.id}
+                    className="hover:bg-gray-50/80 transition-colors"
+                  >
+                    <td className="py-3 px-3 text-center font-bold text-xs text-gray-400">
+                      {idx + 1}
+                    </td>
+                    <td className="py-3 px-4 max-w-md">
+                      <Link
+                        href={`/article?id=${art.id}`}
+                        className="font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1 inline-flex items-center gap-1.5"
+                      >
+                        <span>{art.title}</span>
+                        <ExternalLink className="w-3 h-3 text-gray-400 shrink-0" />
+                      </Link>
+                      <div className="text-[11px] text-gray-400 mt-0.5">
+                        Fonte: {sourceName}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700">
+                        {category}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                          views > 0
+                            ? "bg-primary/10 text-primary"
+                            : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        <Eye className="w-3 h-3" />
+                        {views}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                          votes > 0
+                            ? "bg-green-500/10 text-green-700"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {votes}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right text-xs text-gray-500 whitespace-nowrap">
+                      {pubDate}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteArticle(art.id, art.title)}
+                        disabled={deletingId === art.id}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
+                        title="Elimina articolo"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {!loadingData && sortedArticles.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="py-10 text-center text-gray-500 text-sm"
+                  >
+                    Nessun articolo trovato.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  );
+}

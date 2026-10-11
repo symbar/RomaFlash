@@ -1,0 +1,51 @@
+User-agent: *
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: GPTBot
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: OAI-SearchBot
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: ChatGPT-User
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: ClaudeBot
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: Claude-Web
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: anthropic-ai
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: Google-Extended
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: PerplexityBot
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: CCBot
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: Bytespider
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: Applebot-Extended
+Disallow: /stats
+Disallow: /stats/
+
+User-agent: Meta-ExternalAgent
+Disallow: /stats
+Disallow: /stats/

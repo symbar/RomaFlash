@@ -442,8 +442,100 @@ export default function StatsBackofficePage() {
         </div>
       </div>
 
-      {/* Tabella Articoli */}
-      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-xs">
+      {/* Lista Articoli Mobile/PWA (md:hidden) */}
+      <div className="md:hidden space-y-2.5">
+        {sortedArticles.map((art, idx) => {
+          const views = art.views || 0;
+          const votes = pollVotesMap[art.id] || 0;
+          const category = art.ai_summary?.category || "Altro";
+          const sourceName = art.sources?.name || "RomaFlash";
+          const pubDate = new Date(art.published_at).toLocaleString("it-IT", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "Europe/Rome",
+          });
+
+          return (
+            <div
+              key={art.id}
+              className="bg-white border border-border rounded-xl p-3.5 shadow-xs flex flex-col gap-2"
+            >
+              {/* Riga Superiore: Posizione + Categoria a sinistra | Letture + Voti + Elimina a destra */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-[11px] font-black text-gray-400">
+                    #{idx + 1}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700 truncate">
+                    {category}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-extrabold ${
+                      views > 0
+                        ? "bg-primary/10 text-primary"
+                        : "bg-gray-100 text-gray-500"
+                    }`}
+                    title="Letture uniche"
+                  >
+                    <Eye className="w-3 h-3" />
+                    {views}
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                      votes > 0
+                        ? "bg-green-500/10 text-green-700"
+                        : "bg-gray-50 text-gray-400"
+                    }`}
+                    title="Voti sondaggio"
+                  >
+                    <Vote className="w-3 h-3" />
+                    {votes}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteArticle(art.id, art.title)}
+                    disabled={deletingId === art.id}
+                    className="p-1 rounded-lg text-gray-400 hover:text-red-600 active:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
+                    title="Elimina articolo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Titolo Articolo leggibile per intero (fino a 2 righe) */}
+              <Link
+                href={`/article?id=${art.id}`}
+                className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 active:text-primary"
+              >
+                {art.title}
+              </Link>
+
+              {/* Riga Inferiore: Fonte e Orario */}
+              <div className="flex items-center justify-between text-[11px] text-gray-400 pt-1 border-t border-border/50">
+                <span className="truncate">{sourceName}</span>
+                <span className="shrink-0">{pubDate}</span>
+              </div>
+            </div>
+          );
+        })}
+
+        {!loadingData && sortedArticles.length === 0 && (
+          <div className="bg-white border border-border rounded-xl py-10 text-center text-gray-500 text-sm">
+            Nessun articolo trovato.
+          </div>
+        )}
+      </div>
+
+      {/* Tabella Articoli Desktop (hidden md:block) */}
+      <div className="hidden md:block bg-white border border-border rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 border-b border-border text-[11px] font-bold uppercase text-gray-500">

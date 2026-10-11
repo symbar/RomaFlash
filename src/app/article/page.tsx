@@ -176,7 +176,7 @@ function ArticleContent() {
                   <ShareButton 
                     title={displayTitle} 
                     text={displayExcerpt} 
-                    url={`https://romaflash.pages.dev/article?id=${article.id}`} 
+                    url={`https://romaflash.app/article?id=${article.id}`} 
                   />
                 </div>
               </div>

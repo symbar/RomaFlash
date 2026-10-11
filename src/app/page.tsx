@@ -347,7 +347,7 @@ export default function Home() {
                           </div>
                           <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-gray-500 font-medium">
                             <span>{formatDate(article.published_at, lang)}</span>
-                            <ShareButton title={displayTitle} text={displayExcerpt} url={`https://romaflash.pages.dev/article?id=${article.id}`} />
+                            <ShareButton title={displayTitle} text={displayExcerpt} url={`https://romaflash.app/article?id=${article.id}`} />
                           </div>
                         </div>
                       </>

@@ -8,77 +8,63 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-function rfc3986Encode(str: string): string {
-  return encodeURIComponent(str).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase())
-}
-
 async function postToX(tweetText: string): Promise<{ id?: string; error?: string }> {
-  const apiKey = Deno.env.get('X_API_KEY')
-  const apiSecret = Deno.env.get('X_API_SECRET')
-  const accessToken = Deno.env.get('X_ACCESS_TOKEN')
-  const accessSecret = Deno.env.get('X_ACCESS_TOKEN_SECRET')
+  const bufferApiKey = Deno.env.get('BUFFER_API_KEY')
+  const bufferChannelId = Deno.env.get('BUFFER_CHANNEL_ID') || '6acbee4e778b240e2fdc27e7'
 
-  if (!apiKey || !apiSecret || !accessToken || !accessSecret) {
-    return { error: 'Credenziali X_API non configurate su Supabase' }
+  if (!bufferApiKey) {
+    return { error: 'BUFFER_API_KEY non configurata su Supabase' }
   }
 
-  const url = 'https://api.twitter.com/2/tweets'
-  const method = 'POST'
-  const oauthParams: Record<string, string> = {
-    oauth_consumer_key: apiKey,
-    oauth_nonce: crypto.randomUUID().replace(/-/g, ''),
-    oauth_signature_method: 'HMAC-SHA1',
-    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-    oauth_token: accessToken,
-    oauth_version: '1.0',
-  }
-
-  const sortedParamStr = Object.keys(oauthParams)
-    .sort()
-    .map((k) => `${rfc3986Encode(k)}=${rfc3986Encode(oauthParams[k])}`)
-    .join('&')
-
-  const baseString = `${method}&${rfc3986Encode(url)}&${rfc3986Encode(sortedParamStr)}`
-  const signingKey = `${rfc3986Encode(apiSecret)}&${rfc3986Encode(accessSecret)}`
-
-  const encoder = new TextEncoder()
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(signingKey),
-    { name: 'HMAC', hash: 'SHA-1' },
-    false,
-    ['sign']
-  )
-  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(baseString))
-  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)))
-
-  oauthParams.oauth_signature = signatureBase64
-
-  const authHeader =
-    'OAuth ' +
-    Object.keys(oauthParams)
-      .sort()
-      .map((k) => `${rfc3986Encode(k)}="${rfc3986Encode(oauthParams[k])}"`)
-      .join(', ')
+  const mutation = `
+    mutation CreatePost($text: String!, $channelId: ChannelId!) {
+      createPost(
+        input: {
+          text: $text
+          channelId: $channelId
+          schedulingType: automatic
+          mode: shareNow
+        }
+      ) {
+        ... on PostActionSuccess {
+          post {
+            id
+            text
+          }
+        }
+        ... on MutationError {
+          message
+        }
+      }
+    }
+  `
 
   try {
-    const res = await fetch(url, {
-      method,
+    const res = await fetch('https://api.buffer.com', {
+      method: 'POST',
       headers: {
-        Authorization: authHeader,
+        Authorization: `Bearer ${bufferApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text: tweetText }),
+      body: JSON.stringify({
+        query: mutation,
+        variables: {
+          text: tweetText,
+          channelId: bufferChannelId,
+        },
+      }),
     })
 
     const data = await res.json()
-    if (!res.ok) {
-      console.error('Errore API X:', res.status, data)
-      return { error: JSON.stringify(data) }
+    const postId = data?.data?.createPost?.post?.id
+    if (postId) {
+      return { id: postId }
     }
-    return { id: data?.data?.id }
+    const errMsg = data?.data?.createPost?.message || JSON.stringify(data)
+    console.error('Errore Buffer API:', errMsg)
+    return { error: errMsg }
   } catch (err: any) {
-    console.error('Errore di rete verso X:', err)
+    console.error('Errore di rete verso Buffer:', err)
     return { error: err?.message || String(err) }
   }
 }

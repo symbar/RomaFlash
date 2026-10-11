@@ -473,7 +473,7 @@ export default function StatsBackofficePage() {
                   </span>
                   {art.ai_summary?.x_tweet_id && (
                     <a
-                      href={`https://x.com/i/web/status/${art.ai_summary.x_tweet_id}`}
+                      href="https://x.com/romaflashoffici"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0"
@@ -589,7 +589,7 @@ export default function StatsBackofficePage() {
                       <div className="flex items-center gap-1.5">
                         {art.ai_summary?.x_tweet_id && (
                           <a
-                            href={`https://x.com/i/web/status/${art.ai_summary.x_tweet_id}`}
+                            href="https://x.com/romaflashoffici"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0 hover:bg-gray-800"

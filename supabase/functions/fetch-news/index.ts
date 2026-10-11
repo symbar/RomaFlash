@@ -111,32 +111,21 @@ serve(async (req) => {
       ? new Date(recentArticles[0].published_at).getTime() 
       : 0;
 
-    // Calcolo quota giornaliera X (max 11 notizie standard + 1 Punto della Giornata = 12 post/giorno)
-    const MAX_NEWS_TWEETS_PER_DAY = 11;
-    const MIN_TWEET_COOLDOWN_MS = 25 * 60 * 1000; // Minimo 25 minuti tra due tweet automatici
+    // Conteggio informativo dei tweet pubblicati oggi (fuso Europe/Rome)
     const getRomeDateStr = (d: Date) =>
       new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(d);
     const todayRome = getRomeDateStr(new Date());
 
     let tweetsTodayCount = 0;
-    let lastTweetTimeMs = 0;
-    let hasTweetedThisRun = false;
-
     if (recentArticles) {
       for (const art of recentArticles) {
         const postedAt = art.ai_summary?.x_posted_at;
-        if (postedAt) {
-          const postedDate = new Date(postedAt);
-          if (getRomeDateStr(postedDate) === todayRome) {
-            tweetsTodayCount++;
-          }
-          if (postedDate.getTime() > lastTweetTimeMs) {
-            lastTweetTimeMs = postedDate.getTime();
-          }
+        if (postedAt && getRomeDateStr(new Date(postedAt)) === todayRome) {
+          tweetsTodayCount++;
         }
       }
     }
-    console.log(`[X AUTO-POST] Tweet notizie pubblicati oggi (${todayRome}): ${tweetsTodayCount}/${MAX_NEWS_TWEETS_PER_DAY}`);
+    console.log(`[X AUTO-POST] Tweet notizie già pubblicati oggi (${todayRome}): ${tweetsTodayCount}`);
 
     // Funzione deterministica anti-duplicato: normalizza testo rimuovendo punteggiatura e stop-words
     const stopWords = new Set(['como', 'roma', 'della', 'delle', 'degli', 'dello', 'nella', 'nelle', 'negli', 'sulla', 'sulle', 'sugli', 'contro', 'verso', 'prima', 'dopo', 'anche', 'sono', 'stato', 'stata', 'questo', 'questa', 'quello', 'quella', 'tutto', 'tutti', 'tutte', 'molto', 'solo', 'fare', 'fatto', 'essere', 'avere', 'hanno', 'alla', 'alle', 'agli', 'dalla', 'dalle', 'dagli', 'con', 'per', 'tra', 'fra', 'che', 'non', 'piu', 'suo', 'sua', 'suoi', 'sue', 'loro', 'gli', 'una', 'uno', 'dei', 'del', 'dal', 'nel', 'sul', 'col']);
@@ -397,16 +386,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             existingTitlesArray.push(newTitle);
             recentTitlesList += `\n- ${newTitle} (${aiSummary.excerpt || ''})`;
 
-            // 6b. Auto-Pubblicazione su X (Max 11 notizie importanti al giorno + cooldown 25 min)
-            const nowMs = Date.now();
-            const cooldownElapsed = (nowMs - lastTweetTimeMs) >= MIN_TWEET_COOLDOWN_MS;
-            if (
-              insertedArticle?.id &&
-              aiSummary.is_breaking === true &&
-              tweetsTodayCount < MAX_NEWS_TWEETS_PER_DAY &&
-              !hasTweetedThisRun &&
-              cooldownElapsed
-            ) {
+            // 6b. Auto-Pubblicazione su X per TUTTI gli articoli (esclusi i post Social)
+            const isSocialPost =
+              aiSummary.category === 'Social' ||
+              Boolean(aiSummary.social_embed_url) ||
+              source.name === 'AS Roma (Ufficiale)';
+
+            if (insertedArticle?.id && !isSocialPost) {
               const articleUrl = `https://romaflash.app/article?id=${insertedArticle.id}`;
               const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}`)
                 .replace(/#[a-zA-Z0-9_]+/g, '')
@@ -418,13 +404,11 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`;
               const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n${hashtagsLine}`;
 
-              console.log(`[X AUTO-POST] Pubblicazione tweet (${tweetsTodayCount + 1}/${MAX_NEWS_TWEETS_PER_DAY}): ${newTitle}`);
+              console.log(`[X AUTO-POST] Pubblicazione tweet (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
               const xRes = await postToX(fullTweet);
               if (xRes.id) {
                 console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
-                hasTweetedThisRun = true;
                 tweetsTodayCount++;
-                lastTweetTimeMs = nowMs;
                 aiSummary.x_tweet_id = xRes.id;
                 aiSummary.x_posted_at = new Date().toISOString();
                 await supabase

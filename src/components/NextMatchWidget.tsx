@@ -67,47 +67,47 @@ export default function NextMatchWidget({ homeTeam, awayTeam, competition, match
 
   if (!timeLeft) return null; // Nascondi il widget se non c'è una partita imminente
 
+  const shortComp = competition
+    .replace(/UEFA Champions League/i, 'Champions League')
+    .replace(/UEFA Europa League/i, 'Europa League')
+    .replace(/UEFA Conference League/i, 'Conference League');
+
   return (
-    <div className="bg-gradient-to-r from-primary to-secondary p-[1px] shadow-sm overflow-hidden rounded-xl">
-      <div className="bg-white px-4 py-2.5 flex items-center justify-between text-xs md:text-sm">
+    <div className="bg-gradient-to-r from-primary to-secondary p-[1px] shadow-sm overflow-hidden rounded-xl w-full">
+      <div className="bg-white rounded-[11px] px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs md:text-sm">
         
         {/* Info Partita */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col">
-            <span className="text-gray-500 flex items-center text-[10px] uppercase font-bold tracking-wider">
-              <CompetitionIcon competition={competition} />
-              {competition}
-            </span>
-            <span className="font-bold text-gray-900 uppercase tracking-wide">
-              {homeTeam} <span className="text-yellow-600 font-normal mx-1">vs</span> {awayTeam}
-            </span>
-          </div>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className="text-gray-500 flex items-center text-[10px] uppercase font-bold tracking-wider whitespace-nowrap mb-0.5">
+            <CompetitionIcon competition={competition} />
+            <span className="truncate">{shortComp}</span>
+          </span>
+          <span className="font-extrabold text-gray-900 uppercase tracking-tight text-xs md:text-[13px] whitespace-nowrap truncate">
+            {homeTeam} <span className="text-yellow-600 font-bold mx-0.5">vs</span> {awayTeam}
+          </span>
         </div>
 
         {/* Countdown */}
-        <div className="flex items-center gap-2">
-          <div className="hidden md:flex text-gray-400 mr-2">
-            <Calendar className="w-4 h-4" />
-          </div>
-          <div className="flex gap-1 md:gap-2 text-center font-mono">
+        <div className="flex items-center shrink-0">
+          <div className="flex gap-1 text-center font-mono">
             <div className="flex flex-col">
-              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.days}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">G</span>
+              <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.days}</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">G</span>
             </div>
-            <span className="text-gray-400 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
-              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.hours.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">O</span>
+              <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.hours.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">O</span>
             </div>
-            <span className="text-gray-400 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
-              <span className="text-gray-900 font-bold text-sm md:text-base bg-gray-100 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.minutes.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-gray-500 uppercase">M</span>
+              <span className="text-gray-900 font-bold text-xs md:text-sm bg-gray-100 px-1.5 py-0.5 rounded">{timeLeft.minutes.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[9px] text-gray-500 uppercase mt-0.5">M</span>
             </div>
-            <span className="text-gray-400 font-bold self-start mt-1">:</span>
+            <span className="text-gray-400 font-bold self-start mt-0.5">:</span>
             <div className="flex flex-col">
-              <span className="text-amber-600 font-bold text-sm md:text-base bg-amber-50 px-1.5 md:px-2 py-0.5 rounded">{timeLeft.seconds.toString().padStart(2, '0')}</span>
-              <span className="text-[8px] md:text-[10px] text-amber-600 uppercase">S</span>
+              <span className="text-amber-600 font-bold text-xs md:text-sm bg-amber-50 px-1.5 py-0.5 rounded">{timeLeft.seconds.toString().padStart(2, '0')}</span>
+              <span className="text-[8px] md:text-[9px] text-amber-600 uppercase mt-0.5">S</span>
             </div>
           </div>
         </div>

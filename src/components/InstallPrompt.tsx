@@ -110,7 +110,7 @@ export function InstallPrompt() {
       {/* Modal Istruzioni iOS */}
       {showiOSInstructions && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-end md:items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-card w-full max-w-sm rounded-2xl p-6 relative border border-border shadow-2xl animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0 md:zoom-in-95">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 relative border border-border shadow-2xl animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-0 md:zoom-in-95">
             <button 
               onClick={() => {
               setShowiOSInstructions(false);
@@ -121,8 +121,8 @@ export function InstallPrompt() {
             >
               <X className="w-6 h-6" />
             </button>
-            <h3 className="text-xl font-bold font-serif mb-4 text-white">Installa su iPhone/iPad</h3>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <h3 className="text-xl font-bold font-serif mb-4 text-gray-900">Installa su iPhone/iPad</h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
               Apple non permette l'installazione automatica. Segui questi due semplici passaggi:
             </p>
             
@@ -132,7 +132,7 @@ export function InstallPrompt() {
                   <Share className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-white mb-1">1. Tocca Condividi</p>
+                  <p className="font-bold text-gray-900 mb-1">1. Tocca Condividi</p>
                   <p className="text-sm text-gray-400">Premi l'icona di condivisione che trovi nella barra in basso del browser Safari.</p>
                 </div>
               </div>
@@ -142,7 +142,7 @@ export function InstallPrompt() {
                   <PlusSquare className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-white mb-1">2. Aggiungi a Home</p>
+                  <p className="font-bold text-gray-900 mb-1">2. Aggiungi a Home</p>
                   <p className="text-sm text-gray-400">Scorri l'elenco e seleziona "Aggiungi alla schermata Home". Fatto!</p>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export function InstallPrompt() {
               setIsVisible(false);
               localStorage.setItem('romaflash_dismiss_top_banner', 'true');
             }}
-              className="w-full mt-8 bg-white text-black font-bold py-3 rounded-xl"
+              className="w-full mt-8 bg-primary text-white font-bold py-3 rounded-xl shadow-sm"
             >
               Ho capito, grazie!
             </button>

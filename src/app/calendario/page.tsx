@@ -41,10 +41,10 @@ export default async function CalendarioPage() {
           const isFinished = match.status === 'FINISHED';
           
           return (
-            <div key={match.id} className={`bg-card border border-border rounded-xl p-4 md:p-5 flex flex-col relative overflow-hidden shadow-lg ${!isFinished ? 'ring-1 ring-primary/20' : 'opacity-70'}`}>
+            <div key={match.id} className={`bg-white border border-border rounded-xl p-4 md:p-5 flex flex-col relative overflow-hidden shadow-sm ${!isFinished ? 'ring-1 ring-primary/20' : 'opacity-80'}`}>
               
               <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
                   <TrophyIcon comp={match.competition} />
                   {match.competition}
                 </span>
@@ -60,19 +60,19 @@ export default async function CalendarioPage() {
                   <div className="w-12 h-12 md:w-16 md:h-16 relative">
                     <img src={match.home_logo} alt={match.home_team} className="object-contain w-full h-full" />
                   </div>
-                  <span className={`text-sm md:text-base font-bold text-center ${isHome ? 'text-primary' : 'text-white'}`}>{match.home_team}</span>
+                  <span className={`text-sm md:text-base font-bold text-center ${isHome ? 'text-primary' : 'text-gray-900'}`}>{match.home_team}</span>
                 </div>
 
                 {/* Score / VS */}
                 <div className="flex flex-col items-center justify-center w-1/3">
                   {isFinished || match.status === 'IN_PLAY' || match.status === 'PAUSED' ? (
-                    <div className="flex items-center gap-2 text-2xl md:text-4xl font-black text-white">
+                    <div className="flex items-center gap-2 text-2xl md:text-4xl font-black text-gray-900">
                       <span>{match.score_home}</span>
-                      <span className="text-gray-600">-</span>
+                      <span className="text-gray-400">-</span>
                       <span>{match.score_away}</span>
                     </div>
                   ) : (
-                    <div className="text-lg md:text-xl font-black text-gray-500 bg-gray-900 px-3 py-1 rounded-lg">VS</div>
+                    <div className="text-base md:text-lg font-black text-gray-500 bg-gray-100 border border-gray-200 px-3 py-1 rounded-lg">VS</div>
                   )}
                 </div>
 
@@ -81,7 +81,7 @@ export default async function CalendarioPage() {
                   <div className="w-12 h-12 md:w-16 md:h-16 relative">
                     <img src={match.away_logo} alt={match.away_team} className="object-contain w-full h-full" />
                   </div>
-                  <span className={`text-sm md:text-base font-bold text-center ${!isHome ? 'text-primary' : 'text-white'}`}>{match.away_team}</span>
+                  <span className={`text-sm md:text-base font-bold text-center ${!isHome ? 'text-primary' : 'text-gray-900'}`}>{match.away_team}</span>
                 </div>
               </div>
               

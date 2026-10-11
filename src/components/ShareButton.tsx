@@ -46,7 +46,7 @@ export default function ShareButton({ title, text, url }: ShareButtonProps) {
   return (
     <button 
       onClick={handleShare}
-      className="p-2 -mr-2 text-gray-500 hover:text-primary transition-colors rounded-full hover:bg-gray-800"
+      className="p-2 -mr-2 text-gray-500 hover:text-primary transition-colors rounded-full hover:bg-gray-100"
       title="Condividi"
     >
       <Share2 className="w-4 h-4" />

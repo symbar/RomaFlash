@@ -66,15 +66,15 @@ export default function PollWidget({ articleId, poll }: PollProps) {
   };
 
   return (
-    <div className="my-8 bg-card border border-border rounded-xl p-5 shadow-lg relative overflow-hidden">
+    <div className="my-8 bg-white border border-border rounded-xl p-5 shadow-sm relative overflow-hidden">
       <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
       
       <div className="flex items-center gap-2 mb-4 text-primary">
         <BarChart3 className="w-5 h-5" />
-        <h3 className="font-bold text-lg text-white">Sondaggio RomaFlash</h3>
+        <h3 className="font-bold text-lg text-gray-900">Sondaggio RomaFlash</h3>
       </div>
       
-      <p className="text-xl font-serif font-bold mb-6 text-white leading-snug">
+      <p className="text-xl font-serif font-bold mb-6 text-gray-900 leading-snug">
         {poll.question}
       </p>
 
@@ -91,13 +91,13 @@ export default function PollWidget({ articleId, poll }: PollProps) {
                 onClick={() => handleVote(index)}
                 disabled={votedOption !== null}
                 className={`w-full text-left relative z-10 px-4 py-3 rounded-lg border transition-all duration-300 flex justify-between items-center
-                  ${isSelected ? 'border-primary bg-primary/10 text-white font-bold' : 'border-border bg-black/50 text-gray-300'}
-                  ${votedOption === null ? 'hover:border-primary/50 hover:bg-gray-800' : 'cursor-default'}
+                  ${isSelected ? 'border-primary bg-primary/10 text-primary font-bold' : 'border-gray-200 bg-gray-50 text-gray-800'}
+                  ${votedOption === null ? 'hover:border-primary/50 hover:bg-gray-100' : 'cursor-default'}
                 `}
               >
                 <span>{option}</span>
                 {showResults && (
-                  <span className={`text-sm ${isSelected ? 'text-primary font-bold' : 'text-gray-500'}`}>
+                  <span className={`text-sm ${isSelected ? 'text-primary font-bold' : 'text-gray-600'}`}>
                     {percentage}%
                   </span>
                 )}
@@ -107,7 +107,7 @@ export default function PollWidget({ articleId, poll }: PollProps) {
               {showResults && (
                 <div 
                   className={`absolute top-0 left-0 h-full rounded-lg transition-all duration-1000 ease-out z-0
-                    ${isSelected ? 'bg-primary/20' : 'bg-gray-800'}
+                    ${isSelected ? 'bg-primary/20' : 'bg-gray-200/70'}
                   `}
                   style={{ width: `${percentage}%` }}
                 />

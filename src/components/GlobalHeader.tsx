@@ -154,9 +154,22 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
           </a>
+
+          <a
+            href="https://www.tiktok.com/@romaflash4"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center p-1.5 rounded-lg text-gray-700 hover:text-primary hover:bg-gray-100/80 transition-colors"
+            title={lang === 'it' ? 'Seguici su TikTok (@romaflash4)' : 'Follow us on TikTok (@romaflash4)'}
+            aria-label="RomaFlash TikTok Profile"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+            </svg>
+          </a>
         </div>
 
-        {/* Vertical Divider 2 (between Language/X section and Utilities) */}
+        {/* Vertical Divider 2 (between Language/Social section and Utilities) */}
         <div className="h-5 w-[1px] bg-gray-200 mx-2.5 md:mx-4" />
 
         {/* Right Utilities */}

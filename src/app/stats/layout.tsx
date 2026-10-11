@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "RomaFlash | Backoffice",
+  title: "RF Stats",
+  manifest: "/manifest-stats.json",
+  appleWebApp: {
+    capable: true,
+    title: "RF Stats",
+    statusBarStyle: "default",
+  },
   robots: {
     index: false,
     follow: false,

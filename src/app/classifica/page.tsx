@@ -26,8 +26,8 @@ export default async function ClassificaPage() {
             <tr>
               <th className="px-3 py-3 font-semibold w-8 text-center">#</th>
               <th className="px-3 py-3 font-semibold">Squadra</th>
-              <th className="px-1 md:px-2 py-3 font-semibold text-center">G</th>
               <th className="px-1 md:px-2 py-3 font-semibold text-center text-gray-900 font-extrabold">PT</th>
+              <th className="px-1 md:px-2 py-3 font-semibold text-center">G</th>
               <th className="px-1 md:px-2 py-3 font-semibold text-center">V</th>
               <th className="px-1 md:px-2 py-3 font-semibold text-center">N</th>
               <th className="px-1 md:px-2 py-3 font-semibold text-center">P</th>
@@ -46,8 +46,8 @@ export default async function ClassificaPage() {
                     <span className={`font-semibold ${team.team_name.includes('Roma') && !team.team_name.includes('Lazio') ? 'text-primary' : 'text-gray-900'}`}>{team.team_name}</span>
                   </div>
                 </td>
-                <td className="px-1 md:px-2 py-3 text-center text-gray-600">{team.played}</td>
                 <td className="px-1 md:px-2 py-3 text-center font-bold text-gray-900">{team.points}</td>
+                <td className="px-1 md:px-2 py-3 text-center text-gray-600">{team.played}</td>
                 <td className="px-1 md:px-2 py-3 text-center text-gray-600">{team.won}</td>
                 <td className="px-1 md:px-2 py-3 text-center text-gray-600">{team.draw}</td>
                 <td className="px-1 md:px-2 py-3 text-center text-gray-600">{team.lost}</td>

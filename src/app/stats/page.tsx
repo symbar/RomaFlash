@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import GlobalHeader from "@/components/GlobalHeader";
+import TikTokKitModal, { TikTokIcon } from "@/components/TikTokKitModal";
 import {
   Eye,
   Flame,
@@ -37,6 +38,7 @@ export default function StatsBackofficePage() {
   const [loadingData, setLoadingData] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>("most_read");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [tiktokArticle, setTiktokArticle] = useState<any | null>(null);
 
   useEffect(() => {
     try {
@@ -511,6 +513,19 @@ export default function StatsBackofficePage() {
 
                   <button
                     type="button"
+                    onClick={() => setTiktokArticle(art)}
+                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      art.ai_summary?.poll || art.ai_summary?.is_daily_recap
+                        ? "bg-black text-white hover:bg-gray-800 shadow-xs"
+                        : "bg-gray-100 text-gray-700 hover:bg-black hover:text-white"
+                    }`}
+                    title="Genera Kit 2 Slide per TikTok"
+                  >
+                    <TikTokIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => handleDeleteArticle(art.id, art.title)}
                     disabled={deletingId === art.id}
                     className="p-1 rounded-lg text-gray-400 hover:text-red-600 active:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
@@ -557,7 +572,7 @@ export default function StatsBackofficePage() {
                 <th className="py-3 px-3 text-center">Letture</th>
                 <th className="py-3 px-3 text-center">Voti Poll</th>
                 <th className="py-3 px-3 text-right">Data</th>
-                <th className="py-3 px-3 w-12 text-center">Azioni</th>
+                <th className="py-3 px-3 w-20 text-center">Azioni</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -642,15 +657,29 @@ export default function StatsBackofficePage() {
                       {pubDate}
                     </td>
                     <td className="py-3 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteArticle(art.id, art.title)}
-                        disabled={deletingId === art.id}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
-                        title="Elimina articolo"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="inline-flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setTiktokArticle(art)}
+                          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                            art.ai_summary?.poll || art.ai_summary?.is_daily_recap
+                              ? "bg-black text-white hover:bg-gray-800 shadow-xs"
+                              : "bg-gray-100 text-gray-700 hover:bg-black hover:text-white"
+                          }`}
+                          title="Genera Kit 2 Slide per TikTok"
+                        >
+                          <TikTokIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteArticle(art.id, art.title)}
+                          disabled={deletingId === art.id}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
+                          title="Elimina articolo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -670,6 +699,12 @@ export default function StatsBackofficePage() {
           </table>
         </div>
       </div>
+
+      {/* Modal Generatore Kit TikTok 2 Slide (1080x1920) */}
+      <TikTokKitModal
+        article={tiktokArticle}
+        onClose={() => setTiktokArticle(null)}
+      />
     </main>
   );
 }

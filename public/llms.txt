@@ -1,0 +1,10 @@
+# RomaFlash — L'essenza delle notizie giallorosse
+
+> RomaFlash (https://romaflash.app) è la piattaforma in tempo reale sull'AS Roma (Serie A, Coppe Europee, Calciomercato, Probabili Formazioni, Calendario e Classifica), disponibile in Italiano e Inglese.
+
+## Sezioni Principali
+- [Ultime Notizie AS Roma](https://romaflash.app/): Feed in tempo reale con riassunti editoriali, analisi sentiment e sondaggi per i tifosi.
+- [Probabili Formazioni AS Roma](https://romaflash.app/formazioni): Campo tattico, percentuali di titolarità, ballottaggi, infortunati e squalificati aggiornati ogni ora.
+- [Calendario e Risultati AS Roma](https://romaflash.app/calendario): Tutte le partite stagionali di Serie A e Coppe con date, orari e punteggi.
+- [Classifica Serie A](https://romaflash.app/classifica): Classifica aggiornata con punti, partite giocate e differenza reti.
+- [Sitemap XML](https://romaflash.app/sitemap.xml): Elenco completo e aggiornato di tutti gli articoli pubblicati.

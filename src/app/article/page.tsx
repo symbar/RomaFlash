@@ -94,6 +94,15 @@ function ArticleContent() {
     return () => clearTimeout(timer);
   }, [loading]);
 
+  useEffect(() => {
+    if (article) {
+      const currentTitle = getArticleTitle(article);
+      if (currentTitle) {
+        document.title = `${currentTitle} | RomaFlash`;
+      }
+    }
+  }, [article, lang, getArticleTitle]);
+
   if (loading) {
     if (!showSkeleton) {
       return <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12"></main>;
@@ -126,6 +135,40 @@ function ArticleContent() {
   const displayPoll = getArticlePoll(article);
   const displayCategory = article.ai_summary?.category ? translateCategory(article.ai_summary.category) : '';
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: displayTitle,
+    description: displayExcerpt,
+    articleBody: content,
+    articleSection: displayCategory || "AS Roma",
+    datePublished: article.published_at,
+    dateModified: article.published_at,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://romaflash.app/article?id=${article.id}`,
+    },
+    image: [
+      article.ai_summary?.youtube_id
+        ? `https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`
+        : "https://romaflash.app/icon",
+    ],
+    author: {
+      "@type": "Organization",
+      name: "RomaFlash",
+      url: "https://romaflash.app",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "RomaFlash",
+      url: "https://romaflash.app",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://romaflash.app/icon",
+      },
+    },
+  };
+
   const getSentimentBadge = (sentiment?: string) => {
     if (sentiment === 'Positivo') {
       return (
@@ -150,6 +193,10 @@ function ArticleContent() {
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <div className="bg-background">
         <GlobalHeader title="Notizia" />
 

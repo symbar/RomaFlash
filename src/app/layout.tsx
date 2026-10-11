@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { InstallPrompt } from '@/components/InstallPrompt';
@@ -19,16 +19,66 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "RomaFlash | L'essenza delle notizie",
-  description: "Notizie sull'AS Roma riassunte dall'AI. Veloce, pulito, senza pubblicità.",
-  manifest: "/manifest.json",
+export const viewport: Viewport = {
   themeColor: "#ffffff",
+};
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://romaflash.app"),
+  title: {
+    default: "RomaFlash | L'essenza delle notizie giallorosse",
+    template: "%s | RomaFlash",
+  },
+  description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Probabili formazioni, calciomercato, calendario e classifica. Veloce, pulito, senza pubblicità.",
+  manifest: "/manifest.json",
+  alternates: {
+    canonical: "https://romaflash.app",
+  },
+  openGraph: {
+    type: "website",
+    locale: "it_IT",
+    url: "https://romaflash.app",
+    siteName: "RomaFlash",
+    title: "RomaFlash | L'essenza delle notizie giallorosse",
+    description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Veloce, pulito, senza pubblicità.",
+    images: [
+      {
+        url: "https://romaflash.app/icon",
+        width: 512,
+        height: 512,
+        alt: "RomaFlash",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "RomaFlash | L'essenza delle notizie giallorosse",
+    description: "Notizie sull'AS Roma in tempo reale riassunte dall'AI. Veloce, pulito, senza pubblicità.",
+    images: ["https://romaflash.app/icon"],
+  },
 };
 
 import TabBar from '@/components/TabBar';
 import GlobalFooter from '@/components/GlobalFooter';
 import { LanguageProvider } from '@/components/LanguageContext';
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "RomaFlash",
+  alternateName: "RomaFlash — L'essenza delle notizie giallorosse",
+  url: "https://romaflash.app",
+  inLanguage: ["it-IT", "en-GB"],
+  publisher: {
+    "@type": "Organization",
+    name: "RomaFlash",
+    url: "https://romaflash.app",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://romaflash.app/icon",
+    },
+  },
+};
 
 export default function RootLayout({
   children,
@@ -42,6 +92,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-screen">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <LanguageProvider>
           <InstallPrompt />
           <div className="flex min-h-screen max-w-[1600px] mx-auto">

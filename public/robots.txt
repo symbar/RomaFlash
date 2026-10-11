@@ -1,51 +1,66 @@
 User-agent: *
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: GPTBot
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: OAI-SearchBot
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: ChatGPT-User
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: ClaudeBot
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: Claude-Web
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: anthropic-ai
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: Google-Extended
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: PerplexityBot
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: CCBot
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: Bytespider
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: Applebot-Extended
+Allow: /
 Disallow: /stats
 Disallow: /stats/
 
 User-agent: Meta-ExternalAgent
+Allow: /
 Disallow: /stats
 Disallow: /stats/
+
+Sitemap: https://romaflash.app/sitemap.xml

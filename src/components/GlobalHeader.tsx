@@ -101,7 +101,12 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span>🇮🇹</span> Italiano
+                  <svg viewBox="0 0 36 24" className="w-4 h-3 rounded-[2px] shadow-2xs shrink-0" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="12" height="24" x="0" fill="#009246" />
+                    <rect width="12" height="24" x="12" fill="#ffffff" />
+                    <rect width="12" height="24" x="24" fill="#ce2b37" />
+                  </svg>
+                  Italiano
                 </span>
                 {lang === 'it' && <Check className="w-3.5 h-3.5 text-primary" />}
               </button>
@@ -116,7 +121,14 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span>🇬🇧</span> English
+                  <svg viewBox="0 0 60 30" className="w-4 h-3 rounded-[2px] shadow-2xs shrink-0" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="60" height="30" fill="#012169"/>
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="2.5"/>
+                    <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
+                    <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+                  </svg>
+                  English
                 </span>
                 {lang === 'en' && <Check className="w-3.5 h-3.5 text-primary" />}
               </button>

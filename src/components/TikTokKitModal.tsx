@@ -72,15 +72,21 @@ const WOLF_LOGO_SVG_PATH =
   "M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6";
 
 function drawBrandHeader(ctx: CanvasRenderingContext2D) {
-  // Clean White Header Bar matching the RomaFlash site header so Roma (#f0b516) + Flash (#8e1f2f) and WolfLogo (#f0b516) have exact header colors
-  drawRoundedRect(ctx, 72, 76, 936, 134, 28);
+  // TikTok Safe Zone: Top 0-255px is reserved for TikTok's "Per Te / Seguiti" & Search bar.
+  // Horizontal safe width: x=64 to x=908 (w=844) so right-side TikTok icons (x=920..1080) never overlap.
+  const x = 64;
+  const y = 260;
+  const w = 844;
+  const h = 116;
+
+  drawRoundedRect(ctx, x, y, w, h, 26);
   ctx.fillStyle = "#ffffff";
   ctx.fill();
 
   // Exact WolfLogo from GlobalHeader (viewBox 0 0 512 512, fill #f0b516)
   ctx.save();
-  ctx.translate(104, 96);
-  const scale = 94 / 512;
+  ctx.translate(x + 28, y + 17);
+  const scale = 82 / 512;
   ctx.scale(scale, scale);
   const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
   ctx.fillStyle = "#f0b516";
@@ -88,18 +94,22 @@ function drawBrandHeader(ctx: CanvasRenderingContext2D) {
   ctx.restore();
 
   // RomaFlash Text with exact GlobalHeader colors: "Roma" (#f0b516) + "Flash" (#8e1f2f)
-  ctx.font = "800 58px system-ui, -apple-system, sans-serif";
+  ctx.font = "800 50px system-ui, -apple-system, sans-serif";
   ctx.textBaseline = "top";
   ctx.fillStyle = "#f0b516";
-  ctx.fillText("Roma", 216, 96);
+  ctx.fillText("Roma", x + 126, y + 16);
   const romaW = ctx.measureText("Roma").width;
   ctx.fillStyle = "#8e1f2f";
-  ctx.fillText("Flash", 216 + romaW, 96);
+  ctx.fillText("Flash", x + 126 + romaW, y + 16);
 
   // Slogan below logo, matching GlobalHeader
-  ctx.font = "600 23px system-ui, -apple-system, sans-serif";
+  ctx.font = "600 20px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#6b7280";
-  ctx.fillText("L'essenza delle notizie giallorosse • romaflash.app", 218, 160);
+  ctx.fillText(
+    "L'essenza delle notizie giallorosse • romaflash.app",
+    x + 128,
+    y + 74
+  );
 }
 
 function renderSlide1Canvas(article: any): string {
@@ -116,83 +126,83 @@ function renderSlide1Canvas(article: any): string {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 1080, 1920);
 
-  // Subtle decorative glow circle
-  const radGrad = ctx.createRadialGradient(540, 500, 50, 540, 500, 650);
+  // Subtle decorative glow circle in the safe center
+  const radGrad = ctx.createRadialGradient(486, 760, 50, 486, 760, 620);
   radGrad.addColorStop(0, "rgba(240, 181, 22, 0.14)");
   radGrad.addColorStop(1, "rgba(240, 181, 22, 0)");
   ctx.fillStyle = radGrad;
   ctx.fillRect(0, 0, 1080, 1920);
 
+  // Safe Zone Coordinates:
+  // x = 64 .. 908 (width 844px, leaves 172px on right for TikTok buttons)
+  // y = 260 .. 1315 (leaves 260px top for search bar & 605px bottom for caption/dots)
+  const safeX = 64;
+  const safeW = 844;
+
   drawBrandHeader(ctx);
 
-  // Main Headline (no category tag on left or right)
+  // Main Headline
   ctx.textBaseline = "top";
   const title = article.title || "Notizia AS Roma";
-  ctx.font = "900 66px system-ui, -apple-system, sans-serif";
-  const titleLines = wrapText(ctx, title, 936).slice(0, 5);
-  let y = 275;
+  ctx.font = "900 52px system-ui, -apple-system, sans-serif";
+  const titleLines = wrapText(ctx, title, safeW).slice(0, 4);
+  let y = 412;
   for (let i = 0; i < titleLines.length; i++) {
-    // Highlight last line in gold for visual punch
-    ctx.fillStyle = i === titleLines.length - 1 && titleLines.length > 1 ? "#f0b516" : "#ffffff";
-    ctx.fillText(titleLines[i], 72, y);
-    y += 80;
+    ctx.fillStyle =
+      i === titleLines.length - 1 && titleLines.length > 1
+        ? "#f0b516"
+        : "#ffffff";
+    ctx.fillText(titleLines[i], safeX, y);
+    y += 64;
   }
 
   // White Summary Box
   const excerpt =
     article.ai_summary?.excerpt ||
     "Leggi tutti i dettagli della notizia in tempo reale su romaflash.app.";
-  ctx.font = "600 40px system-ui, -apple-system, sans-serif";
-  const excerptLines = wrapText(ctx, excerpt, 820).slice(0, 6);
+  ctx.font = "600 34px system-ui, -apple-system, sans-serif";
+  const excerptLines = wrapText(ctx, excerpt, safeW - 96).slice(0, 6);
 
-  const boxY = Math.max(y + 50, 740);
-  const boxH = 140 + excerptLines.length * 56;
+  const boxY = Math.max(y + 28, 640);
+  const boxH = Math.min(116 + excerptLines.length * 48, 1185 - boxY);
 
-  drawRoundedRect(ctx, 72, boxY, 936, boxH, 36);
+  drawRoundedRect(ctx, safeX, boxY, safeW, boxH, 32);
   ctx.fillStyle = "rgba(255, 255, 255, 0.97)";
   ctx.fill();
 
   // Gold left accent bar inside white card
-  drawRoundedRect(ctx, 72, boxY, 18, boxH, 9);
+  drawRoundedRect(ctx, safeX, boxY, 16, boxH, 8);
   ctx.fillStyle = "#f0b516";
   ctx.fill();
 
-  ctx.font = "900 28px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 24px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#8e1f2f";
-  ctx.fillText("📄 LA NOTIZIA IN SINTESI", 124, boxY + 42);
+  ctx.fillText("📄 LA NOTIZIA IN SINTESI", safeX + 44, boxY + 34);
 
-  ctx.font = "600 40px system-ui, -apple-system, sans-serif";
+  ctx.font = "600 34px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#1f2937";
-  let ey = boxY + 98;
+  let ey = boxY + 82;
   for (const line of excerptLines) {
-    ctx.fillText(line, 124, ey);
-    ey += 56;
+    if (ey + 40 <= boxY + boxH - 16) {
+      ctx.fillText(line, safeX + 44, ey);
+    }
+    ey += 48;
   }
 
-  // Bottom Swipe Call-to-Action Box
-  const ctaY = 1520;
-  drawRoundedRect(ctx, 72, ctaY, 936, 118, 28);
+  // Bottom Swipe Call-to-Action Box (strictly inside y <= 1315 safe zone)
+  const ctaY = 1215;
+  const ctaH = 96;
+  drawRoundedRect(ctx, safeX, ctaY, safeW, ctaH, 26);
   ctx.fillStyle = "#f0b516";
   ctx.fill();
 
-  ctx.font = "900 38px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 32px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#4a0e17";
   ctx.textBaseline = "middle";
-  ctx.fillText("📊 Scorri e vota il Sondaggio Tifosi", 112, ctaY + 59);
+  ctx.fillText("📊 Scorri e vota il Sondaggio Tifosi", safeX + 34, ctaY + ctaH / 2);
 
   ctx.textAlign = "right";
-  ctx.fillText("👉 1/2", 968, ctaY + 59);
-  ctx.textAlign = "left";
-
-  // Bottom Footer Domain
-  ctx.font = "700 30px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.75)";
-  ctx.textAlign = "center";
-  ctx.fillText(
-    "Tutte le notizie senza pubblicità su ROMAFLASH.APP",
-    540,
-    1730
-  );
+  ctx.fillText("👉 1/2", safeX + safeW - 34, ctaY + ctaH / 2);
   ctx.textAlign = "left";
 
   return canvas.toDataURL("image/png");
@@ -212,6 +222,9 @@ function renderSlide2Canvas(article: any): string {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 1080, 1920);
 
+  const safeX = 64;
+  const safeW = 844;
+
   drawBrandHeader(ctx);
 
   const poll = article.ai_summary?.poll || {
@@ -223,81 +236,74 @@ function renderSlide2Canvas(article: any): string {
     ],
   };
 
-  // White Poll Card
-  const cardY = 270;
-  const cardH = 1160;
-  drawRoundedRect(ctx, 72, cardY, 936, cardH, 40);
+  // White Poll Card (strictly inside y = 402 .. 1190)
+  const cardY = 402;
+  const cardH = 786;
+  drawRoundedRect(ctx, safeX, cardY, safeW, cardH, 34);
   ctx.fillStyle = "#ffffff";
   ctx.fill();
-  ctx.lineWidth = 6;
+  ctx.lineWidth = 5;
   ctx.strokeStyle = "#f0b516";
   ctx.stroke();
 
   ctx.textBaseline = "top";
-  ctx.font = "900 30px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 24px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#8e1f2f";
-  ctx.fillText("📊 LA PAROLA AI TIFOSI GIALLOROSSI", 128, cardY + 56);
+  ctx.fillText("📊 LA PAROLA AI TIFOSI GIALLOROSSI", safeX + 42, cardY + 36);
 
   // Poll Question
-  ctx.font = "900 50px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 38px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#111827";
-  const qLines = wrapText(ctx, poll.question, 824).slice(0, 4);
-  let qy = cardY + 120;
+  const qLines = wrapText(ctx, poll.question, safeW - 84).slice(0, 3);
+  let qy = cardY + 80;
   for (const line of qLines) {
-    ctx.fillText(line, 128, qy);
-    qy += 64;
+    ctx.fillText(line, safeX + 42, qy);
+    qy += 48;
   }
 
   // Options (1, 2, 3)
   const badges = ["1️⃣", "2️⃣", "3️⃣"];
   const options: string[] = (poll.options || []).slice(0, 3);
-  let oy = Math.max(qy + 44, cardY + 380);
+  let oy = Math.max(qy + 24, cardY + 240);
 
   for (let i = 0; i < options.length; i++) {
     const optText = `${badges[i] || `${i + 1}.`}  ${options[i]}`;
-    ctx.font = "800 38px system-ui, -apple-system, sans-serif";
-    const optLines = wrapText(ctx, optText, 760).slice(0, 2);
-    const optBoxH = optLines.length > 1 ? 185 : 140;
+    ctx.font = "800 31px system-ui, -apple-system, sans-serif";
+    const optLines = wrapText(ctx, optText, safeW - 140).slice(0, 2);
+    const optBoxH = optLines.length > 1 ? 136 : 112;
 
-    drawRoundedRect(ctx, 124, oy, 832, optBoxH, 28);
+    drawRoundedRect(ctx, safeX + 38, oy, safeW - 76, optBoxH, 22);
     ctx.fillStyle = i === 0 ? "#fdf2f4" : "#f3f4f6";
     ctx.fill();
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.strokeStyle = i === 0 ? "#8e1f2f" : "#d1d5db";
     ctx.stroke();
 
     ctx.fillStyle = i === 0 ? "#8e1f2f" : "#1f2937";
-    let textY = oy + (optLines.length > 1 ? 38 : 48);
+    let textY = oy + (optLines.length > 1 ? 26 : 38);
     for (const l of optLines) {
-      ctx.fillText(l, 164, textY);
-      textY += 50;
+      ctx.fillText(l, safeX + 68, textY);
+      textY += 40;
     }
 
-    oy += optBoxH + 34;
+    oy += optBoxH + 20;
   }
 
-  // Bottom Gold CTA Box
-  const ctaY = 1500;
-  drawRoundedRect(ctx, 72, ctaY, 936, 130, 28);
+  // Bottom Gold CTA Box (strictly inside y <= 1311 safe zone)
+  const ctaY = 1215;
+  const ctaH = 96;
+  drawRoundedRect(ctx, safeX, ctaY, safeW, ctaH, 26);
   ctx.fillStyle = "#f0b516";
   ctx.fill();
 
-  ctx.font = "900 35px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 30px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#4a0e17";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(
-    "💬 Scrivi 1, 2 o 3 nei commenti qui sotto!",
-    540,
-    ctaY + 65
-  );
-
-  ctx.font = "700 30px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
-  ctx.fillText(
-    "Oppure vota il sondaggio in tempo reale su ROMAFLASH.APP",
-    540,
-    1720
+    "💬 Scrivi 1, 2 o 3 nei commenti! • romaflash.app",
+    safeX + safeW / 2,
+    ctaY + ctaH / 2
   );
   ctx.textAlign = "left";
 

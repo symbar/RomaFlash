@@ -68,64 +68,38 @@ function drawRoundedRect(
   ctx.closePath();
 }
 
-function drawBrandHeader(
-  ctx: CanvasRenderingContext2D,
-  rightBadgeText: string,
-  isGoldBadge: boolean
-) {
-  // Badge Box (88x88)
-  drawRoundedRect(ctx, 72, 90, 92, 92, 24);
-  ctx.fillStyle = "#5a101b";
-  ctx.fill();
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = "#f0b516";
-  ctx.stroke();
+const WOLF_LOGO_SVG_PATH =
+  "M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6";
 
-  // Wolf Polygon inside badge
+function drawBrandHeader(ctx: CanvasRenderingContext2D) {
+  // Clean White Header Bar matching the RomaFlash site header so Roma (#f0b516) + Flash (#8e1f2f) and WolfLogo (#f0b516) have exact header colors
+  drawRoundedRect(ctx, 72, 76, 936, 134, 28);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+
+  // Exact WolfLogo from GlobalHeader (viewBox 0 0 512 512, fill #f0b516)
   ctx.save();
-  ctx.translate(86, 104);
-  ctx.scale(0.64, 0.64);
-  const wolfPath = new Path2D(
-    "M92 38L72 28L76 10L56 22L44 8L40 24L20 18L28 36L10 42L26 54L12 68L34 66L26 86L48 74L60 72L66 56L88 54L74 44L92 38Z"
-  );
+  ctx.translate(104, 96);
+  const scale = 94 / 512;
+  ctx.scale(scale, scale);
+  const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
   ctx.fillStyle = "#f0b516";
   ctx.fill(wolfPath);
-  const boltPath = new Path2D(
-    "M52 36L64 34L56 44L68 42L50 56L54 44L44 46L52 36Z"
-  );
-  ctx.fillStyle = "#8e1f2f";
-  ctx.fill(boltPath);
   ctx.restore();
 
-  // RomaFlash Text
-  ctx.font = "900 54px system-ui, -apple-system, sans-serif";
+  // RomaFlash Text with exact GlobalHeader colors: "Roma" (#f0b516) + "Flash" (#8e1f2f)
+  ctx.font = "800 58px system-ui, -apple-system, sans-serif";
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("Roma", 184, 96);
-  const romaW = ctx.measureText("Roma").width;
   ctx.fillStyle = "#f0b516";
-  ctx.fillText("Flash", 184 + romaW, 96);
+  ctx.fillText("Roma", 216, 96);
+  const romaW = ctx.measureText("Roma").width;
+  ctx.fillStyle = "#8e1f2f";
+  ctx.fillText("Flash", 216 + romaW, 96);
 
-  ctx.font = "600 24px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#fbd38d";
-  ctx.fillText("romaflash.app", 184, 156);
-
-  // Right Pill
-  ctx.font = "900 28px system-ui, -apple-system, sans-serif";
-  const pillText = rightBadgeText.toUpperCase();
-  const textW = ctx.measureText(pillText).width;
-  const pillW = textW + 64;
-  const pillH = 64;
-  const pillX = 1080 - 72 - pillW;
-  const pillY = 104;
-
-  drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 32);
-  ctx.fillStyle = isGoldBadge ? "#f0b516" : "rgba(255,255,255,0.16)";
-  ctx.fill();
-
-  ctx.fillStyle = isGoldBadge ? "#4a0e17" : "#f0b516";
-  ctx.textBaseline = "middle";
-  ctx.fillText(pillText, pillX + 32, pillY + pillH / 2 + 2);
+  // Slogan below logo, matching GlobalHeader
+  ctx.font = "600 23px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "#6b7280";
+  ctx.fillText("L'essenza delle notizie giallorosse • romaflash.app", 218, 160);
 }
 
 function renderSlide1Canvas(article: any): string {
@@ -149,20 +123,14 @@ function renderSlide1Canvas(article: any): string {
   ctx.fillStyle = radGrad;
   ctx.fillRect(0, 0, 1080, 1920);
 
-  const category = article.ai_summary?.category || "Notizia";
-  drawBrandHeader(ctx, category, true);
+  drawBrandHeader(ctx);
 
-  // Kicker
+  // Main Headline (no category tag on left or right)
   ctx.textBaseline = "top";
-  ctx.font = "900 30px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.fillText("⚡ ULTIM'ORA GIALLOROSSA", 72, 265);
-
-  // Main Headline
   const title = article.title || "Notizia AS Roma";
   ctx.font = "900 66px system-ui, -apple-system, sans-serif";
   const titleLines = wrapText(ctx, title, 936).slice(0, 5);
-  let y = 325;
+  let y = 275;
   for (let i = 0; i < titleLines.length; i++) {
     // Highlight last line in gold for visual punch
     ctx.fillStyle = i === titleLines.length - 1 && titleLines.length > 1 ? "#f0b516" : "#ffffff";
@@ -177,7 +145,7 @@ function renderSlide1Canvas(article: any): string {
   ctx.font = "600 40px system-ui, -apple-system, sans-serif";
   const excerptLines = wrapText(ctx, excerpt, 820).slice(0, 6);
 
-  const boxY = Math.max(y + 50, 760);
+  const boxY = Math.max(y + 50, 740);
   const boxH = 140 + excerptLines.length * 56;
 
   drawRoundedRect(ctx, 72, boxY, 936, boxH, 36);
@@ -244,7 +212,7 @@ function renderSlide2Canvas(article: any): string {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 1080, 1920);
 
-  drawBrandHeader(ctx, "SLIDE 2/2", false);
+  drawBrandHeader(ctx);
 
   const poll = article.ai_summary?.poll || {
     question: "Cosa ne pensi di questa notizia in casa giallorossa?",

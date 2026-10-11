@@ -32,10 +32,8 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
     <header className="flex items-center justify-between py-5 mb-5 border-b border-border relative z-30">
       {/* Left: Brand Logo + Slogan */}
       <div className="flex items-center">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-gradient-to-br from-[#6b1421] to-[#540e18] border border-[#f0b516]/60 shadow-sm flex items-center justify-center shrink-0">
-            <WolfLogo className="w-7 h-7 md:w-7.5 md:h-7.5" />
-          </div>
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-85 transition-opacity">
+          <WolfLogo className="w-8 h-8 md:w-9 md:h-9 shrink-0" />
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold tracking-tight text-secondary leading-none">
               Roma<span className="text-primary">Flash</span>

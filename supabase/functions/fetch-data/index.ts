@@ -87,6 +87,24 @@ serve(async (req) => {
         
         await supabase.from('calendar_matches').insert(matchesData)
         console.log(`Calendario aggiornato con ${matchesData.length} partite!`)
+
+        // 3. Aggiorna automaticamente anche la tabella next_match con la prossima partita futura
+        const nowTime = Date.now()
+        const upcomingMatch = matchesData
+          .filter((m: any) => new Date(m.match_date).getTime() > nowTime)
+          .sort((a: any, b: any) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime())[0]
+
+        if (upcomingMatch) {
+          await supabase.from('next_match').delete().neq('id', -1)
+          await supabase.from('next_match').insert({
+            home_team: upcomingMatch.home_team,
+            away_team: upcomingMatch.away_team,
+            competition: upcomingMatch.competition,
+            match_date: upcomingMatch.match_date,
+            updated_at: new Date().toISOString()
+          })
+          console.log(`Prossima partita aggiornata: ${upcomingMatch.home_team} vs ${upcomingMatch.away_team}`)
+        }
       }
     } else {
       console.error("Errore fetch calendario", await matchesRes.text())

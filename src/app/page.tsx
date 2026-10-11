@@ -230,7 +230,7 @@ export default function Home() {
     <PullToRefresh onRefresh={fetchArticles}>
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 relative">
         {newArticlesCount > 0 && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50">
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto">
             <button 
               onClick={() => {
                 window.scrollTo({ top: 0, /* behavior: 'smooth' rimosso per evitare salti glitch */ });
@@ -238,7 +238,7 @@ export default function Home() {
                 setCategoryFilter('Tutte');
                 fetchArticles();
               }}
-              className="bg-card text-foreground font-semibold text-xs px-4 py-1.5 rounded-full shadow-lg border border-border hover:bg-card/80 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="bg-white text-gray-900 font-bold text-xs px-4 py-2 rounded-full shadow-xl border border-primary/30 hover:border-primary hover:bg-gray-50 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer pointer-events-auto"
             >
               <ArrowUp className="w-3.5 h-3.5 text-primary" />
               {newArticlesCount} Nuov{newArticlesCount === 1 ? 'a' : 'e'} Notizi{newArticlesCount === 1 ? 'a' : 'e'}

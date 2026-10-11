@@ -1,4 +1,4 @@
-﻿import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 import Parser from "https://esm.sh/rss-parser@3.13.0"
 import webpush from "npm:web-push@3.6.7"
@@ -37,12 +37,12 @@ serve(async (req) => {
       })
     }
 
-    // 2b. Recupera i titoli recenti per la deduplicazione
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    // 2b. Recupera i titoli e riassunti recenti per la deduplicazione (ultime 36 ore)
+    const thirtySixHoursAgo = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
-      .select('title, published_at')
-      .gte('published_at', twentyFourHoursAgo)
+      .select('title, ai_summary, published_at')
+      .gte('published_at', thirtySixHoursAgo)
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
       .order('published_at', { ascending: false });
       
@@ -50,8 +50,47 @@ serve(async (req) => {
       ? new Date(recentArticles[0].published_at).getTime() 
       : 0;
 
+    // Funzione deterministica anti-duplicato: normalizza testo rimuovendo punteggiatura e stop-words
+    const stopWords = new Set(['como', 'roma', 'della', 'delle', 'degli', 'dello', 'nella', 'nelle', 'negli', 'sulla', 'sulle', 'sugli', 'contro', 'verso', 'prima', 'dopo', 'anche', 'sono', 'stato', 'stata', 'questo', 'questa', 'quello', 'quella', 'tutto', 'tutti', 'tutte', 'molto', 'solo', 'fare', 'fatto', 'essere', 'avere', 'hanno', 'alla', 'alle', 'agli', 'dalla', 'dalle', 'dagli', 'con', 'per', 'tra', 'fra', 'che', 'non', 'piu', 'suo', 'sua', 'suoi', 'sue', 'loro', 'gli', 'una', 'uno', 'dei', 'del', 'dal', 'nel', 'sul', 'col']);
+    const extractTokens = (str: string): string[] => {
+      return (str || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 4 && !stopWords.has(w));
+    };
+
+    const isTitleTooSimilar = (candidateTitle: string, existingTitles: string[]): string | null => {
+      const candTokens = extractTokens(candidateTitle);
+      if (candTokens.length === 0) return null;
+      const candSet = new Set(candTokens);
+
+      for (const existing of existingTitles) {
+        const exTokens = extractTokens(existing);
+        if (exTokens.length === 0) continue;
+        const exSet = new Set(exTokens);
+
+        let intersection = 0;
+        for (const t of candSet) {
+          if (exSet.has(t)) intersection++;
+        }
+
+        const minSize = Math.min(candSet.size, exSet.size);
+        const overlapRatio = minSize > 0 ? intersection / minSize : 0;
+
+        // Se condividono almeno 3 parole chiave specifiche o >= 50% dei termini chiave, è lo stesso argomento
+        if (intersection >= 3 || (intersection >= 2 && overlapRatio >= 0.5)) {
+          return existing;
+        }
+      }
+      return null;
+    };
+
+    const existingTitlesArray: string[] = recentArticles ? recentArticles.map(a => a.title) : [];
+
     let recentTitlesList = recentArticles && recentArticles.length > 0 
-      ? recentArticles.map(a => `- ${a.title}`).join('\n')
+      ? recentArticles.map(a => `- ${a.title}${a.ai_summary?.excerpt ? ` (${a.ai_summary.excerpt})` : ''}`).join('\n')
       : "Nessun articolo recente."
 
     const parser = new Parser()
@@ -64,7 +103,7 @@ serve(async (req) => {
       try {
         const feed = await parser.parseURL(source.rss_url)
         
-        // Prendiamo solo le ultime 5 notizie per evitare di sovraccaricare l'API al primo avvio
+        // Prendiamo solo le ultime 2 notizie per fonte ad ogni giro
         const items = feed.items.slice(0, 2)
 
         for (const item of items) {
@@ -82,20 +121,32 @@ serve(async (req) => {
             continue
           }
 
+          // Controllo deterministico preliminare sul titolo originale RSS contro i titoli già pubblicati
+          const matchedOriginalDup = isTitleTooSimilar(item.title, existingTitlesArray);
+          if (matchedOriginalDup) {
+            console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Titolo RSS): "${item.title}" ~ "${matchedOriginalDup}"`);
+            continue;
+          }
+
           console.log(`Nuova notizia trovata: ${item.title}`)
 
           // 4. Chiama Gemini per il riassunto e il controllo anti-spam
-          const prompt = `Sei un giornalista sportivo esperto dell'AS Roma. 
-Il tuo compito è rielaborare completamente questa notizia con uno stile editoriale accattivante.
-TUTTAVIA, hai anche il compito di fare da "Filtro Anti-Spam". Devi controllare due cose:
+          const prompt = `Sei il caporedattore di RomaFlash, quotidiano sportivo sull'AS Roma. 
+Il tuo compito è rielaborare questa notizia, ma PRIMA devi applicare un FILTRO ANTI-DUPLICATI E ANTI-SPAM ESTREMAMENTE RIGOROSO.
 
-1) DUPLICATI: verifica se questa notizia tratta LO STESSO IDENTICO EVENTO di uno dei seguenti titoli già pubblicati oggi:
+1) CONTROLLO DUPLICATI (FONDAMENTALE):
+Verifica se la notizia che ti sto passando parla DELLO STESSO ARGOMENTO, EVENTO, INTERVISTA, CONVOCATI O PROBABILI FORMAZIONI di uno qualsiasi di questi articoli già pubblicati nelle ultime ore:
 ---
 ${recentTitlesList}
 ---
-ATTENZIONE: i titoli nella lista sopra sono stati rielaborati. Devi valutare il SENSO e l'ARGOMENTO CENTRALE, non la corrispondenza esatta delle parole. Se l'argomento centrale (es. "Lobont incontra De Rossi") è lo stesso di un articolo già in lista, DEVI impostare "is_duplicate" a true. Sii molto severo, preferiamo scartare una notizia piuttosto che avere due articoli sullo stesso evento.
+REGOLE TASSATIVE SUI DUPLICATI (imposta "is_duplicate": true in tutti questi casi):
+- Se nella lista c'è già un articolo sui "Convocati" della partita e questo parla dei convocati -> È DUPLICATO (is_duplicate: true).
+- Se nella lista c'è già un articolo sulle "Probabili formazioni / scelte dei quotidiani / ultime di formazione" per la stessa partita -> È DUPLICATO (is_duplicate: true).
+- Se nella lista c'è già un'intervista o dichiarazione della stessa persona (es. Vierchowod, Capello, Fabregas, Gasperini, Tchouameni) sullo stesso tema -> È DUPLICATO (is_duplicate: true).
+- Se due testate diverse riportano la stessa notizia (es. infortunio di un giocatore, designazione arbitrale, conferenza stampa) con parole diverse -> È DUPLICATO (is_duplicate: true).
+Nel dubbio, imposta SEMPRE "is_duplicate": true!
 
-2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o di calcio. Se l'articolo è un annuncio del sito web stesso (es. "Cerchiamo collaboratori", "Lavora con noi", problemi ai server) o non c'entra nulla con la squadra, imposta "is_spam" a true. ATTENZIONE: I post e i feed provenienti dai canali social ufficiali (es. Twitter AS Roma) NON SONO MAI SPAM. Accettali sempre (is_spam: false) anche se sono auguri di compleanno, vendita biglietti o foto.
+2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo (diverso dall'originale).
@@ -103,7 +154,7 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 3. Riscrivi l'intero articolo in modo discorsivo, fluido e professionale.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
-  6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
+6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -114,7 +165,7 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "content": "Testo completo dell'articolo riscritto...", 
   "category": "Probabili Formazioni, Calciomercato, Infortunio, Dichiarazioni, Partita, Social o Altro", 
   "sentiment": "Positivo, Negativo o Neutro",
-    "social_embed_url": null, // INSERISCI SOLO UN URL REALE. SE NON ESISTE, DEVE ESSERE null. NON INVENTARE URL CON PUNTINI DI SOSPENSIONE.
+  "social_embed_url": null,
   "formation": {
     "modulo": "4-3-3",
     "portiere": ["Svilar"],
@@ -141,7 +192,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.3 }
+                generationConfig: { temperature: 0.1 }
               }),
             }
           )
@@ -170,6 +221,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
 
             if (parsed.titolo) {
               newTitle = parsed.titolo.replace(/<bos>/g, '').replace(/<eos>/g, '').replace(/\*\*2/g, '').replace(/<[^>]+>/g, '');
+            }
+
+            // Secondo controllo deterministico: confronta anche il titolo generato da Gemini con i titoli già a DB
+            const matchedGeneratedDup = isTitleTooSimilar(newTitle, existingTitlesArray);
+            if (matchedGeneratedDup) {
+              console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Titolo Generato): "${newTitle}" ~ "${matchedGeneratedDup}"`);
+              continue;
             }
             if (parsed.excerpt && parsed.content) {
               aiSummary = { 
@@ -224,7 +282,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             console.error(`Errore inserimento in DB per: ${item.title}`, insertError)
           } else {
             processedCount++;
-            recentTitlesList += "\n- " + newTitle;
+            existingTitlesArray.push(newTitle);
+            recentTitlesList += `\n- ${newTitle} (${aiSummary.excerpt || ''})`;
             
             // Invia notifica push
             const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')

@@ -61,14 +61,6 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
             {t('nav.lineups')}
           </Link>
           <Link
-            href="/classifica"
-            className={`transition-colors ${
-              isStandings ? 'text-primary font-semibold' : 'text-gray-800 hover:text-primary'
-            }`}
-          >
-            {t('nav.standings')}
-          </Link>
-          <Link
             href="/calendario"
             className={`transition-colors ${
               isCalendar ? 'text-primary font-semibold' : 'text-gray-800 hover:text-primary'

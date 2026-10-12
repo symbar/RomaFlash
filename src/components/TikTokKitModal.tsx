@@ -113,8 +113,8 @@ function drawUniformBackground(ctx: CanvasRenderingContext2D) {
   }
 }
 
-const HEADER_Y = 295;
-const HEADER_BOTTOM_Y = HEADER_Y + 124; // 419px
+const HEADER_Y = 390;
+const HEADER_BOTTOM_Y = HEADER_Y + 124; // 514px
 
 function drawCleanBrandHeader(
   ctx: CanvasRenderingContext2D,
@@ -235,8 +235,8 @@ function renderSlide1Canvas(article: any): string {
     totalLines * bodyLineH + Math.max(0, blocks.length - 1) * paraGap;
 
   const bodyTotalH = titleH + 38 + excerptH;
-  const bodyAreaTop = HEADER_BOTTOM_Y + 30; // 449
-  const bodyAreaBottom = 1320;
+  const bodyAreaTop = HEADER_BOTTOM_Y + 30; // 544
+  const bodyAreaBottom = 1420;
   const bodyStartY = Math.max(
     bodyAreaTop,
     Math.round(bodyAreaTop + (bodyAreaBottom - bodyAreaTop - bodyTotalH) / 2)
@@ -311,8 +311,8 @@ function renderSlide2Canvas(article: any): string {
     Math.max(0, optRendered.length - 1) * 24;
 
   const bodyTotalH = qH + 44 + optionsTotalH;
-  const bodyAreaTop = HEADER_BOTTOM_Y + 36; // 470
-  const bodyAreaBottom = 1310;
+  const bodyAreaTop = HEADER_BOTTOM_Y + 36; // 550
+  const bodyAreaBottom = 1410;
   const bodyStartY = Math.max(
     bodyAreaTop,
     Math.round(bodyAreaTop + (bodyAreaBottom - bodyAreaTop - bodyTotalH) / 2)

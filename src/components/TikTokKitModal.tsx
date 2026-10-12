@@ -25,7 +25,7 @@ interface TikTokKitModalProps {
 }
 
 const SLIDE_W = 1080;
-const SLIDE_H = 1350; // 4:5 aspect ratio (same as @romanews.eu TikTok photo mode)
+const SLIDE_H = 1350; // 4:5 portrait format for TikTok
 
 const WOLF_LOGO_SVG_PATH =
   "M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6";
@@ -33,12 +33,12 @@ const WOLF_LOGO_SVG_PATH =
 function getCondensedFontFamily(): string {
   if (typeof document !== "undefined") {
     const computed = getComputedStyle(document.documentElement);
-    const bebas = computed.getPropertyValue("--font-bebas").trim();
     const oswald = computed.getPropertyValue("--font-oswald").trim();
-    if (bebas) return `${bebas}, Impact, "Arial Narrow", sans-serif`;
+    const bebas = computed.getPropertyValue("--font-bebas").trim();
     if (oswald) return `${oswald}, Impact, "Arial Narrow", sans-serif`;
+    if (bebas) return `${bebas}, Impact, "Arial Narrow", sans-serif`;
   }
-  return `"Bebas Neue", "Oswald", Impact, "Arial Narrow", sans-serif`;
+  return `"Oswald", "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
 }
 
 function wrapText(
@@ -83,84 +83,27 @@ function toProxiedUrl(url: string): string {
 }
 
 /**
- * Draws the full-bleed background photo (1080x1350) with natural cover framing
- * and a right-side dark editorial gradient so the giant condensed text pops.
- */
-function drawPhotoBackground(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement | null,
-  focusLeft = true
-) {
-  ctx.fillStyle = "#140407";
-  ctx.fillRect(0, 0, SLIDE_W, SLIDE_H);
-
-  if (img && img.width > 0 && img.height > 0) {
-    const scale = Math.max(SLIDE_W / img.width, SLIDE_H / img.height);
-    const drawW = img.width * scale;
-    const drawH = img.height * scale;
-    // Slight horizontal bias so subject is visible on the left side while text sits on the right
-    const offsetX = focusLeft
-      ? Math.min(0, (SLIDE_W - drawW) * 0.35)
-      : (SLIDE_W - drawW) * 0.5;
-    const offsetY = (SLIDE_H - drawH) * 0.3;
-    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-  }
-
-  // Right-side dark gradient overlay (matches @romanews.eu readability shadow)
-  const rightGrad = ctx.createLinearGradient(180, 0, SLIDE_W, 0);
-  rightGrad.addColorStop(0, "rgba(0, 0, 0, 0.08)");
-  rightGrad.addColorStop(0.32, "rgba(0, 0, 0, 0.42)");
-  rightGrad.addColorStop(0.65, "rgba(0, 0, 0, 0.68)");
-  rightGrad.addColorStop(1, "rgba(0, 0, 0, 0.82)");
-  ctx.fillStyle = rightGrad;
-  ctx.fillRect(0, 0, SLIDE_W, SLIDE_H);
-
-  // Subtle top & bottom vignette
-  const vertGrad = ctx.createLinearGradient(0, 0, 0, SLIDE_H);
-  vertGrad.addColorStop(0, "rgba(0, 0, 0, 0.28)");
-  vertGrad.addColorStop(0.2, "rgba(0, 0, 0, 0)");
-  vertGrad.addColorStop(0.78, "rgba(0, 0, 0, 0.12)");
-  vertGrad.addColorStop(1, "rgba(0, 0, 0, 0.55)");
-  ctx.fillStyle = vertGrad;
-  ctx.fillRect(0, 0, SLIDE_W, SLIDE_H);
-
-  // Micro-jitter grain so every exported JPEG has a unique hash
-  for (let i = 0; i < 250; i++) {
-    const gx = Math.floor(Math.random() * SLIDE_W);
-    const gy = Math.floor(Math.random() * SLIDE_H);
-    ctx.fillStyle =
-      i % 2 === 0 ? "rgba(255, 255, 255, 0.01)" : "rgba(0, 0, 0, 0.012)";
-    ctx.fillRect(gx, gy, 2, 2);
-  }
-}
-
-/**
- * Draws the top-left circular logo badge in the exact position & style of @romanews.eu,
- * featuring the RomaFlash Wolf emblem and ROMAFLASH.APP label inside a crisp circular crest.
+ * Draws the top-left circular RomaFlash crest (matching @romanews.eu placement).
  */
 function drawTopLeftCircularLogo(ctx: CanvasRenderingContext2D) {
-  const cx = 98;
+  const cx = 96;
   const cy = 94;
-  const r = 74;
+  const r = 72;
 
   ctx.save();
 
-  // Drop shadow behind circular badge
-  ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
   ctx.shadowBlur = 16;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 5;
 
-  // Outer circle fill (deep Roma bordeaux so the gold WolfLogo stands out sharply)
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fillStyle = "#26050a";
   ctx.fill();
 
-  // Reset shadow for crisp borders
   ctx.shadowColor = "transparent";
 
-  // Outer red-orange ring + inner gold ring
   ctx.lineWidth = 5;
   ctx.strokeStyle = "#f0b516";
   ctx.stroke();
@@ -171,10 +114,9 @@ function drawTopLeftCircularLogo(ctx: CanvasRenderingContext2D) {
   ctx.strokeStyle = "rgba(224, 45, 71, 0.85)";
   ctx.stroke();
 
-  // Draw WolfLogo centered in upper portion of the circle
-  const wolfSize = 84;
+  const wolfSize = 82;
   ctx.save();
-  ctx.translate(cx - wolfSize / 2, cy - 52);
+  ctx.translate(cx - wolfSize / 2, cy - 50);
   const scale = wolfSize / 512;
   ctx.scale(scale, scale);
   const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
@@ -182,213 +124,68 @@ function drawTopLeftCircularLogo(ctx: CanvasRenderingContext2D) {
   ctx.fill(wolfPath);
   ctx.restore();
 
-  // "ROMAFLASH" text inside bottom of the circle
   ctx.font = "900 15px system-ui, -apple-system, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#ffffff";
-  ctx.fillText("ROMAFLASH", cx, cy + 40);
+  ctx.fillText("ROMAFLASH", cx, cy + 39);
 
   ctx.restore();
 }
 
 /**
- * Draws the bottom-left ">>> SCORRI A DESTRA" yellow chevrons + white text indicator on Slide 1.
+ * Builds a complete, never-truncated "super sunto" of the article.
+ * Uses ai_summary.excerpt (which is always a complete 2-sentence summary)
+ * and optionally adds the next complete sentence from content if excerpt is short.
  */
-function drawSwipeRightIndicator(ctx: CanvasRenderingContext2D) {
-  const startX = 76;
-  const topY = 1175;
-  const chevW = 66;
-  const chevH = 118;
-  const thickness = 44;
-  const gap = 90;
+function buildCompleteSuperSunto(article: any): string {
+  const excerpt = (article?.ai_summary?.excerpt || "").replace(/\s+/g, " ").trim();
+  const content = (article?.ai_summary?.content || "").replace(/\s+/g, " ").trim();
 
-  ctx.save();
-
-  // 3 Yellow Chevrons (>>>)
-  ctx.fillStyle = "#f5b800";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 4;
-
-  for (let i = 0; i < 3; i++) {
-    const x = startX + i * gap;
-    ctx.beginPath();
-    ctx.moveTo(x, topY);
-    ctx.lineTo(x + thickness, topY);
-    ctx.lineTo(x + thickness + chevW, topY + chevH / 2);
-    ctx.lineTo(x + thickness, topY + chevH);
-    ctx.lineTo(x, topY + chevH);
-    ctx.lineTo(x + chevW, topY + chevH / 2);
-    ctx.closePath();
-    ctx.fill();
+  if (excerpt && excerpt.length >= 110) {
+    return excerpt;
   }
 
-  // "SCORRI A DESTRA" centered over the chevrons
-  const centerX = startX + (2 * gap + thickness + chevW) / 2;
-  const centerY = topY + chevH / 2;
-  ctx.font = "900 33px system-ui, -apple-system, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.lineWidth = 7;
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
-  ctx.strokeText("SCORRI A DESTRA", centerX, centerY);
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("SCORRI A DESTRA", centerX, centerY);
-
-  ctx.restore();
-}
-
-/**
- * Draws the top-right yellow circle with the point number (1, 2, 3) like @romanews.eu.
- */
-function drawTopRightNumberCircle(
-  ctx: CanvasRenderingContext2D,
-  pointNumber: number
-) {
-  const cx = 936;
-  const cy = 128;
-  const r = 106;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(0, 0, 0, 0.58)";
-  ctx.fill();
-  ctx.lineWidth = 6;
-  ctx.strokeStyle = "#f5b800";
-  ctx.stroke();
-
-  ctx.font = "900 84px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#f5b800";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(String(pointNumber), cx, cy + 4);
-  ctx.restore();
-}
-
-/**
- * Fits uppercase text into the right-hand column using condensed poster typography,
- * automatically scaling font size so lines fill the vertical space cleanly.
- */
-function fitRightColumnPosterLines(
-  ctx: CanvasRenderingContext2D,
-  rawText: string,
-  maxWidth: number,
-  maxHeight: number,
-  maxFontSize = 148,
-  minFontSize = 78
-): { lines: string[]; fontSize: number; lineHeight: number } {
-  const cleanUpper = rawText
-    .replace(/['’‘]/g, "'")
-    .replace(/[“”«»]/g, '"')
-    .toUpperCase()
-    .trim();
-
-  const fontFamily = getCondensedFontFamily();
-
-  for (let size = maxFontSize; size >= minFontSize; size -= 4) {
-    ctx.font = `700 ${size}px ${fontFamily}`;
-    const lines = wrapText(ctx, cleanUpper, maxWidth);
-    const lineHeight = Math.round(size * 0.94);
-    const totalH = lines.length * lineHeight;
-
-    // Ensure no single word exceeds maxWidth and total height fits maxHeight
-    const widestWord = cleanUpper
-      .split(/\s+/)
-      .reduce((max, w) => Math.max(max, ctx.measureText(w).width), 0);
-
-    if (totalH <= maxHeight && widestWord <= maxWidth + 8 && lines.length <= 9) {
-      return { lines, fontSize: size, lineHeight };
-    }
-  }
-
-  const fallbackSize = minFontSize;
-  ctx.font = `700 ${fallbackSize}px ${fontFamily}`;
-  const lines = wrapText(ctx, cleanUpper, maxWidth).slice(0, 9);
-  return {
-    lines,
-    fontSize: fallbackSize,
-    lineHeight: Math.round(fallbackSize * 0.94),
-  };
-}
-
-/**
- * Extracts 3 punchy, self-contained journalistic points (10-16 words each) from the article
- * for Slides 2, 3, and 4 (numbered 1, 2, 3).
- */
-function extractThreeKeyPoints(article: any): [string, string, string] {
-  const excerpt = (article?.ai_summary?.excerpt || "").trim();
-  const content = (article?.ai_summary?.content || "").trim();
-
-  const combined = `${excerpt} ${content}`
-    .replace(/\s+/g, " ")
-    .trim();
-
-  // Split into sentences
-  const rawSentences = combined
+  // Extract complete sentences from content
+  const sentences = content
     .split(/(?<=[.!?])\s+/)
-    .map((s) => s.replace(/^[•\-–—\s]+/, "").trim())
-    .filter((s) => s.length >= 25);
+    .map((s: string) => s.trim())
+    .filter((s: string) => s.length >= 20);
 
-  const shortenToPunchyPoint = (sentence: string, maxWords = 14): string => {
-    const cleaned = sentence
-      .replace(/\([^)]*\)/g, "")
-      .replace(/["«»“”]/g, "")
-      .replace(/[.!?]+$/, "")
-      .trim();
+  if (!excerpt && sentences.length > 0) {
+    let acc = sentences[0];
+    if (sentences[1] && (acc + " " + sentences[1]).length <= 320) {
+      acc += " " + sentences[1];
+    }
+    return acc;
+  }
 
-    // If sentence has clauses separated by ";" or ":", keep the strongest 1-2 clauses
-    const words = cleaned.split(/\s+/);
-    if (words.length <= maxWords) return cleaned;
-
-    // Try cutting cleanly at a comma or colon between word 8 and maxWords
-    const subClauses = cleaned.split(/[,;:–—]/);
-    let acc = "";
-    for (const clause of subClauses) {
-      const candidate = acc ? `${acc}, ${clause.trim()}` : clause.trim();
-      const wc = candidate.split(/\s+/).length;
-      if (wc <= maxWords) {
-        acc = candidate;
-      } else {
+  if (excerpt) {
+    // Try appending 1 extra non-duplicate sentence from content if excerpt is very short
+    for (const s of sentences) {
+      const normEx = excerpt.toLowerCase().slice(0, 28);
+      const normS = s.toLowerCase().slice(0, 28);
+      if (normS !== normEx && !excerpt.toLowerCase().includes(normS)) {
+        const combined = `${excerpt} ${s}`;
+        if (combined.length <= 320) {
+          return combined;
+        }
         break;
       }
     }
-    if (acc && acc.split(/\s+/).length >= 7) {
-      return acc;
-    }
-
-    return words.slice(0, maxWords).join(" ").replace(/[,;:\s]+$/, "");
-  };
-
-  // Pick 3 distinct sentences spread across the article
-  const uniqueSentences: string[] = [];
-  for (const s of rawSentences) {
-    const norm = s.toLowerCase().slice(0, 30);
-    if (!uniqueSentences.some((u) => u.toLowerCase().slice(0, 30) === norm)) {
-      uniqueSentences.push(s);
-    }
+    return excerpt;
   }
 
-  const p1 = uniqueSentences[0]
-    ? shortenToPunchyPoint(uniqueSentences[0], 14)
-    : "Tutti i dettagli sulla situazione in casa giallorossa a Trigoria";
-  const midIdx = Math.max(1, Math.floor(uniqueSentences.length / 2));
-  const p2 = uniqueSentences[midIdx]
-    ? shortenToPunchyPoint(uniqueSentences[midIdx], 14)
-    : "La società e lo staff tecnico valutano le prossime mosse decisive";
-  const lastIdx =
-    uniqueSentences.length > 2 ? uniqueSentences.length - 1 : 2;
-  const p3 =
-    uniqueSentences[lastIdx] && lastIdx !== midIdx
-      ? shortenToPunchyPoint(uniqueSentences[lastIdx], 14)
-      : "Attesa per i prossimi impegni ufficiali della squadra giallorossa";
-
-  return [p1, p2, p3];
+  return "Tutti gli aggiornamenti e i dettagli in tempo reale sull'AS Roma.";
 }
 
-function renderCoverSlide(
+/**
+ * Renders the single 1080x1350 photo-poster slide with:
+ * - The article's real photo as background
+ * - Top-left circular RomaFlash logo
+ * - Full untrunacted Headline + Full untruncated Super Sunto on the lower half
+ */
+function renderSingleSlide(
   article: any,
   bgImg: HTMLImageElement | null
 ): string {
@@ -397,111 +194,151 @@ function renderCoverSlide(
   canvas.height = SLIDE_H;
   const ctx = canvas.getContext("2d")!;
 
-  drawPhotoBackground(ctx, bgImg, true);
-  drawTopLeftCircularLogo(ctx);
-  drawSwipeRightIndicator(ctx);
+  // 1. Background Photo (framed so top ~62% clearly shows the real photo subject)
+  ctx.fillStyle = "#140407";
+  ctx.fillRect(0, 0, SLIDE_W, SLIDE_H);
 
-  const rightX = 465;
-  const rightMaxW = 575;
-  const areaTop = 65;
-  const areaBottom = 1285;
-  const maxH = areaBottom - areaTop;
-
-  const title = article?.title || "Ultime notizie AS Roma";
-  const { lines, fontSize, lineHeight } = fitRightColumnPosterLines(
-    ctx,
-    title,
-    rightMaxW,
-    maxH,
-    144,
-    82
-  );
-
-  const totalTextH = lines.length * lineHeight;
-  let y = Math.max(areaTop, Math.round(areaTop + (maxH - totalTextH) / 2));
-
-  // Split color between White (#ffffff) top half and Yellow Gold (#f5b800) bottom half
-  const colonLineIdx = lines.findIndex((l) => l.includes(":"));
-  const splitIdx =
-    colonLineIdx >= 0 && colonLineIdx < lines.length - 1
-      ? colonLineIdx + 1
-      : Math.ceil(lines.length / 2);
-
-  const fontFamily = getCondensedFontFamily();
-  ctx.save();
-  ctx.font = `700 ${fontSize}px ${fontFamily}`;
-  ctx.textBaseline = "top";
-  ctx.textAlign = "left";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.92)";
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetX = 5;
-  ctx.shadowOffsetY = 6;
-
-  for (let i = 0; i < lines.length; i++) {
-    ctx.fillStyle = i < splitIdx ? "#ffffff" : "#f5b800";
-    ctx.fillText(lines[i], rightX, y);
-    y += lineHeight;
+  if (bgImg && bgImg.width > 0 && bgImg.height > 0) {
+    // Draw photo in top/full area with smart vertical bias toward the top so faces/action aren't covered by bottom text
+    const targetH = 920; // Photo prominent in upper 920px, smoothly blending into dark editorial base
+    const scale = Math.max(SLIDE_W / bgImg.width, targetH / bgImg.height);
+    const drawW = bgImg.width * scale;
+    const drawH = bgImg.height * scale;
+    const offsetX = (SLIDE_W - drawW) * 0.5;
+    const offsetY = Math.min(0, (targetH - drawH) * 0.2);
+    ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
   }
-  ctx.restore();
 
-  return canvas.toDataURL("image/jpeg", 0.94);
-}
+  // Smooth vertical gradient from transparent photo top into deep dark editorial bottom
+  const grad = ctx.createLinearGradient(0, 0, 0, SLIDE_H);
+  grad.addColorStop(0, "rgba(0, 0, 0, 0.22)");
+  grad.addColorStop(0.18, "rgba(0, 0, 0, 0.0)");
+  grad.addColorStop(0.42, "rgba(12, 2, 4, 0.25)");
+  grad.addColorStop(0.56, "rgba(16, 3, 6, 0.84)");
+  grad.addColorStop(0.7, "rgba(18, 3, 6, 0.96)");
+  grad.addColorStop(1, "#120204");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, SLIDE_W, SLIDE_H);
 
-function renderPointSlide(
-  pointNumber: number,
-  pointText: string,
-  bgImg: HTMLImageElement | null
-): string {
-  const canvas = document.createElement("canvas");
-  canvas.width = SLIDE_W;
-  canvas.height = SLIDE_H;
-  const ctx = canvas.getContext("2d")!;
+  // Subtle micro-grain for unique perceptual hash on TikTok
+  for (let i = 0; i < 240; i++) {
+    const gx = Math.floor(Math.random() * SLIDE_W);
+    const gy = Math.floor(Math.random() * SLIDE_H);
+    ctx.fillStyle =
+      i % 2 === 0 ? "rgba(255, 255, 255, 0.01)" : "rgba(0, 0, 0, 0.012)";
+    ctx.fillRect(gx, gy, 2, 2);
+  }
 
-  drawPhotoBackground(ctx, bgImg, true);
+  // 2. Top-Left Circular Logo Badge
   drawTopLeftCircularLogo(ctx);
-  drawTopRightNumberCircle(ctx, pointNumber);
 
-  const rightX = 465;
-  const rightMaxW = 575;
-  const areaTop = 265;
-  const areaBottom = 1295;
-  const maxH = areaBottom - areaTop;
+  // 3. Measure & Auto-Fit Full Title + Full Super Sunto so ZERO words are ever cut off
+  const padX = 72;
+  const maxW = SLIDE_W - padX * 2; // 936px
+  const titleText = (article?.title || "Ultime Notizie AS Roma")
+    .replace(/['’‘]/g, "'")
+    .toUpperCase()
+    .trim();
+  const suntoText = buildCompleteSuperSunto(article);
+  const categoryText = (article?.ai_summary?.category || "ULTIM'ORA").toUpperCase();
 
-  const { lines, fontSize, lineHeight } = fitRightColumnPosterLines(
-    ctx,
-    pointText,
-    rightMaxW,
-    maxH,
-    138,
-    78
-  );
+  const condensedFont = getCondensedFontFamily();
 
-  const totalTextH = lines.length * lineHeight;
-  let y = Math.max(areaTop, Math.round(areaTop + (maxH - totalTextH) / 2));
+  // Dynamic sizing loop so Title + Sunto always fit comfortably between y=560 and y=1285 without any truncation
+  let titleSize = 68;
+  let suntoSize = 38;
+  let titleLines: string[] = [];
+  let suntoLines: string[] = [];
+  let titleLineH = 74;
+  let suntoLineH = 50;
 
-  const splitIdx = Math.ceil(lines.length / 2);
-  const startWithYellow = pointNumber % 2 === 1;
+  for (let step = 0; step < 8; step++) {
+    ctx.font = `700 ${titleSize}px ${condensedFont}`;
+    titleLines = wrapText(ctx, titleText, maxW);
+    titleLineH = Math.round(titleSize * 1.08);
 
-  const fontFamily = getCondensedFontFamily();
-  ctx.save();
-  ctx.font = `700 ${fontSize}px ${fontFamily}`;
-  ctx.textBaseline = "top";
-  ctx.textAlign = "left";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.92)";
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetX = 5;
-  ctx.shadowOffsetY = 6;
+    ctx.font = `600 ${suntoSize}px system-ui, -apple-system, sans-serif`;
+    suntoLines = wrapText(ctx, suntoText, maxW);
+    suntoLineH = Math.round(suntoSize * 1.34);
 
-  for (let i = 0; i < lines.length; i++) {
-    const isFirstHalf = i < splitIdx;
-    if (startWithYellow) {
-      ctx.fillStyle = isFirstHalf ? "#f5b800" : "#ffffff";
-    } else {
-      ctx.fillStyle = isFirstHalf ? "#ffffff" : "#f5b800";
+    const totalBlockH =
+      52 + // Category badge
+      titleLines.length * titleLineH +
+      34 + // Gold bar gap
+      suntoLines.length * suntoLineH;
+
+    if (totalBlockH <= 690 || (titleSize <= 48 && suntoSize <= 28)) {
+      break;
     }
-    ctx.fillText(lines[i], rightX, y);
-    y += lineHeight;
+    titleSize -= 3;
+    suntoSize -= 2;
   }
+
+  const totalBlockH =
+    52 +
+    titleLines.length * titleLineH +
+    34 +
+    suntoLines.length * suntoLineH;
+
+  // Position block in the lower portion, leaving generous bottom margin (y <= 1280)
+  const bottomLimit = 1280;
+  const minTop = 540;
+  let y = Math.max(minTop, bottomLimit - totalBlockH);
+
+  ctx.save();
+  ctx.textBaseline = "top";
+  ctx.textAlign = "left";
+
+  // Category Pill Badge
+  ctx.font = "800 22px system-ui, -apple-system, sans-serif";
+  const catMetrics = ctx.measureText(categoryText);
+  const pillW = catMetrics.width + 32;
+  const pillH = 38;
+  ctx.fillStyle = "#e02d47";
+  ctx.beginPath();
+  ctx.roundRect(padX, y, pillW, pillH, 8);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(categoryText, padX + 16, y + 8);
+
+  y += 54;
+
+  // Headline (Two-tone White + Gold, 100% complete)
+  ctx.font = `700 ${titleSize}px ${condensedFont}`;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetX = 3;
+  ctx.shadowOffsetY = 4;
+
+  const splitTitleIdx = Math.ceil(titleLines.length / 2);
+  for (let i = 0; i < titleLines.length; i++) {
+    ctx.fillStyle = i < splitTitleIdx ? "#ffffff" : "#f5b800";
+    ctx.fillText(titleLines[i], padX, y);
+    y += titleLineH;
+  }
+
+  // Gold Separator Bar
+  y += 14;
+  ctx.shadowColor = "transparent";
+  ctx.fillStyle = "#f5b800";
+  ctx.beginPath();
+  ctx.roundRect(padX, y, 140, 6, 3);
+  ctx.fill();
+  y += 24;
+
+  // Complete Super Sunto (Crisp white readable body, 100% complete)
+  ctx.font = `600 ${suntoSize}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  for (const line of suntoLines) {
+    ctx.fillText(line, padX, y);
+    y += suntoLineH;
+  }
+
   ctx.restore();
 
   return canvas.toDataURL("image/jpeg", 0.94);
@@ -512,8 +349,7 @@ export default function TikTokKitModal({
   onClose,
   onMarkShared,
 }: TikTokKitModalProps) {
-  const [slides, setSlides] = useState<string[]>([]);
-  const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
+  const [slideUrl, setSlideUrl] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(true);
   const [copied, setCopied] = useState(false);
 
@@ -521,63 +357,33 @@ export default function TikTokKitModal({
     if (!article) return;
     let cancelled = false;
     setGenerating(true);
-    setActiveSlideIdx(0);
     setCopied(false);
 
-    async function generateAllSlides() {
+    async function generateSlide() {
       try {
         if (typeof document !== "undefined" && (document as any).fonts) {
           const ff = getCondensedFontFamily();
-          await (document as any).fonts.load(`700 100px ${ff}`);
+          await (document as any).fonts.load(`700 80px ${ff}`);
           await (document as any).fonts.ready;
         }
       } catch {
         // continue
       }
 
-      // Slide 1 uses the article's main photo; Slides 2, 3, 4 use 3 distinct archive photos
       const mainImgUrl = getArticleImageUrl(article) || "/images/archive/roma-1.jpg";
-      const idStr = String(article.id || article.title || "");
-      let hash = 0;
-      for (let i = 0; i < idStr.length; i++) {
-        hash = (hash * 31 + idStr.charCodeAt(i)) >>> 0;
+      let loadedImg = await loadImageElement(toProxiedUrl(mainImgUrl));
+      if (!loadedImg) {
+        loadedImg = await loadImageElement("/images/archive/roma-1.jpg");
       }
 
-      const pickArchivePath = (offset: number) => {
-        const idx = ((hash + offset * 3) % 10) + 1;
-        return `/images/archive/roma-${idx}.jpg`;
-      };
-
-      const bgUrls = [
-        toProxiedUrl(mainImgUrl),
-        pickArchivePath(1),
-        pickArchivePath(2),
-        pickArchivePath(3),
-      ];
-
-      // Ensure Slide 2 doesn't accidentally repeat Slide 1 if Slide 1 was already an archive photo
-      if (bgUrls[1] === mainImgUrl) {
-        bgUrls[1] = pickArchivePath(4);
-      }
-
-      const loadedImages = await Promise.all(bgUrls.map((u) => loadImageElement(u)));
-      if (!loadedImages[0]) {
-        loadedImages[0] = await loadImageElement(pickArchivePath(0));
-      }
-      const [point1, point2, point3] = extractThreeKeyPoints(article);
-
-      const s1 = renderCoverSlide(article, loadedImages[0]);
-      const s2 = renderPointSlide(1, point1, loadedImages[1]);
-      const s3 = renderPointSlide(2, point2, loadedImages[2]);
-      const s4 = renderPointSlide(3, point3, loadedImages[3]);
-
+      const dataUrl = renderSingleSlide(article, loadedImg);
       if (!cancelled) {
-        setSlides([s1, s2, s3, s4]);
+        setSlideUrl(dataUrl);
         setGenerating(false);
       }
     }
 
-    generateAllSlides();
+    generateSlide();
 
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -602,11 +408,11 @@ export default function TikTokKitModal({
   const cleanExcerpt = (article.ai_summary?.excerpt || article.title || "").trim();
   const tiktokCaption = `${article.title} 🟡🔴🐺\n${cleanExcerpt}\n\n${hashtags}`;
 
-  const handleDownloadSingle = (dataUrl: string, index: number) => {
-    if (!dataUrl) return;
+  const handleDownload = () => {
+    if (!slideUrl) return;
     const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `romaflash-tiktok-${index + 1}.jpg`;
+    a.href = slideUrl;
+    a.download = "romaflash-tiktok.jpg";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -615,31 +421,18 @@ export default function TikTokKitModal({
     }
   };
 
-  const handleDownloadAll = () => {
-    slides.forEach((url, idx) => {
-      setTimeout(() => {
-        handleDownloadSingle(url, idx);
-      }, idx * 280);
-    });
-  };
-
   const handleShareMobile = async () => {
-    if (slides.length === 0) return;
+    if (!slideUrl) return;
     try {
-      const files: File[] = [];
-      for (let i = 0; i < slides.length; i++) {
-        const res = await fetch(slides[i]);
-        const blob = await res.blob();
-        files.push(
-          new File([blob], `romaflash-tiktok-${i + 1}.jpg`, {
-            type: "image/jpeg",
-          })
-        );
-      }
+      const res = await fetch(slideUrl);
+      const blob = await res.blob();
+      const file = new File([blob], "romaflash-tiktok.jpg", {
+        type: "image/jpeg",
+      });
 
-      if (navigator.canShare && navigator.canShare({ files })) {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          files,
+          files: [file],
           title: article.title,
           text: tiktokCaption,
         });
@@ -647,7 +440,7 @@ export default function TikTokKitModal({
           onMarkShared(article.id, true);
         }
       } else {
-        handleDownloadAll();
+        handleDownload();
       }
     } catch {
       // User cancelled share
@@ -681,10 +474,10 @@ export default function TikTokKitModal({
             </span>
             <div>
               <h3 className="text-sm md:text-base font-black text-gray-900">
-                Kit TikTok Photo Mode — 4 Slide (1080×1350 4:5)
+                Locandina TikTok (1080×1350 4:5)
               </h3>
               <p className="text-[11px] text-gray-500">
-                Stile editoriale fotografico con Copertina + 3 Punti numerati
+                Foto reale dell&apos;articolo con Titolo + Super Sunto completo
               </p>
             </div>
           </div>
@@ -699,35 +492,18 @@ export default function TikTokKitModal({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-          {/* Left: Slide Preview + Switcher */}
+          {/* Left: Slide Preview */}
           <div className="md:col-span-6 flex flex-col items-center">
-            <div className="flex flex-wrap gap-1.5 mb-3 w-full justify-center">
-              {["Copertina", "Punto 1", "Punto 2", "Punto 3"].map((label, idx) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setActiveSlideIdx(idx)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                    activeSlideIdx === idx
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
             {generating ? (
-              <div className="w-[240px] aspect-[4/5] rounded-2xl bg-gray-100 animate-pulse flex items-center justify-center text-xs text-gray-500 font-semibold">
-                Generazione 4 slide...
+              <div className="w-[250px] aspect-[4/5] rounded-2xl bg-gray-100 animate-pulse flex items-center justify-center text-xs text-gray-500 font-semibold">
+                Generazione locandina...
               </div>
             ) : (
-              slides[activeSlideIdx] && (
+              slideUrl && (
                 <img
-                  src={slides[activeSlideIdx]}
-                  alt={`Slide ${activeSlideIdx + 1}`}
-                  className="w-[240px] md:w-[270px] aspect-[4/5] object-cover rounded-2xl shadow-lg border border-gray-200"
+                  src={slideUrl}
+                  alt="Locandina TikTok"
+                  className="w-[250px] md:w-[280px] aspect-[4/5] object-cover rounded-2xl shadow-lg border border-gray-200"
                 />
               )
             )}
@@ -737,39 +513,22 @@ export default function TikTokKitModal({
           <div className="md:col-span-6 flex flex-col gap-3">
             <button
               type="button"
-              disabled={generating}
-              onClick={handleDownloadAll}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50"
+              disabled={generating || !slideUrl}
+              onClick={handleDownload}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              Scarica tutte le 4 Slide (JPG)
+              Scarica Locandina (JPG)
             </button>
-
-            <div className="grid grid-cols-2 gap-2">
-              {["Slide 1 (Cover)", "Slide 2 (Punto 1)", "Slide 3 (Punto 2)", "Slide 4 (Punto 3)"].map(
-                (label, idx) => (
-                  <button
-                    key={label}
-                    type="button"
-                    disabled={generating || !slides[idx]}
-                    onClick={() => handleDownloadSingle(slides[idx], idx)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gray-100 text-gray-800 text-[11px] font-bold hover:bg-gray-200 transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <Download className="w-3 h-3" />
-                    {label}
-                  </button>
-                )
-              )}
-            </div>
 
             <button
               type="button"
-              disabled={generating}
+              disabled={generating || !slideUrl}
               onClick={handleShareMobile}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-black text-white text-xs font-bold hover:bg-gray-900 transition-colors cursor-pointer disabled:opacity-50"
             >
               <Share2 className="w-3.5 h-3.5" />
-              Invia / Salva tutte su Smartphone
+              Invia / Salva su Smartphone
             </button>
 
             {/* Caption Box */}

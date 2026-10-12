@@ -58,7 +58,7 @@ export default function StatsBackofficePage() {
       const [articlesRes, votesRes] = await Promise.all([
         supabase
           .from("articles")
-          .select("id, title, published_at, views, ai_summary, sources(name)")
+          .select("id, title, published_at, views, image_url, original_url, ai_summary, sources(name)")
           .order("published_at", { ascending: false })
           .limit(200),
         supabase.from("poll_votes").select("article_id"),

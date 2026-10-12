@@ -46,18 +46,19 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   
-  const PAGE_SIZE = 15;
+  const INITIAL_PAGE_SIZE = 17;
+  const LOAD_MORE_SIZE = 15;
 
   const fetchArticles = async () => {
     const { data } = await supabase
       .from('articles')
       .select('*, sources(name)')
       .order('published_at', { ascending: false })
-      .range(0, PAGE_SIZE - 1);
+      .range(0, INITIAL_PAGE_SIZE - 1);
     
     if (data) {
       setArticles(data);
-      setHasMore(data.length === PAGE_SIZE);
+      setHasMore(data.length === INITIAL_PAGE_SIZE);
     }
     setLoading(false);
   };
@@ -85,11 +86,11 @@ export default function Home() {
       .from('articles')
       .select('*, sources(name)')
       .order('published_at', { ascending: false })
-      .range(currentLength, currentLength + PAGE_SIZE - 1);
+      .range(currentLength, currentLength + LOAD_MORE_SIZE - 1);
     
     if (data && data.length > 0) {
       setArticles(prev => [...prev, ...data]);
-      setHasMore(data.length === PAGE_SIZE);
+      setHasMore(data.length === LOAD_MORE_SIZE);
     } else {
       setHasMore(false);
     }

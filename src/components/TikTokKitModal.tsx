@@ -375,25 +375,9 @@ export default function TikTokKitModal({
 
   if (!article || typeof document === "undefined") return null;
 
-  const poll = article.ai_summary?.poll || {
-    question: "Cosa ne pensi di questa notizia in casa giallorossa?",
-    options: [
-      "Ottima notizia, avanti così!",
-      "Serve fare di più sul campo",
-      "Aspettiamo la prossima partita",
-    ],
-  };
-
-  const pollOptionsText = (poll.options || [])
-    .slice(0, 3)
-    .map(
-      (opt: string, i: number) => `${["1️⃣", "2️⃣", "3️⃣"][i] || `${i + 1}.`} ${opt}`
-    )
-    .join("\n");
-
-  const summarySnippet = (article.ai_summary?.excerpt || article.title || "")
-    .replace(/#[a-zA-Z0-9_]+/g, "")
-    .trim();
+  const pollQuestion =
+    article.ai_summary?.poll?.question ||
+    "Cosa ne pensi di questa notizia in casa giallorossa?";
 
   const extraTags = (article.ai_summary?.dynamic_hashtags || "")
     .replace(/#ASRoma/gi, "")
@@ -406,7 +390,7 @@ export default function TikTokKitModal({
 
   const hashtags = `#ASRoma #RomaFlash ${extraTags ? `${extraTags} ` : ""}#Romanisti #CurvaSudRoma #SerieA #PerTe`;
 
-  const tiktokCaption = `🔥 ${poll.question} 👉 Scorri alla Slide 2 e scrivi 1, 2 o 3 nei commenti! 👇\n\n${pollOptionsText}\n\n🐺🟡🔴 ${summarySnippet}\n\n⚡ Tutte le notizie sulla Roma in tempo reale e ZERO pubblicità su romaflash.app (Link in Bio)\n\n${hashtags}`;
+  const tiktokCaption = `🔥 ${pollQuestion} 👉 Scorri alla Slide 2 e scrivi 1, 2 o 3 nei commenti! 👇\n\n⚡ Tutte le notizie sulla Roma in tempo reale e ZERO pubblicità su romaflash.app (Link in Bio)\n\n${hashtags}`;
 
   const handleDownload = (dataUrl: string, filename: string) => {
     const a = document.createElement("a");

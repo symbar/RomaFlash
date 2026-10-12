@@ -248,22 +248,10 @@ serve(async (req) => {
             }
           }
 
-          // Controllo deterministico preliminare sull'URL immagine e sul titolo (grafiche, xG, screenshot, duplicati foto)
-          const lowerImgUrl = (candidateImageUrl || '').toLowerCase();
-          const lowerOrigTitle = (item.title || '').toLowerCase();
+          // Controllo preliminare: scarta solo se manca l'URL o se la stessa identica foto è già stata usata
           let isImageRejected =
             !candidateImageUrl ||
-            usedImageUrls.has(candidateImageUrl) ||
-            lowerImgUrl.includes('screenshot') ||
-            lowerImgUrl.includes('grafica') ||
-            lowerImgUrl.includes('locandina') ||
-            lowerImgUrl.includes('podcast') ||
-            lowerImgUrl.includes('banner') ||
-            lowerImgUrl.includes('logo') ||
-            lowerImgUrl.includes('placeholder') ||
-            lowerImgUrl.includes('default') ||
-            lowerImgUrl.includes('footyheadlines') ||
-            /\bxg\b/i.test(lowerOrigTitle);
+            usedImageUrls.has(candidateImageUrl);
 
           // Scarica i byte dell'immagine per farla ispezionare visivamente da Gemini Vision
           let inlineImagePart: any = null;

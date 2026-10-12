@@ -79,7 +79,7 @@ function loadImageElement(src: string): Promise<HTMLImageElement | null> {
 function toProxiedUrl(url: string): string {
   if (!url) return "/images/archive/roma-1.jpg";
   if (url.startsWith("/")) return url;
-  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg`;
 }
 
 /**
@@ -561,6 +561,9 @@ export default function TikTokKitModal({
       }
 
       const loadedImages = await Promise.all(bgUrls.map((u) => loadImageElement(u)));
+      if (!loadedImages[0]) {
+        loadedImages[0] = await loadImageElement(pickArchivePath(0));
+      }
       const [point1, point2, point3] = extractThreeKeyPoints(article);
 
       const s1 = renderCoverSlide(article, loadedImages[0]);

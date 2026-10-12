@@ -30,19 +30,10 @@ export function getArticleImageUrl(article: any): string | null {
   }
 
   if (article.image_url) {
-    const lowerUrl = String(article.image_url).toLowerCase();
-    const isSuspiciousGraphic =
-      lowerUrl.includes('screenshot') ||
-      lowerUrl.includes('grafica') ||
-      lowerUrl.includes('locandina') ||
-      lowerUrl.includes('f0eb4d5d3acaee6038d79b320b3d1541');
-
-    if (!isSuspiciousGraphic) {
-      return article.image_url;
-    }
+    return article.image_url;
   }
 
-  // Fallback to one of the 10 custom RomaFlash archive images
+  // Fallback to one of the 10 custom RomaFlash archive images only when image_url is missing
   const archiveIdx = (hash % 10) + 1;
   return `/images/archive/roma-${archiveIdx}.jpg`;
 }

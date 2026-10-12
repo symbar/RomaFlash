@@ -12,6 +12,7 @@ import { Tweet } from 'react-tweet';
 import PitchView from '@/components/PitchView';
 import PollWidget from '@/components/PollWidget';
 import { useLanguage } from '@/components/LanguageContext';
+import ArticleImage from '@/components/ArticleImage';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -287,6 +288,10 @@ function ArticleContent() {
               >
                 {displayTitle}
               </h1>
+
+              {article.image_url && !article.ai_summary?.youtube_id && (
+                <ArticleImage src={article.image_url} alt={displayTitle} variant="article" />
+              )}
               
               {article.ai_summary?.youtube_id && (
                 <a 

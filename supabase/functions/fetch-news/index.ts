@@ -170,7 +170,15 @@ serve(async (req) => {
       ? recentArticles.map(a => `- ${a.title}${a.ai_summary?.excerpt ? ` (${a.ai_summary.excerpt})` : ''}`).join('\n')
       : "Nessun articolo recente."
 
-    const parser = new Parser()
+    const parser = new Parser({
+      customFields: {
+        item: [
+          ['media:content', 'mediaContent', { keepArray: true }],
+          ['enclosure', 'enclosure'],
+          ['media:thumbnail', 'mediaThumbnail']
+        ]
+      }
+    })
     let processedCount = 0
 
     // 3. Itera su ogni fonte
@@ -350,8 +358,32 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             continue; // Salta il salvataggio in caso di errore di parsing
           }
 
-          // Per ora disabilitiamo l'immagine originale come richiesto
-          const imageUrl = null
+          // Estrazione immagine reale (enclosure RSS, media:content, o og:image della pagina)
+          let imageUrl: string | null = null;
+          if (item.enclosure?.url) {
+            imageUrl = item.enclosure.url;
+          } else if ((item as any).mediaContent?.[0]?.$.url) {
+            imageUrl = (item as any).mediaContent[0].$.url;
+          } else if ((item as any).mediaThumbnail?.$.url) {
+            imageUrl = (item as any).mediaThumbnail.$.url;
+          }
+
+          if (!imageUrl && item.link) {
+            try {
+              const pageRes = await fetch(item.link, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+                signal: AbortSignal.timeout(4000)
+              });
+              const pageHtml = await pageRes.text();
+              const ogMatch = pageHtml.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i) ||
+                              pageHtml.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:image["']/i);
+              if (ogMatch && ogMatch[1]) {
+                imageUrl = ogMatch[1];
+              }
+            } catch {
+              // fallback gracefully
+            }
+          }
 
           // 5. Determina la data di pubblicazione (Falsificazione a fin di bene se è in ritardo)
           let finalPublishedAt = item.isoDate || item.pubDate || new Date().toISOString()

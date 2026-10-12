@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalRightSidebar from '@/components/GlobalRightSidebar';
 import { useLanguage } from '@/components/LanguageContext';
+import ArticleImage from '@/components/ArticleImage';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -312,10 +313,14 @@ export default function Home() {
                     {/* FIRST ITEM HERO LAYOUT */}
                     {index === 0 ? (
                       <>
-                        <div className="h-56 md:h-72 bg-gradient-to-tr from-gray-50 via-white to-primary/10 relative overflow-hidden flex flex-col justify-end p-6 border-b border-border">
-                          {article.ai_summary?.youtube_id && (
+                        <div className="h-60 sm:h-72 md:h-80 bg-gradient-to-tr from-gray-900 via-gray-800 to-black relative overflow-hidden flex flex-col justify-end p-6 border-b border-border">
+                          {article.image_url ? (
+                            <div className="absolute inset-0">
+                              <ArticleImage src={article.image_url} alt={displayTitle} variant="hero" />
+                            </div>
+                          ) : article.ai_summary?.youtube_id ? (
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" alt="Video" />
-                          )}
+                          ) : null}
                           <div className="relative z-10">
                             <div className="flex gap-2 mb-3">
                               <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded shadow-md uppercase tracking-wide">
@@ -327,7 +332,7 @@ export default function Home() {
                                 </span>
                               )}
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+                            <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
                               {displayTitle}
                             </h2>
                           </div>
@@ -349,9 +354,9 @@ export default function Home() {
                         </div>
                       </>
                     ) : (
-                      /* STANDARD CARD LAYOUT */
+                      /* STANDARD CARD LAYOUT WITH THUMBNAIL */
                       <>
-                        {article.ai_summary?.youtube_id && (
+                        {article.ai_summary?.youtube_id && !article.image_url && (
                           <div className="h-48 relative overflow-hidden bg-black">
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" alt="Video" />
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -372,9 +377,14 @@ export default function Home() {
                               )}
                               {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                             </div>
-                            <h2 className="text-lg font-bold text-foreground leading-snug mb-2 group-hover:text-primary transition-colors">
-                              {displayTitle}
-                            </h2>
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <h2 className="text-lg font-bold text-foreground leading-snug group-hover:text-primary transition-colors flex-1">
+                                {displayTitle}
+                              </h2>
+                              {article.image_url && (
+                                <ArticleImage src={article.image_url} alt={displayTitle} variant="thumbnail" />
+                              )}
+                            </div>
                             <p className="text-sm text-gray-600 line-clamp-3">
                               {displayExcerpt}
                             </p>

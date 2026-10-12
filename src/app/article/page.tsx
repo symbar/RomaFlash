@@ -34,6 +34,33 @@ function ArticleContent() {
   const [article, setArticle] = useState<any>(null);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('romaflash_font_size');
+      if (saved === 'normal' || saved === 'large' || saved === 'xlarge') {
+        setFontSize(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const cycleFontSize = () => {
+    const next =
+      fontSize === 'normal'
+        ? 'large'
+        : fontSize === 'large'
+          ? 'xlarge'
+          : 'normal';
+    setFontSize(next);
+    try {
+      localStorage.setItem('romaflash_font_size', next);
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     let viewTimer: NodeJS.Timeout | null = null;
@@ -219,11 +246,28 @@ function ArticleContent() {
                   </span>
                 )}
                 {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
-                <div className="flex items-center gap-3 ml-auto text-gray-500">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center gap-2 ml-auto text-gray-500">
+                  <span className="flex items-center gap-1 mr-1">
                     <Clock className="w-3 h-3" />
                     {formatDate(article.published_at, lang)}
                   </span>
+                  <button
+                    type="button"
+                    onClick={cycleFontSize}
+                    className={`px-2 py-1 rounded-lg text-xs font-extrabold tracking-tight transition-colors cursor-pointer select-none ${
+                      fontSize === 'normal'
+                        ? 'text-gray-500 hover:text-primary hover:bg-gray-100'
+                        : 'bg-primary/10 text-primary'
+                    }`}
+                    title={
+                      lang === 'it'
+                        ? 'Dimensione testo (Normale / Grande / Extra Grande)'
+                        : 'Text size (Normal / Large / Extra Large)'
+                    }
+                    aria-label="Regola dimensione testo"
+                  >
+                    {fontSize === 'normal' ? 'Aa' : fontSize === 'large' ? 'Aa+' : 'Aa++'}
+                  </button>
                   <ShareButton 
                     title={displayTitle} 
                     text={displayExcerpt} 
@@ -232,7 +276,15 @@ function ArticleContent() {
                 </div>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-serif font-bold leading-tight text-foreground mb-6">
+              <h1
+                className={`font-serif font-bold leading-tight text-foreground mb-6 transition-all duration-150 ${
+                  fontSize === 'xlarge'
+                    ? 'text-[34px] md:text-[42px]'
+                    : fontSize === 'large'
+                      ? 'text-[32px] md:text-[40px]'
+                      : 'text-3xl md:text-4xl'
+                }`}
+              >
                 {displayTitle}
               </h1>
               
@@ -260,7 +312,15 @@ function ArticleContent() {
               )}
             </header>
 
-            <article className="text-base md:text-lg leading-relaxed text-foreground">
+            <article
+              className={`leading-relaxed text-foreground transition-all duration-150 ${
+                fontSize === 'xlarge'
+                  ? 'text-xl md:text-2xl'
+                  : fontSize === 'large'
+                    ? 'text-lg md:text-xl'
+                    : 'text-base md:text-lg'
+              }`}
+            >
               {(() => {
                 const paragraphs = content.split('\n').filter((p: string) => p.trim() !== '');
                 let embedUrl = (article.original_url && (article.original_url.includes('twitter.com') || article.original_url.includes('x.com'))) 

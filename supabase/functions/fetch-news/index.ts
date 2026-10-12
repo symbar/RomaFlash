@@ -209,44 +209,100 @@ serve(async (req) => {
     }
     console.log(`[X AUTO-POST] Tweet notizie già pubblicati oggi (${todayRome}): ${tweetsTodayCount}`);
 
-    // Funzione deterministica anti-duplicato: normalizza testo rimuovendo punteggiatura e stop-words
-    const stopWords = new Set(['como', 'roma', 'della', 'delle', 'degli', 'dello', 'nella', 'nelle', 'negli', 'sulla', 'sulle', 'sugli', 'contro', 'verso', 'prima', 'dopo', 'anche', 'sono', 'stato', 'stata', 'questo', 'questa', 'quello', 'quella', 'tutto', 'tutti', 'tutte', 'molto', 'solo', 'fare', 'fatto', 'essere', 'avere', 'hanno', 'alla', 'alle', 'agli', 'dalla', 'dalle', 'dagli', 'con', 'per', 'tra', 'fra', 'che', 'non', 'piu', 'suo', 'sua', 'suoi', 'sue', 'loro', 'gli', 'una', 'uno', 'dei', 'del', 'dal', 'nel', 'sul', 'col']);
+    // Funzione deterministica anti-duplicato con stemming italiano e confronto incrociato Titolo + Riassunto
+    const stopWords = new Set([
+      'como', 'roma', 'real', 'madrid', 'milan', 'inter', 'juve', 'juventus', 'napoli', 'lazio',
+      'giallorosso', 'giallorossi', 'giallorossa', 'giallorosse', 'trigoria', 'olimpico', 'stadio',
+      'squadra', 'partita', 'sfida', 'match', 'campionato', 'serie', 'champions', 'league', 'europa',
+      'stagione', 'calcio', 'calciatore', 'giocatore', 'giocatori', 'tecnico', 'allenatore', ' tifosi', 'tifoso',
+      'della', 'delle', 'degli', 'dello', 'nella', 'nelle', 'negli', 'sulla', 'sulle', 'sugli',
+      'contro', 'verso', 'prima', 'dopo', 'anche', 'sono', 'stato', 'stata', 'questo', 'questa',
+      'quello', 'quella', 'tutto', 'tutti', 'tutte', 'molto', 'solo', 'fare', 'fatto', 'essere',
+      'avere', 'hanno', 'alla', 'alle', 'agli', 'dalla', 'dalle', 'dagli', 'con', 'per', 'tra',
+      'fra', 'che', 'non', 'piu', 'suo', 'sua', 'suoi', 'sue', 'loro', 'gli', 'una', 'uno',
+      'dei', 'del', 'dal', 'nel', 'sul', 'col', 'oggi', 'ieri', 'domani', 'sempre', 'ancora',
+      'nuovo', 'nuova', 'nuovi', 'nuove', 'grande', 'grandi', 'casa', 'parole', 'ultime', 'notizie'
+    ]);
+
+    const stemItalian = (word: string): string => {
+      if (word.length <= 4) return word;
+      return word
+        .replace(/(zioni|zione|menti|mento)$/, 'z')
+        .replace(/es$/, '')
+        .replace(/[aeio]$/, '');
+    };
+
     const extractTokens = (str: string): string[] => {
       return (str || '')
         .toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
-        .filter(w => w.length >= 4 && !stopWords.has(w));
+        .filter(w => w.length >= 4 && !stopWords.has(w))
+        .map(stemItalian)
+        .filter(w => w.length >= 3 && !stopWords.has(w));
     };
 
-    const isTitleTooSimilar = (candidateTitle: string, existingTitles: string[]): string | null => {
-      const candTokens = extractTokens(candidateTitle);
-      if (candTokens.length === 0) return null;
-      const candSet = new Set(candTokens);
+    interface ExistingArticleItem {
+      title: string;
+      fullText: string;
+    }
 
-      for (const existing of existingTitles) {
-        const exTokens = extractTokens(existing);
-        if (exTokens.length === 0) continue;
-        const exSet = new Set(exTokens);
+    const isArticleTooSimilar = (
+      candidateTitle: string,
+      candidateExtra: string,
+      existingItems: ExistingArticleItem[]
+    ): string | null => {
+      const candTitleSet = new Set(extractTokens(candidateTitle));
+      const candFullSet = new Set(extractTokens(`${candidateTitle} ${candidateExtra}`));
+      if (candTitleSet.size === 0) return null;
 
-        let intersection = 0;
-        for (const t of candSet) {
-          if (exSet.has(t)) intersection++;
+      for (const existing of existingItems) {
+        const exTitleSet = new Set(extractTokens(existing.title));
+        const exFullSet = new Set(extractTokens(existing.fullText));
+        if (exTitleSet.size === 0) continue;
+
+        // 1. Intersezione diretta Titolo vs Titolo
+        let titleIntersection = 0;
+        for (const t of candTitleSet) {
+          if (exTitleSet.has(t)) titleIntersection++;
+        }
+        const minTitleSize = Math.min(candTitleSet.size, exTitleSet.size);
+        const titleOverlap = minTitleSize > 0 ? titleIntersection / minTitleSize : 0;
+
+        if (titleIntersection >= 3 || (titleIntersection >= 2 && titleOverlap >= 0.4)) {
+          return existing.title;
         }
 
-        const minSize = Math.min(candSet.size, exSet.size);
-        const overlapRatio = minSize > 0 ? intersection / minSize : 0;
+        // 2. Intersezione incrociata Titolo candidato vs (Titolo + Excerpt esistente) e viceversa
+        let candInExFull = 0;
+        for (const t of candTitleSet) {
+          if (exFullSet.has(t)) candInExFull++;
+        }
+        let exInCandFull = 0;
+        for (const t of exTitleSet) {
+          if (candFullSet.has(t)) exInCandFull++;
+        }
+        if (candInExFull >= 3 || exInCandFull >= 3) {
+          return existing.title;
+        }
 
-        // Se condividono almeno 3 parole chiave specifiche o >= 50% dei termini chiave, è lo stesso argomento
-        if (intersection >= 3 || (intersection >= 2 && overlapRatio >= 0.5)) {
-          return existing;
+        // 3. Intersezione complessiva (Titolo + Excerpt) vs (Titolo + Excerpt)
+        let fullIntersection = 0;
+        for (const t of candFullSet) {
+          if (exFullSet.has(t)) fullIntersection++;
+        }
+        if (fullIntersection >= 5) {
+          return existing.title;
         }
       }
       return null;
     };
 
-    const existingTitlesArray: string[] = recentArticles ? recentArticles.map(a => a.title) : [];
+    const existingItemsArray: ExistingArticleItem[] = (recentArticles || []).map((a: any) => ({
+      title: a.title,
+      fullText: `${a.title} ${a.ai_summary?.excerpt || ''}`,
+    }));
 
     let recentTitlesList = recentArticles && recentArticles.length > 0 
       ? recentArticles.map(a => `- ${a.title}${a.ai_summary?.excerpt ? ` (${a.ai_summary.excerpt})` : ''}`).join('\n')
@@ -288,10 +344,14 @@ serve(async (req) => {
             continue
           }
 
-          // Controllo deterministico preliminare sul titolo originale RSS contro i titoli già pubblicati
-          const matchedOriginalDup = isTitleTooSimilar(item.title, existingTitlesArray);
+          // Controllo deterministico preliminare sul titolo/snippet originale RSS contro gli articoli già pubblicati
+          const matchedOriginalDup = isArticleTooSimilar(
+            item.title,
+            item.contentSnippet || '',
+            existingItemsArray
+          );
           if (matchedOriginalDup) {
-            console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Titolo RSS): "${item.title}" ~ "${matchedOriginalDup}"`);
+            console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (RSS): "${item.title}" ~ "${matchedOriginalDup}"`);
             continue;
           }
 
@@ -376,8 +436,8 @@ ${recentTitlesList}
 REGOLE TASSATIVE SUI DUPLICATI (imposta "is_duplicate": true in tutti questi casi):
 - Se nella lista c'è già un articolo sui "Convocati" della partita e questo parla dei convocati -> È DUPLICATO (is_duplicate: true).
 - Se nella lista c'è già un articolo sulle "Probabili formazioni / scelte dei quotidiani / ultime di formazione" per la stessa partita -> È DUPLICATO (is_duplicate: true).
-- Se nella lista c'è già un'intervista o dichiarazione della stessa persona (es. Vierchowod, Capello, Fabregas, Gasperini, Tchouameni) sullo stesso tema -> È DUPLICATO (is_duplicate: true).
-- Se due testate diverse riportano la stessa notizia (es. infortunio di un giocatore, designazione arbitrale, conferenza stampa) con parole diverse -> È DUPLICATO (is_duplicate: true).
+- Se nella lista c'è già un'intervista o dichiarazione della stessa persona (es. Vierchowod, Capello, Fabregas, Gasperini, Tchouameni, Totti, Bove) sullo stesso tema -> È DUPLICATO (is_duplicate: true).
+- Se due testate diverse riportano la stessa notizia, episodio, tributo, murale, evento, ospitata TV, libro, infortunio o designazione arbitrale usando sinonimi o angolazioni diverse (es. "Mourinho" vs "Special One", "murale" vs "murales") -> È DUPLICATO (is_duplicate: true).
 Nel dubbio, imposta SEMPRE "is_duplicate": true!
 
 2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
@@ -488,10 +548,14 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               newTitle = parsed.titolo.replace(/<bos>/g, '').replace(/<eos>/g, '').replace(/\*\*2/g, '').replace(/<[^>]+>/g, '');
             }
 
-            // Secondo controllo deterministico: confronta anche il titolo generato da Gemini con i titoli già a DB
-            const matchedGeneratedDup = isTitleTooSimilar(newTitle, existingTitlesArray);
+            // Secondo controllo deterministico: confronta anche il titolo e l'excerpt generati da Gemini con gli articoli già a DB
+            const matchedGeneratedDup = isArticleTooSimilar(
+              newTitle,
+              parsed.excerpt || '',
+              existingItemsArray
+            );
             if (matchedGeneratedDup) {
-              console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Titolo Generato): "${newTitle}" ~ "${matchedGeneratedDup}"`);
+              console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Generato): "${newTitle}" ~ "${matchedGeneratedDup}"`);
               continue;
             }
             if (parsed.excerpt && parsed.content) {
@@ -560,7 +624,10 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             console.error(`Errore inserimento in DB per: ${item.title}`, insertError)
           } else {
             processedCount++;
-            existingTitlesArray.push(newTitle);
+            existingItemsArray.push({
+              title: newTitle,
+              fullText: `${newTitle} ${aiSummary.excerpt || ''}`,
+            });
             recentTitlesList += `\n- ${newTitle} (${aiSummary.excerpt || ''})`;
 
             // 6b. Auto-Pubblicazione su X per TUTTI gli articoli (esclusi i post Social)

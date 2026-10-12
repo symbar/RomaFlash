@@ -28,7 +28,7 @@ export async function onRequestGet(context: any) {
     const apiRes = await fetch(
       `${sbUrl}/rest/v1/articles?id=eq.${encodeURIComponent(
         articleId
-      )}&select=id,title,published_at,ai_summary`,
+      )}&select=id,title,published_at,image_url,original_url,ai_summary`,
       {
         headers: {
           apikey: sbKey,
@@ -55,9 +55,21 @@ export async function onRequestGet(context: any) {
     const category = article.ai_summary?.category || "AS Roma";
     const publishedAt = article.published_at || new Date().toISOString();
     const canonicalUrl = `https://romaflash.app/article?id=${article.id}`;
-    const ogImage = article.ai_summary?.youtube_id
-      ? `https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`
-      : "https://romaflash.app/icon";
+
+    // Resolve full absolute image URL for OpenGraph and X/Twitter Cards
+    let ogImage = "https://romaflash.app/images/archive/roma-1.jpg";
+    if (article.image_url) {
+      ogImage = article.image_url.startsWith("/")
+        ? `https://romaflash.app${article.image_url}`
+        : article.image_url;
+    } else if (article.ai_summary?.youtube_id) {
+      ogImage = `https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`;
+    } else if (
+      article.original_url?.startsWith("romaflash-daily-briefing") ||
+      category === "Il Punto della Giornata"
+    ) {
+      ogImage = "https://romaflash.app/images/daily-briefing/briefing-1.jpg";
+    }
 
     const jsonLd = {
       "@context": "https://schema.org",
@@ -109,7 +121,7 @@ export async function onRequestGet(context: any) {
       <meta property="og:image" content="${safeOgImage}" />
       <meta property="article:published_time" content="${escapeHtml(publishedAt)}" />
       <meta property="article:section" content="${safeCategory}" />
-      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="${safeOgTitle}" />
       <meta name="twitter:description" content="${safeDesc}" />
       <meta name="twitter:image" content="${safeOgImage}" />

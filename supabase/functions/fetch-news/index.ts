@@ -8,12 +8,88 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-async function postToX(tweetText: string): Promise<{ id?: string; error?: string }> {
+function resolvePublicImageUrl(rawUrl?: string | null): string | null {
+  if (!rawUrl) return null
+  if (rawUrl.startsWith('/')) {
+    return `https://romaflash.app${rawUrl}`
+  }
+  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&output=jpg`
+  }
+  return null
+}
+
+async function postToX(
+  tweetText: string,
+  imageUrl?: string | null
+): Promise<{ id?: string; error?: string }> {
   const bufferApiKey = Deno.env.get('BUFFER_API_KEY')
   const bufferChannelId = Deno.env.get('BUFFER_CHANNEL_ID') || '6acbee4e778b240e2fdc27e7'
 
   if (!bufferApiKey) {
     return { error: 'BUFFER_API_KEY non configurata su Supabase' }
+  }
+
+  const publicImageUrl = resolvePublicImageUrl(imageUrl)
+
+  if (publicImageUrl) {
+    const mediaMutation = `
+      mutation CreatePostWithImage($text: String!, $channelId: ChannelId!, $imageUrl: String!) {
+        createPost(
+          input: {
+            text: $text
+            channelId: $channelId
+            schedulingType: automatic
+            mode: shareNow
+            assets: [
+              {
+                image: {
+                  url: $imageUrl
+                }
+              }
+            ]
+          }
+        ) {
+          ... on PostActionSuccess {
+            post {
+              id
+              text
+            }
+          }
+          ... on MutationError {
+            message
+          }
+        }
+      }
+    `
+    try {
+      const mediaRes = await fetch('https://api.buffer.com', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${bufferApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mediaMutation,
+          variables: {
+            text: tweetText,
+            channelId: bufferChannelId,
+            imageUrl: publicImageUrl,
+          },
+        }),
+      })
+      const mediaData = await mediaRes.json()
+      const mediaPostId = mediaData?.data?.createPost?.post?.id
+      if (mediaPostId) {
+        return { id: mediaPostId }
+      }
+      console.warn(
+        '[X AUTO-POST] Invio con immagine non riuscito, fallback a link card:',
+        mediaData?.data?.createPost?.message || JSON.stringify(mediaData)
+      )
+    } catch (e) {
+      console.warn('[X AUTO-POST] Errore invio immagine a Buffer, fallback a link card:', e)
+    }
   }
 
   const mutation = `
@@ -506,7 +582,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n${hashtagsLine}`;
 
               console.log(`[X AUTO-POST] Pubblicazione tweet (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
-              const xRes = await postToX(fullTweet);
+              const xRes = await postToX(fullTweet, imageUrl);
               if (xRes.id) {
                 console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
                 tweetsTodayCount++;

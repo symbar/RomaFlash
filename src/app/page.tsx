@@ -115,6 +115,10 @@ export default function Home() {
   }, [hasMore, loadingMore, articles.length, categoryFilter]);
 
   const [newArticlesCount, setNewArticlesCount] = useState(0);
+  const newArticlesCountRef = useRef(0);
+  useEffect(() => {
+    newArticlesCountRef.current = newArticlesCount;
+  }, [newArticlesCount]);
 
   useEffect(() => { cachedArticles = articles; }, [articles]);
   useEffect(() => { cachedCategoryFilter = categoryFilter; }, [categoryFilter]);
@@ -123,8 +127,17 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       savedScrollPosition = window.scrollY;
+      if (
+        window.innerWidth >= 1024 &&
+        window.scrollY < 120 &&
+        newArticlesCountRef.current > 0
+      ) {
+        newArticlesCountRef.current = 0;
+        setNewArticlesCount(0);
+        fetchArticles();
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -132,7 +145,7 @@ export default function Home() {
     fetchArticles();
     fetchNextMatch();
 
-    const intervalId = setInterval(async () => {
+    const checkForUpdates = () => {
       setArticles(currentArticles => {
         if (currentArticles.length === 0) return currentArticles;
         
@@ -144,15 +157,36 @@ export default function Home() {
           .gt('published_at', latestLocalTime)
           .then(({ count }) => {
             if (count && count > 0) {
-              setNewArticlesCount(count);
+              if (window.innerWidth >= 1024 && window.scrollY < 160) {
+                newArticlesCountRef.current = 0;
+                setNewArticlesCount(0);
+                fetchArticles();
+              } else {
+                newArticlesCountRef.current = count;
+                setNewArticlesCount(count);
+              }
             }
           });
           
         return currentArticles;
       });
-    }, 45000);
+    };
 
-    return () => clearInterval(intervalId);
+    const intervalId = setInterval(checkForUpdates, 45000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && window.innerWidth >= 1024) {
+        if (window.scrollY < 160) {
+          checkForUpdates();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const getSentimentBadge = (sentiment?: string) => {
@@ -214,7 +248,7 @@ export default function Home() {
     <PullToRefresh onRefresh={fetchArticles}>
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-12 relative">
         {newArticlesCount > 0 && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto">
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] pointer-events-auto lg:hidden">
             <button 
               type="button"
               onClick={() => {

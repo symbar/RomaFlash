@@ -21,8 +21,53 @@ serve(async (req) => {
         const html = await response.text();
         const $ = cheerio.load(html);
 
-        const matches = $('ul.match-list > li.match');
+        const matches = $('li.match.match-item');
         let recordsToUpsert: any[] = [];
+
+        const buildFactualCommentary = (
+            teamName: string,
+            formation: string,
+            starters: any[],
+            ballottaggi: any[],
+            infortunati: any[],
+            squalificati: any[]
+        ): string => {
+            if (!starters || starters.length === 0) {
+                return "In attesa delle indicazioni ufficiali dai campi di allenamento.";
+            }
+            const gk = starters.filter(p => p.role.toUpperCase() === 'P').map(p => p.name);
+            const defs = starters.filter(p => p.role.toUpperCase() === 'D').map(p => p.name);
+            const mids = starters.filter(p => p.role.toUpperCase() === 'C').map(p => p.name);
+            const fwds = starters.filter(p => p.role.toUpperCase() === 'A').map(p => p.name);
+
+            const parts: string[] = [];
+            parts.push(`${teamName} verso il modulo ${formation}.`);
+            if (gk.length > 0 && defs.length > 0) {
+                parts.push(`Tra i pali ${gk[0]}, con il reparto arretrato composto da ${defs.join(', ')}.`);
+            }
+            if (mids.length > 0) {
+                parts.push(`In mediana spazio a ${mids.join(', ')}.`);
+            }
+            if (fwds.length > 0) {
+                parts.push(`Nel reparto offensivo pronti ${fwds.join(' e ')}.`);
+            }
+            if (ballottaggi && ballottaggi.length > 0) {
+                const bStrings = ballottaggi
+                    .filter((pair: any) => pair && pair.length >= 2)
+                    .map((pair: any) => `${pair[0].name} (${pair[0].prob}%) - ${pair[1].name} (${pair[1].prob}%)`);
+                if (bStrings.length > 0) {
+                    parts.push(`Ballottaggi aperti: ${bStrings.join('; ')}.`);
+                }
+            }
+            const outNames = [
+                ...(squalificati || []).map((x: any) => x.name),
+                ...(infortunati || []).map((x: any) => x.name),
+            ].filter(Boolean);
+            if (outNames.length > 0) {
+                parts.push(`Indisponibili: ${outNames.join(', ')}.`);
+            }
+            return parts.join(' ');
+        };
 
         matches.each((i, match) => {
             const homeName = $(match).find("label.team-home meta[itemprop='name']").attr("content");
@@ -44,7 +89,7 @@ serve(async (req) => {
                         const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
                         const prob = parseInt(probText.replace('%', '')) || 100;
-                        const role = $(el).find('.role').attr('data-value') || '-';
+                        const role = ($(el).find('.role').attr('data-value') || '-').toUpperCase();
                         if (name) {
                             starters.push({ name, prob, role, ballottaggio: prob < 100 });
                         }
@@ -54,7 +99,7 @@ serve(async (req) => {
                         const name = $(el).find('.player-name span').text().trim() || $(el).find('.player-name').text().trim();
                         const probText = $(el).find('.progress-value').text().trim();
                         const prob = parseInt(probText.replace('%', '')) || 0;
-                        const role = $(el).find('.role').attr('data-value') || '-';
+                        const role = ($(el).find('.role').attr('data-value') || '-').toUpperCase();
                         if (name) {
                             bench.push({ name, prob, role, ballottaggio: prob > 0 });
                         }
@@ -128,15 +173,41 @@ serve(async (req) => {
                     }
                 });
 
+                const matchDate = $(match).find('.match-info .match-date').text().replace(/\s+/g, ' ').trim();
+                const matchStadium = $(match).find('.match-info .match-stadium').text().replace(/\s+/g, ' ').trim();
+
                 // PARSE PRESENTAZIONE SQUADRE (Commentary)
                 let homeCommentary = "";
                 let awayCommentary = "";
-                $(match).find('.col').each((i: number, col: any) => {
+                $(match).find('.match-comment .col').each((i: number, col: any) => {
                     const colTeam = $(col).find('h4').text().trim();
-                    const comment = $(col).find('.comment p').text().replace(/\s+/g, ' ').trim();
-                    if (colTeam === homeName) homeCommentary = comment;
-                    if (colTeam === awayName) awayCommentary = comment;
+                    const comment = ($(col).find('.comment p').text() || $(col).find('.comment').text()).replace(/\s+/g, ' ').trim();
+                    if (comment && comment.toLowerCase() !== 'nessuna notizia') {
+                        if (colTeam === homeName) homeCommentary = comment;
+                        if (colTeam === awayName) awayCommentary = comment;
+                    }
                 });
+
+                if (!homeCommentary) {
+                    homeCommentary = buildFactualCommentary(
+                        homeName || "",
+                        homeTeamData.formation,
+                        homeTeamData.starters,
+                        details.Ballottaggi?.home || [],
+                        details.Infortunati?.home || [],
+                        details.Squalificati?.home || []
+                    );
+                }
+                if (!awayCommentary) {
+                    awayCommentary = buildFactualCommentary(
+                        awayName || "",
+                        awayTeamData.formation,
+                        awayTeamData.starters,
+                        details.Ballottaggi?.away || [],
+                        details.Infortunati?.away || [],
+                        details.Squalificati?.away || []
+                    );
+                }
 
                 const match_name = `${homeName} - ${awayName}`;
 
@@ -148,6 +219,8 @@ serve(async (req) => {
                     bench: homeTeamData.bench,
                     details: {
                         commentary: homeCommentary,
+                        match_date: matchDate,
+                        match_stadium: matchStadium,
                         Ballottaggi: details.Ballottaggi?.home || [],
                         Squalificati: details.Squalificati?.home || [],
                         Diffidati: details.Diffidati?.home || [],
@@ -165,6 +238,8 @@ serve(async (req) => {
                     bench: awayTeamData.bench,
                     details: {
                         commentary: awayCommentary,
+                        match_date: matchDate,
+                        match_stadium: matchStadium,
                         Ballottaggi: details.Ballottaggi?.away || [],
                         Squalificati: details.Squalificati?.away || [],
                         Diffidati: details.Diffidati?.away || [],

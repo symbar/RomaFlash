@@ -8,75 +8,14 @@ import PullToRefresh from '@/components/PullToRefresh';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/components/LanguageContext';
 
-// --- MOCK DATA ---
-const matchData = {
-  homeTeam: "Como",
-  homeLogo: "https://crests.football-data.org/7397.png",
+const initialMatchData = {
+  homeTeam: "Casa",
+  homeLogo: "https://crests.football-data.org/100.png",
   awayTeam: "Roma",
   awayLogo: "https://crests.football-data.org/100.png",
-  date: "Domenica 11 Ottobre, 12:30",
-  stadium: "Giuseppe Sinigaglia",
-  lastUpdate: "10/10/2026 - 19:04"
-};
-
-const homeState = {
-  formation: "4-2-3-1",
-  starters: [
-    { name: "Audero", role: "P", prob: 95 },
-    { name: "Iovine", role: "D", prob: 90 },
-    { name: "Kempf", role: "D", prob: 90 },
-    { name: "Dossena", role: "D", prob: 85 },
-    { name: "Moreno", role: "D", prob: 80 },
-    { name: "Perrone", role: "C", prob: 85 },
-    { name: "Sergi Roberto", role: "C", prob: 90 },
-    { name: "Strefezza", role: "C", prob: 95 },
-    { name: "Paz", role: "C", prob: 60, ballottaggio: true },
-    { name: "Fadera", role: "C", prob: 55, ballottaggio: true },
-    { name: "Cutrone", role: "A", prob: 90 },
-  ],
-  bench: [
-    { name: "Reina", prob: 5 },
-    { name: "Goldaniga", prob: 10 },
-    { name: "Sala", prob: 15 },
-    { name: "Engelhardt", prob: 20 },
-    { name: "Baselli", prob: 30 },
-    { name: "Verdi", prob: 40 },
-    { name: "Gabrielloni", prob: 45 },
-    { name: "Belotti", prob: 35 },
-  ]
-};
-
-const awayState = {
-  formation: "3-4-2-1",
-  starters: [
-    { name: "Svilar", role: "P", prob: 99 },
-    { name: "Mancini", role: "D", prob: 90 },
-    { name: "Ndicka", role: "D", prob: 85 },
-    { name: "Hermoso", role: "D", prob: 60, ballottaggio: true },
-    { name: "Celik", role: "C", prob: 90 },
-    { name: "Cristante", role: "C", prob: 70 },
-    { name: "Kone", role: "C", prob: 85 },
-    { name: "Angelino", role: "C", prob: 90 },
-    { name: "Dybala", role: "A", prob: 55, ballottaggio: true },
-    { name: "Pellegrini", role: "A", prob: 80 },
-    { name: "Dovbyk", role: "A", prob: 95 },
-  ],
-  bench: [
-    { name: "Ryan", prob: 1 },
-    { name: "Hummels", prob: 40 },
-    { name: "Abdulhamid", prob: 10 },
-    { name: "Dahl", prob: 5 },
-    { name: "Le Fée", prob: 30 },
-    { name: "Pisilli", prob: 45 },
-    { name: "Baldanzi", prob: 40 },
-    { name: "Soulé", prob: 45 },
-    { name: "Shomurodov", prob: 15 },
-  ]
-};
-
-const analysis = {
-  home: "Nel Como mister Fabregas si affida all'esperienza di Sergi Roberto in mezzo al campo. In attacco fiducia a Cutrone, mentre sulla trequarti c'è un serrato ballottaggio tra Paz e Fadera, con il primo leggermente favorito per una maglia da titolare.",
-  away: "Per i giallorossi, De Rossi dovrebbe confermare il 3-4-2-1. In difesa Hermoso è in leggero vantaggio su Hummels per una maglia dal primo minuto. Il vero nodo è in attacco: Dybala non è al 100% e c'è un forte testa a testa con Soulé per affiancare Pellegrini dietro a Dovbyk."
+  date: "",
+  stadium: "",
+  lastUpdate: "-"
 };
 
 // --- COMPONENTS ---
@@ -324,16 +263,54 @@ function DonutChart({ prob, color, size = 48 }: { prob: number, color: string, s
   );
 }
 
+function buildDynamicCommentary(teamName: string, state: any): string {
+  const explicit = (state?.details?.commentary || "").trim();
+  if (explicit && explicit.toLowerCase() !== "nessuna notizia") {
+    return explicit;
+  }
+  const starters = Array.isArray(state?.starters) ? state.starters : [];
+  if (starters.length === 0) {
+    return "In attesa delle indicazioni ufficiali dai campi di allenamento.";
+  }
+  const gk = starters.filter((p: any) => (p.role || "").toUpperCase() === "P").map((p: any) => p.name);
+  const defs = starters.filter((p: any) => (p.role || "").toUpperCase() === "D").map((p: any) => p.name);
+  const mids = starters.filter((p: any) => (p.role || "").toUpperCase() === "C").map((p: any) => p.name);
+  const fwds = starters.filter((p: any) => (p.role || "").toUpperCase() === "A").map((p: any) => p.name);
+
+  const parts: string[] = [`${teamName} verso il modulo ${state.formation || "N/A"}.`];
+  if (gk.length > 0 && defs.length > 0) {
+    parts.push(`Tra i pali ${gk[0]}, con il reparto arretrato formato da ${defs.join(", ")}.`);
+  }
+  if (mids.length > 0) {
+    parts.push(`A centrocampo spazio a ${mids.join(", ")}.`);
+  }
+  if (fwds.length > 0) {
+    parts.push(`In avanti pronti ${fwds.join(" e ")}.`);
+  }
+  const outNames = [
+    ...(state?.details?.Squalificati || []).map((x: any) => x.name),
+    ...(state?.details?.Infortunati || []).map((x: any) => x.name),
+  ].filter(Boolean);
+  if (outNames.length > 0) {
+    parts.push(`Indisponibili: ${outNames.join(", ")}.`);
+  }
+  return parts.join(" ");
+}
+
 export default function FormazioniPage() {
   const { lang, t } = useLanguage();
-  const [matchState, setMatchState] = useState(matchData);
+  const [matchState, setMatchState] = useState(initialMatchData);
   const [homeState, setHomeState] = useState({
     formation: "4-2-3-1",
-    bench: [], starters: ["Audero", "Iovine", "Kempf", "Dossena", "Moreno", "Sergi R.", "Perrone", "Strefezza", {name: "Paz", ballottaggio: true}, {name: "Fadera", ballottaggio: true}, "Cutrone"], details: null as any
+    bench: [] as any[],
+    starters: [] as any[],
+    details: null as any
   });
   const [awayState, setAwayState] = useState({
     formation: "3-4-2-1",
-    bench: [], starters: ["Svilar", "Mancini", "Ndicka", {name: "Hermoso", ballottaggio: true}, "Celik", "Cristante", "Kone", "Angelino", {name: "Dybala", ballottaggio: true}, "Pellegrini", "Dovbyk"], details: null as any
+    bench: [] as any[],
+    starters: [] as any[],
+    details: null as any
   });
   
   const fetchLineups = async () => {
@@ -373,6 +350,8 @@ export default function FormazioniPage() {
         setMatchState(prev => ({
           ...prev,
           lastUpdate: dateStr,
+          date: romaData.details?.match_date || oppData?.details?.match_date || prev.date,
+          stadium: romaData.details?.match_stadium || oppData?.details?.match_stadium || prev.stadium,
           homeTeam: teams[0],
           awayTeam: teams[1],
           homeLogo: findLogo(teams[0], prev.homeLogo),
@@ -492,11 +471,11 @@ export default function FormazioniPage() {
             <div className="grid grid-cols-2 gap-2 md:gap-4">
               <div className="bg-white border border-border rounded-xl p-3 md:p-5 shadow-sm">
                 <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-1.5">{matchState.homeTeam}</h3>
-                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{homeState?.details?.commentary || analysis.home}</p>
+                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{buildDynamicCommentary(matchState.homeTeam, homeState)}</p>
               </div>
               <div className="bg-white border border-primary/20 rounded-xl p-3 md:p-5 shadow-sm">
                 <h3 className="text-xs md:text-sm font-bold text-primary mb-1.5">{matchState.awayTeam}</h3>
-                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{awayState?.details?.commentary || analysis.away}</p>
+                <p className="text-[11px] md:text-xs text-gray-700 leading-relaxed">{buildDynamicCommentary(matchState.awayTeam, awayState)}</p>
               </div>
             </div>
           </div>

@@ -56,12 +56,12 @@ export async function onRequestGet(context: any) {
     const publishedAt = article.published_at || new Date().toISOString();
     const canonicalUrl = `https://romaflash.app/article?id=${article.id}`;
 
-    // Resolve full absolute image URL for OpenGraph and X/Twitter Cards
+    // Resolve full absolute image URL (1200x630 JPEG) for OpenGraph and X/Twitter Cards
     let ogImage = "https://romaflash.app/images/archive/roma-1.jpg";
     if (article.image_url) {
       ogImage = article.image_url.startsWith("/")
         ? `https://romaflash.app${article.image_url}`
-        : article.image_url;
+        : `https://wsrv.nl/?url=${encodeURIComponent(article.image_url)}&w=1200&h=630&fit=cover&output=jpg`;
     } else if (article.ai_summary?.youtube_id) {
       ogImage = `https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`;
     } else if (
@@ -119,12 +119,16 @@ export async function onRequestGet(context: any) {
       <meta property="og:description" content="${safeDesc}" />
       <meta property="og:url" content="${safeCanonical}" />
       <meta property="og:image" content="${safeOgImage}" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:type" content="image/jpeg" />
       <meta property="article:published_time" content="${escapeHtml(publishedAt)}" />
       <meta property="article:section" content="${safeCategory}" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="${safeOgTitle}" />
       <meta name="twitter:description" content="${safeDesc}" />
       <meta name="twitter:image" content="${safeOgImage}" />
+      <meta name="twitter:image:src" content="${safeOgImage}" />
       <script type="application/ld+json">${safeJsonLd}</script>
     `;
 

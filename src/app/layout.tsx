@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display, Bebas_Neue, Oswald } from "next/font/google";
 import "./globals.css";
 import { InstallPrompt } from '@/components/InstallPrompt';
 import Script from 'next/script';
@@ -17,6 +17,18 @@ const geistMono = Geist_Mono({
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
+});
+
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  variable: "--font-bebas",
+  subsets: ["latin", "latin-ext"],
+});
+
+const oswald = Oswald({
+  weight: ["600", "700"],
+  variable: "--font-oswald",
+  subsets: ["latin", "latin-ext"],
 });
 
 export const viewport: Viewport = {
@@ -93,7 +105,7 @@ export default function RootLayout({
   return (
     <html
       lang="it"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${bebasNeue.variable} ${oswald.variable} antialiased`}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-screen">

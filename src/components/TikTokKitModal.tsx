@@ -240,7 +240,6 @@ function renderSingleSlide(
     .toUpperCase()
     .trim();
   const suntoText = buildCompleteSuperSunto(article);
-  const categoryText = (article?.ai_summary?.category || "ULTIM'ORA").toUpperCase();
 
   const condensedFont = getCondensedFontFamily();
 
@@ -262,9 +261,8 @@ function renderSingleSlide(
     suntoLineH = Math.round(suntoSize * 1.34);
 
     const totalBlockH =
-      52 + // Category badge
       titleLines.length * titleLineH +
-      34 + // Gold bar gap
+      38 + // Gold bar gap
       suntoLines.length * suntoLineH;
 
     if (totalBlockH <= 690 || (titleSize <= 48 && suntoSize <= 28)) {
@@ -275,9 +273,8 @@ function renderSingleSlide(
   }
 
   const totalBlockH =
-    52 +
     titleLines.length * titleLineH +
-    34 +
+    38 +
     suntoLines.length * suntoLineH;
 
   // Position block in the lower portion, leaving generous bottom margin (y <= 1280)
@@ -288,20 +285,6 @@ function renderSingleSlide(
   ctx.save();
   ctx.textBaseline = "top";
   ctx.textAlign = "left";
-
-  // Category Pill Badge
-  ctx.font = "800 22px system-ui, -apple-system, sans-serif";
-  const catMetrics = ctx.measureText(categoryText);
-  const pillW = catMetrics.width + 32;
-  const pillH = 38;
-  ctx.fillStyle = "#e02d47";
-  ctx.beginPath();
-  ctx.roundRect(padX, y, pillW, pillH, 8);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText(categoryText, padX + 16, y + 8);
-
-  y += 54;
 
   // Headline (Two-tone White + Gold, 100% complete)
   ctx.font = `700 ${titleSize}px ${condensedFont}`;

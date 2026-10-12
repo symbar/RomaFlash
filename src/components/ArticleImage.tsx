@@ -10,6 +10,25 @@ interface ArticleImageProps {
   className?: string;
 }
 
+export function getArticleImageUrl(article: any): string | null {
+  if (!article) return null;
+  if (article.image_url) return article.image_url;
+  const isDailyBriefing =
+    article.original_url?.startsWith('romaflash-daily-briefing') ||
+    article.ai_summary?.category === 'Il Punto della Giornata' ||
+    article.title?.startsWith('Il Punto della Giornata');
+  if (isDailyBriefing) {
+    const idStr = String(article.id || article.original_url || '');
+    let hash = 0;
+    for (let i = 0; i < idStr.length; i++) {
+      hash = (hash * 31 + idStr.charCodeAt(i)) >>> 0;
+    }
+    const idx = (hash % 3) + 1;
+    return `/images/daily-briefing/briefing-${idx}.jpg`;
+  }
+  return null;
+}
+
 export default function ArticleImage({
   src,
   alt,

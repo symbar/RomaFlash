@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalRightSidebar from '@/components/GlobalRightSidebar';
 import { useLanguage } from '@/components/LanguageContext';
-import ArticleImage from '@/components/ArticleImage';
+import ArticleImage, { getArticleImageUrl } from '@/components/ArticleImage';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -297,6 +297,7 @@ export default function Home() {
                 const displayTitle = getArticleTitle(article);
                 const displayExcerpt = getArticleExcerpt(article);
                 const displayCategory = article.ai_summary?.category ? translateCategory(article.ai_summary.category) : '';
+                const articleImageUrl = getArticleImageUrl(article);
 
                 return (
                   <motion.article 
@@ -315,14 +316,14 @@ export default function Home() {
                       <>
                         <div
                           className={`h-60 sm:h-72 md:h-80 relative overflow-hidden flex flex-col justify-end p-6 border-b border-border ${
-                            article.image_url
+                            articleImageUrl
                               ? 'bg-gray-900'
                               : 'bg-gradient-to-tr from-gray-50 via-white to-primary/10'
                           }`}
                         >
-                          {article.image_url ? (
+                          {articleImageUrl ? (
                             <div className="absolute inset-0">
-                              <ArticleImage src={article.image_url} alt={displayTitle} variant="hero" />
+                              <ArticleImage src={articleImageUrl} alt={displayTitle} variant="hero" />
                             </div>
                           ) : article.ai_summary?.youtube_id ? (
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" alt="Video" />
@@ -340,7 +341,7 @@ export default function Home() {
                             </div>
                             <h2
                               className={`text-2xl md:text-3xl font-bold leading-tight ${
-                                article.image_url ? 'text-white drop-shadow-md' : 'text-gray-900'
+                                articleImageUrl ? 'text-white drop-shadow-md' : 'text-gray-900'
                               }`}
                             >
                               {displayTitle}
@@ -366,8 +367,8 @@ export default function Home() {
                     ) : (
                       /* STANDARD CARD LAYOUT WITH TOP FULL-WIDTH IMAGE */
                       <>
-                        {article.image_url ? (
-                          <ArticleImage src={article.image_url} alt={displayTitle} variant="card" />
+                        {articleImageUrl ? (
+                          <ArticleImage src={articleImageUrl} alt={displayTitle} variant="card" />
                         ) : article.ai_summary?.youtube_id ? (
                           <div className="h-48 relative overflow-hidden bg-black">
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" alt="Video" />

@@ -375,21 +375,38 @@ export default function TikTokKitModal({
 
   if (!article || typeof document === "undefined") return null;
 
-  const baseText = (
-    article.ai_summary?.tweet_text ||
-    `🐺🟡🔴 ${article.title}\n\n${article.ai_summary?.excerpt || ""}`
-  )
+  const poll = article.ai_summary?.poll || {
+    question: "Cosa ne pensi di questa notizia in casa giallorossa?",
+    options: [
+      "Ottima notizia, avanti così!",
+      "Serve fare di più sul campo",
+      "Aspettiamo la prossima partita",
+    ],
+  };
+
+  const pollOptionsText = (poll.options || [])
+    .slice(0, 3)
+    .map(
+      (opt: string, i: number) => `${["1️⃣", "2️⃣", "3️⃣"][i] || `${i + 1}.`} ${opt}`
+    )
+    .join("\n");
+
+  const summarySnippet = (article.ai_summary?.excerpt || article.title || "")
     .replace(/#[a-zA-Z0-9_]+/g, "")
     .trim();
 
   const extraTags = (article.ai_summary?.dynamic_hashtags || "")
     .replace(/#ASRoma/gi, "")
     .replace(/#RomaFlash/gi, "")
+    .replace(/#Romanisti/gi, "")
+    .replace(/#CurvaSudRoma/gi, "")
+    .replace(/#SerieA/gi, "")
+    .replace(/#PerTe/gi, "")
     .trim();
 
-  const hashtags = `#ASRoma #RomaFlash ${extraTags ? `${extraTags} ` : ""}#SerieA #Roma #PerTe`;
+  const hashtags = `#ASRoma #RomaFlash ${extraTags ? `${extraTags} ` : ""}#Romanisti #CurvaSudRoma #SerieA #PerTe`;
 
-  const tiktokCaption = `${baseText}\n\n📊 Scorri alla Slide 2 e vota il sondaggio: scrivi 1, 2 o 3 nei commenti! 👇\n\n⚡ Tutte le notizie giallorosse in tempo reale e ZERO pubblicità su romaflash.app (Link in Bio)\n\n${hashtags}`;
+  const tiktokCaption = `🔥 ${poll.question} 👉 Scorri alla Slide 2 e scrivi 1, 2 o 3 nei commenti! 👇\n\n${pollOptionsText}\n\n🐺🟡🔴 ${summarySnippet}\n\n⚡ Tutte le notizie sulla Roma in tempo reale e ZERO pubblicità su romaflash.app (Link in Bio)\n\n${hashtags}`;
 
   const handleDownload = (dataUrl: string, filename: string) => {
     const a = document.createElement("a");

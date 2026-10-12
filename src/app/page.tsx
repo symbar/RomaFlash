@@ -364,9 +364,11 @@ export default function Home() {
                         </div>
                       </>
                     ) : (
-                      /* STANDARD CARD LAYOUT WITH THUMBNAIL */
+                      /* STANDARD CARD LAYOUT WITH TOP FULL-WIDTH IMAGE */
                       <>
-                        {article.ai_summary?.youtube_id && !article.image_url && (
+                        {article.image_url ? (
+                          <ArticleImage src={article.image_url} alt={displayTitle} variant="card" />
+                        ) : article.ai_summary?.youtube_id ? (
                           <div className="h-48 relative overflow-hidden bg-black">
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" alt="Video" />
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -375,7 +377,7 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
-                        )}
+                        ) : null}
                         
                         <div className="p-5 flex-1 flex flex-col justify-between">
                           <div>
@@ -387,14 +389,9 @@ export default function Home() {
                               )}
                               {article.ai_summary?.sentiment && getSentimentBadge(article.ai_summary.sentiment)}
                             </div>
-                            <div className="flex items-start justify-between gap-3 mb-2">
-                              <h2 className="text-lg font-bold text-foreground leading-snug group-hover:text-primary transition-colors flex-1">
-                                {displayTitle}
-                              </h2>
-                              {article.image_url && (
-                                <ArticleImage src={article.image_url} alt={displayTitle} variant="thumbnail" />
-                              )}
-                            </div>
+                            <h2 className="text-lg font-bold text-foreground leading-snug mb-2 group-hover:text-primary transition-colors">
+                              {displayTitle}
+                            </h2>
                             <p className="text-sm text-gray-600 line-clamp-3">
                               {displayExcerpt}
                             </p>

@@ -6,24 +6,24 @@ import { WolfLogo } from '@/components/Icons';
 interface ArticleImageProps {
   src?: string | null;
   alt: string;
-  variant?: 'hero' | 'thumbnail' | 'article';
+  variant?: 'hero' | 'card' | 'article';
   className?: string;
 }
 
 export default function ArticleImage({
   src,
   alt,
-  variant = 'thumbnail',
+  variant = 'card',
   className = '',
 }: ArticleImageProps) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) return null;
 
-  if (variant === 'thumbnail') {
+  if (variant === 'card') {
     return (
       <div
-        className={`relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] shrink-0 rounded-xl overflow-hidden bg-gray-100 border border-border/70 ${className}`}
+        className={`relative w-full aspect-[16/9] overflow-hidden bg-gray-100 border-b border-border/60 ${className}`}
       >
         <img
           src={src}
@@ -31,10 +31,10 @@ export default function ArticleImage({
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setHasError(true)}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         {/* RomaFlash Wolf Logo Badge (Top-Left) */}
-        <div className="absolute top-1 left-1 w-5 h-5 rounded-md bg-[#2a070c]/85 backdrop-blur-xs flex items-center justify-center p-0.5 shadow-sm border border-[#f0b516]/40 pointer-events-none">
+        <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1 shadow-md border border-[#f0b516]/50 pointer-events-none">
           <WolfLogo className="w-full h-full" />
         </div>
       </div>

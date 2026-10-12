@@ -133,6 +133,25 @@ export default function StatsBackofficePage() {
     setDeletingId(null);
   };
 
+  const handleSetTikTokShared = async (articleId: string, shared: boolean) => {
+    setArticles((prev) =>
+      prev.map((a) =>
+        a.id === articleId
+          ? {
+              ...a,
+              ai_summary: { ...(a.ai_summary || {}), tiktok_shared: shared },
+            }
+          : a
+      )
+    );
+    if (!unlockedPin) return;
+    await supabase.rpc("admin_set_tiktok_shared", {
+      target_article_id: articleId,
+      admin_pin: unlockedPin,
+      is_shared: shared,
+    });
+  };
+
   const metrics = useMemo(() => {
     const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
     const now = Date.now();
@@ -464,26 +483,37 @@ export default function StatsBackofficePage() {
               key={art.id}
               className="bg-white border border-border rounded-xl p-3.5 shadow-xs flex flex-col gap-2"
             >
-              {/* Riga Superiore: Posizione + Categoria a sinistra | Letture + Voti + Elimina a destra */}
+              {/* Riga Superiore: Posizione + Social + Categoria a sinistra | Letture + Voti + Azioni a destra */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-[11px] font-black text-gray-400">
                     #{idx + 1}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700 truncate">
-                    {category}
                   </span>
                   {art.ai_summary?.x_tweet_id && (
                     <a
                       href="https://x.com/romaflashoffici"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0"
-                      title="Pubblicato automaticamente su X"
+                      className="inline-flex items-center justify-center w-5 h-5 rounded bg-black text-white text-[10px] font-black shrink-0"
+                      title="Pubblicato su X (@romaflashoffici)"
                     >
                       𝕏
                     </a>
                   )}
+                  {art.ai_summary?.tiktok_shared && (
+                    <a
+                      href="https://www.tiktok.com/@romaflash4"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center w-5 h-5 rounded bg-black text-white shrink-0"
+                      title="Pubblicato su TikTok (@romaflash4)"
+                    >
+                      <TikTokIcon className="w-3 h-3" />
+                    </a>
+                  )}
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700 truncate">
+                    {category}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -568,6 +598,7 @@ export default function StatsBackofficePage() {
               <tr>
                 <th className="py-3 px-3 w-10 text-center">#</th>
                 <th className="py-3 px-4">Articolo</th>
+                <th className="py-3 px-3 text-center">Social</th>
                 <th className="py-3 px-3 text-center">Categoria</th>
                 <th className="py-3 px-3 text-center">Letture</th>
                 <th className="py-3 px-3 text-center">Voti Poll</th>
@@ -581,6 +612,8 @@ export default function StatsBackofficePage() {
                 const votes = pollVotesMap[art.id] || 0;
                 const category = art.ai_summary?.category || "Altro";
                 const sourceName = art.sources?.name || "RomaFlash";
+                const hasX = Boolean(art.ai_summary?.x_tweet_id);
+                const hasTikTok = Boolean(art.ai_summary?.tiktok_shared);
                 const pubDate = new Date(art.published_at).toLocaleString(
                   "it-IT",
                   {
@@ -601,29 +634,46 @@ export default function StatsBackofficePage() {
                       {idx + 1}
                     </td>
                     <td className="py-3 px-4 max-w-md">
-                      <div className="flex items-center gap-1.5">
-                        {art.ai_summary?.x_tweet_id && (
-                          <a
-                            href="https://x.com/romaflashoffici"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center px-1.5 py-0.5 rounded bg-black text-white text-[10px] font-black shrink-0 hover:bg-gray-800"
-                            title="Pubblicato automaticamente su X (clicca per aprire il tweet)"
-                          >
-                            𝕏
-                          </a>
-                        )}
-                        <Link
-                          href={`/article?id=${art.id}`}
-                          className="font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1 inline-flex items-center gap-1.5"
-                        >
-                          <span>{art.title}</span>
-                          <ExternalLink className="w-3 h-3 text-gray-400 shrink-0" />
-                        </Link>
-                      </div>
+                      <Link
+                        href={`/article?id=${art.id}`}
+                        className="font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1 inline-flex items-center gap-1.5"
+                      >
+                        <span>{art.title}</span>
+                        <ExternalLink className="w-3 h-3 text-gray-400 shrink-0" />
+                      </Link>
                       <div className="text-[11px] text-gray-400 mt-0.5">
                         Fonte: {sourceName}
                       </div>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      {hasX || hasTikTok ? (
+                        <div className="inline-flex items-center justify-center gap-1">
+                          {hasX && (
+                            <a
+                              href="https://x.com/romaflashoffici"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-black text-white text-[11px] font-black hover:bg-gray-800 transition-colors"
+                              title="Pubblicato su X (@romaflashoffici)"
+                            >
+                              𝕏
+                            </a>
+                          )}
+                          {hasTikTok && (
+                            <a
+                              href="https://www.tiktok.com/@romaflash4"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-black text-white hover:bg-gray-800 transition-colors"
+                              title="Pubblicato su TikTok (@romaflash4)"
+                            >
+                              <TikTokIcon className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
                     </td>
                     <td className="py-3 px-3 text-center">
                       <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700">
@@ -688,7 +738,7 @@ export default function StatsBackofficePage() {
               {!loadingData && sortedArticles.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="py-10 text-center text-gray-500 text-sm"
                   >
                     Nessun articolo trovato.
@@ -704,6 +754,7 @@ export default function StatsBackofficePage() {
       <TikTokKitModal
         article={tiktokArticle}
         onClose={() => setTiktokArticle(null)}
+        onMarkShared={handleSetTikTokShared}
       />
     </main>
   );

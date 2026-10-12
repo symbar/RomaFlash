@@ -12,21 +12,39 @@ interface ArticleImageProps {
 
 export function getArticleImageUrl(article: any): string | null {
   if (!article) return null;
-  if (article.image_url) return article.image_url;
+
   const isDailyBriefing =
     article.original_url?.startsWith('romaflash-daily-briefing') ||
     article.ai_summary?.category === 'Il Punto della Giornata' ||
     article.title?.startsWith('Il Punto della Giornata');
+
+  const idStr = String(article.id || article.original_url || article.title || '');
+  let hash = 0;
+  for (let i = 0; i < idStr.length; i++) {
+    hash = (hash * 31 + idStr.charCodeAt(i)) >>> 0;
+  }
+
   if (isDailyBriefing) {
-    const idStr = String(article.id || article.original_url || '');
-    let hash = 0;
-    for (let i = 0; i < idStr.length; i++) {
-      hash = (hash * 31 + idStr.charCodeAt(i)) >>> 0;
-    }
     const idx = (hash % 3) + 1;
     return `/images/daily-briefing/briefing-${idx}.jpg`;
   }
-  return null;
+
+  if (article.image_url) {
+    const lowerUrl = String(article.image_url).toLowerCase();
+    const isSuspiciousGraphic =
+      lowerUrl.includes('screenshot') ||
+      lowerUrl.includes('grafica') ||
+      lowerUrl.includes('locandina') ||
+      lowerUrl.includes('f0eb4d5d3acaee6038d79b320b3d1541');
+
+    if (!isSuspiciousGraphic) {
+      return article.image_url;
+    }
+  }
+
+  // Fallback to one of the 10 custom RomaFlash archive images
+  const archiveIdx = (hash % 10) + 1;
+  return `/images/archive/roma-${archiveIdx}.jpg`;
 }
 
 export default function ArticleImage({

@@ -102,10 +102,16 @@ serve(async (req) => {
     const thirtySixHoursAgo = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
-      .select('title, ai_summary, published_at')
+      .select('title, ai_summary, published_at, image_url')
       .gte('published_at', thirtySixHoursAgo)
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
       .order('published_at', { ascending: false });
+      
+    const usedImageUrls = new Set<string>(
+      (recentArticles || [])
+        .map((a: any) => a.image_url)
+        .filter((u: any) => typeof u === 'string' && u.startsWith('http'))
+    );
       
     const latestPublishedAt = recentArticles && recentArticles.length > 0 
       ? new Date(recentArticles[0].published_at).getTime() 
@@ -215,7 +221,86 @@ serve(async (req) => {
 
           console.log(`Nuova notizia trovata: ${item.title}`)
 
-          // 4. Chiama Gemini per il riassunto e il controllo anti-spam
+          // 3b. Estrazione preventiva immagine candidata (enclosure RSS, media:content, o og:image della pagina)
+          let candidateImageUrl: string | null = null;
+          if (item.enclosure?.url) {
+            candidateImageUrl = item.enclosure.url;
+          } else if ((item as any).mediaContent?.[0]?.$.url) {
+            candidateImageUrl = (item as any).mediaContent[0].$.url;
+          } else if ((item as any).mediaThumbnail?.$.url) {
+            candidateImageUrl = (item as any).mediaThumbnail.$.url;
+          }
+
+          if (!candidateImageUrl && item.link) {
+            try {
+              const pageRes = await fetch(item.link, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+                signal: AbortSignal.timeout(4000)
+              });
+              const pageHtml = await pageRes.text();
+              const ogMatch = pageHtml.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i) ||
+                              pageHtml.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:image["']/i);
+              if (ogMatch && ogMatch[1]) {
+                candidateImageUrl = ogMatch[1];
+              }
+            } catch {
+              // fallback gracefully
+            }
+          }
+
+          // Controllo deterministico preliminare sull'URL immagine e sul titolo (grafiche, xG, screenshot, duplicati foto)
+          const lowerImgUrl = (candidateImageUrl || '').toLowerCase();
+          const lowerOrigTitle = (item.title || '').toLowerCase();
+          let isImageRejected =
+            !candidateImageUrl ||
+            usedImageUrls.has(candidateImageUrl) ||
+            lowerImgUrl.includes('screenshot') ||
+            lowerImgUrl.includes('grafica') ||
+            lowerImgUrl.includes('locandina') ||
+            lowerImgUrl.includes('podcast') ||
+            lowerImgUrl.includes('banner') ||
+            lowerImgUrl.includes('logo') ||
+            lowerImgUrl.includes('placeholder') ||
+            lowerImgUrl.includes('default') ||
+            lowerImgUrl.includes('footyheadlines') ||
+            /\bxg\b/i.test(lowerOrigTitle);
+
+          // Scarica i byte dell'immagine per farla ispezionare visivamente da Gemini Vision
+          let inlineImagePart: any = null;
+          if (candidateImageUrl && !isImageRejected) {
+            try {
+              const imgRes = await fetch(candidateImageUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+                signal: AbortSignal.timeout(3500)
+              });
+              if (imgRes.ok) {
+                const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+                const buf = await imgRes.arrayBuffer();
+                if (buf.byteLength > 5000 && buf.byteLength < 3500000 && contentType.startsWith('image/')) {
+                  const bytes = new Uint8Array(buf);
+                  let binary = '';
+                  const chunkSize = 0x8000;
+                  for (let i = 0; i < bytes.length; i += chunkSize) {
+                    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+                  }
+                  inlineImagePart = {
+                    inlineData: {
+                      mimeType: contentType.split(';')[0].trim(),
+                      data: btoa(binary)
+                    }
+                  };
+                } else {
+                  isImageRejected = true;
+                }
+              } else {
+                isImageRejected = true;
+              }
+            } catch {
+              isImageRejected = true;
+            }
+          }
+
+          // 4. Chiama Gemini per il riassunto, controllo anti-spam e ispezione visiva dell'immagine
           const prompt = `Sei il caporedattore di RomaFlash, quotidiano sportivo sull'AS Roma. 
 Il tuo compito è rielaborare questa notizia, ma PRIMA devi applicare un FILTRO ANTI-DUPLICATI E ANTI-SPAM ESTREMAMENTE RIGOROSO.
 
@@ -245,11 +330,18 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
    Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash.
    Scrivi in "tweet_text" un post magnetico in italiano per X (massimo 170 caratteri, con 1-2 emoji pertinenti, SENZA URL e SENZA hashtag perché verranno aggiunti dal sistema).
    Scrivi in "dynamic_hashtags" 2 hashtag caldi e pertinenti alla notizia specifica (es. "#ComoRoma #Gasperini", "#Dybala #SerieA", "#RomaRealMadrid #ChampionsLeague", "#Calciomercato #Svilar"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
+9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
+   Se ti è stata allegata un'immagine, controllala con estrema severità.
+   Imposta "is_clean_real_photo": false SE l'immagine contiene UNO QUALSIASI di questi elementi:
+   - Loghi, stemmi, scritte o watermark della testata giornalistica o sito fonte (es. "Voce Giallorossa", "ForzaRoma", "RomaNews", "Tuttomercatoweb", "FootyHeadlines", "Sky", "DAZN", ecc.) in un angolo o sovraimpressi;
+   - Grafiche fatte a mano dalla fonte (es. risultati "FULL TIME 0-0", tabelle xG o statistiche, grafiche di formazioni, locandine di rubriche/podcast, fotomontaggi con testo, banner, screenshot di social o siti).
+   Imposta "is_clean_real_photo": true SOLO SE è una fotografia reale e pulita, totalmente priva di loghi di siti terzi, watermark o grafiche redazionali. Nel minimo dubbio, imposta "is_clean_real_photo": false!
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
   "is_duplicate": false, 
   "is_spam": false, 
+  "is_clean_real_photo": true,
   "tweet_text": "🚨 Ultime da Trigoria: Dybala torna in gruppo alla vigilia del match! Scelte quasi fatte in attacco 🐺🟡🔴",
   "dynamic_hashtags": "#Dybala #SerieA",
   "titolo": "Nuovo titolo", 
@@ -286,13 +378,18 @@ Titolo originale: ${item.title}
 Link della fonte originale: ${item.link}
 Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun contenuto aggiuntivo."}`
 
+          const requestParts: any[] = [{ text: prompt }];
+          if (inlineImagePart) {
+            requestParts.push(inlineImagePart);
+          }
+
           const geminiResponse = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiApiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
+                contents: [{ parts: requestParts }],
                 generationConfig: { temperature: 0.1 }
               }),
             }
@@ -302,6 +399,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
           
           let aiSummary: any = {}
           let newTitle = item.title
+          let isCleanRealPhoto = false
 
           try {
             // Estrai il testo dalla risposta di Gemini
@@ -319,6 +417,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               console.log(`SPAM O OFF-TOPIC RILEVATO DA GEMINI: ${item.title}`);
               continue; // Salta il salvataggio su Supabase
             }
+
+            isCleanRealPhoto = parsed.is_clean_real_photo === true;
 
             if (parsed.titolo) {
               newTitle = parsed.titolo.replace(/<bos>/g, '').replace(/<eos>/g, '').replace(/\*\*2/g, '').replace(/<[^>]+>/g, '');
@@ -358,31 +458,15 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             continue; // Salta il salvataggio in caso di errore di parsing
           }
 
-          // Estrazione immagine reale (enclosure RSS, media:content, o og:image della pagina)
-          let imageUrl: string | null = null;
-          if (item.enclosure?.url) {
-            imageUrl = item.enclosure.url;
-          } else if ((item as any).mediaContent?.[0]?.$.url) {
-            imageUrl = (item as any).mediaContent[0].$.url;
-          } else if ((item as any).mediaThumbnail?.$.url) {
-            imageUrl = (item as any).mediaThumbnail.$.url;
-          }
-
-          if (!imageUrl && item.link) {
-            try {
-              const pageRes = await fetch(item.link, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-                signal: AbortSignal.timeout(4000)
-              });
-              const pageHtml = await pageRes.text();
-              const ogMatch = pageHtml.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i) ||
-                              pageHtml.match(/<meta\s+content=["']([^"']+)["']\s+(?:property|name)=["']og:image["']/i);
-              if (ogMatch && ogMatch[1]) {
-                imageUrl = ogMatch[1];
-              }
-            } catch {
-              // fallback gracefully
-            }
+          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 10 immagini proprietarie RomaFlash
+          let imageUrl: string;
+          if (!isImageRejected && inlineImagePart && isCleanRealPhoto && candidateImageUrl) {
+            imageUrl = candidateImageUrl;
+            usedImageUrls.add(candidateImageUrl);
+          } else {
+            const randomIdx = Math.floor(Math.random() * 10) + 1;
+            imageUrl = `/images/archive/roma-${randomIdx}.jpg`;
+            console.log(`[IMAGE FILTER] Immagine fonte scartata (grafica/logo/mancante) -> assegnata ${imageUrl}`);
           }
 
           // 5. Determina la data di pubblicazione (Falsificazione a fin di bene se è in ritardo)

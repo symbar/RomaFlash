@@ -90,8 +90,8 @@ function drawUniformBackground(ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, 1080, 1920);
 }
 
-const HEADER_Y = 310;
-const HEADER_BOTTOM_Y = HEADER_Y + 124; // 434px
+const HEADER_Y = 295;
+const HEADER_BOTTOM_Y = HEADER_Y + 124; // 419px
 
 function drawCleanBrandHeader(
   ctx: CanvasRenderingContext2D,
@@ -135,29 +135,46 @@ function drawCleanBrandHeader(
   ctx.fill();
 }
 
-function buildFullNewsText(aiSummary: any): string {
-  const parts: string[] = [];
-  if (aiSummary?.excerpt && typeof aiSummary.excerpt === "string") {
-    parts.push(aiSummary.excerpt.trim());
-  }
-  const extraSources = [
-    ...(Array.isArray(aiSummary?.bullets) ? aiSummary.bullets : []),
-    ...(Array.isArray(aiSummary?.paragraphs) ? aiSummary.paragraphs : []),
-    ...(typeof aiSummary?.summary === "string" ? [aiSummary.summary] : []),
-  ];
-  for (const item of extraSources) {
-    if (item && typeof item === "string") {
-      const clean = item.replace(/^[•\-*]\s*/, "").trim();
-      if (clean && !parts.join(" ").includes(clean.slice(0, 28))) {
-        parts.push(clean);
+function buildParagraphBlocks(
+  ctx: CanvasRenderingContext2D,
+  aiSummary: any,
+  maxWidth: number,
+  maxTotalLines: number
+): { blocks: string[][]; totalLines: number } {
+  const rawContent = (
+    aiSummary?.content ||
+    aiSummary?.excerpt ||
+    "Leggi tutti i dettagli della notizia in tempo reale e senza pubblicità su romaflash.app."
+  ).trim();
+
+  const rawParagraphs = rawContent
+    .split(/\n+/)
+    .map((p: string) => p.trim())
+    .filter(Boolean);
+
+  const blocks: string[][] = [];
+  let usedLines = 0;
+
+  for (const p of rawParagraphs) {
+    if (usedLines >= maxTotalLines) break;
+    const lines = wrapText(ctx, p, maxWidth);
+    const remaining = maxTotalLines - usedLines;
+    if (lines.length <= remaining) {
+      blocks.push(lines);
+      usedLines += lines.length;
+    } else {
+      const sliced = lines.slice(0, remaining);
+      const lastIdx = sliced.length - 1;
+      if (lastIdx >= 0 && !/[.!?…]$/.test(sliced[lastIdx])) {
+        sliced[lastIdx] = sliced[lastIdx].replace(/[,;:\s]+$/, "") + "...";
       }
+      blocks.push(sliced);
+      usedLines += sliced.length;
+      break;
     }
   }
-  const combined = parts.join(" ").trim();
-  return (
-    combined ||
-    "Leggi tutti i dettagli della notizia in tempo reale e senza pubblicità su romaflash.app."
-  );
+
+  return { blocks, totalLines: usedLines };
 }
 
 function renderSlide1Canvas(article: any): string {
@@ -174,20 +191,29 @@ function renderSlide1Canvas(article: any): string {
   // 1. Fixed Header + Separator Bar
   drawCleanBrandHeader(ctx, safeX, safeW);
 
-  // 2. Measure Title (100% White) + Expanded News Text (up to 9 lines)
+  // 2. Measure Title (100% White) + Full Multi-Paragraph News Body (up to 12 lines)
   const title = article.title || "Notizia AS Roma";
-  ctx.font = "900 52px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 48px system-ui, -apple-system, sans-serif";
   const titleLines = wrapText(ctx, title, safeW).slice(0, 4);
-  const titleH = titleLines.length * 64;
+  const titleLineH = 58;
+  const titleH = titleLines.length * titleLineH;
 
-  const fullNews = buildFullNewsText(article.ai_summary);
-  ctx.font = "500 35px system-ui, -apple-system, sans-serif";
-  const excerptLines = wrapText(ctx, fullNews, safeW - 44).slice(0, 9);
-  const excerptH = excerptLines.length * 50;
+  const bodyFontSize = 31;
+  const bodyLineH = 44;
+  const paraGap = 22;
+  ctx.font = `500 ${bodyFontSize}px system-ui, -apple-system, sans-serif`;
+  const { blocks, totalLines } = buildParagraphBlocks(
+    ctx,
+    article.ai_summary,
+    safeW - 42,
+    12
+  );
+  const excerptH =
+    totalLines * bodyLineH + Math.max(0, blocks.length - 1) * paraGap;
 
-  const bodyTotalH = titleH + 46 + excerptH;
-  const bodyAreaTop = HEADER_BOTTOM_Y + 36; // 470
-  const bodyAreaBottom = 1310;
+  const bodyTotalH = titleH + 38 + excerptH;
+  const bodyAreaTop = HEADER_BOTTOM_Y + 30; // 449
+  const bodyAreaBottom = 1320;
   const bodyStartY = Math.max(
     bodyAreaTop,
     Math.round(bodyAreaTop + (bodyAreaBottom - bodyAreaTop - bodyTotalH) / 2)
@@ -195,26 +221,29 @@ function renderSlide1Canvas(article: any): string {
 
   // Main Headline (100% Pure White #ffffff)
   ctx.textBaseline = "top";
-  ctx.font = "900 52px system-ui, -apple-system, sans-serif";
+  ctx.font = "900 48px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#ffffff";
   let y = bodyStartY;
   for (let i = 0; i < titleLines.length; i++) {
     ctx.fillText(titleLines[i], safeX, y);
-    y += 64;
+    y += titleLineH;
   }
 
-  // Expanded News Summary (Vertical Gold Accent Bar + Crisp Light Text)
-  const summaryY = y + 46;
+  // Expanded News Content (Vertical Gold Accent Bar + Multi-Paragraph Text)
+  const summaryY = y + 38;
   drawRoundedRect(ctx, safeX, summaryY, 8, excerptH, 4);
   ctx.fillStyle = "#f0b516";
   ctx.fill();
 
-  ctx.font = "500 35px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
-  let ey = summaryY - 4;
-  for (const line of excerptLines) {
-    ctx.fillText(line, safeX + 34, ey);
-    ey += 50;
+  ctx.font = `500 ${bodyFontSize}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.93)";
+  let ey = summaryY - 3;
+  for (let b = 0; b < blocks.length; b++) {
+    for (const line of blocks[b]) {
+      ctx.fillText(line, safeX + 34, ey);
+      ey += bodyLineH;
+    }
+    ey += paraGap;
   }
 
   return canvas.toDataURL("image/png");

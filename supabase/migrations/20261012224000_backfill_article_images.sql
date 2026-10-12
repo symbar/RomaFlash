@@ -1,0 +1,24 @@
+-- Backfill real og:image URLs for recent articles
+UPDATE public.articles SET image_url = 'https://net-storage-auto.tcccdn.com/storage/vocegiallorossa.it/img_notizie/thumb3/cb/cbd9d154a2587670a502e652f77a1af6-06127-oooz0000.jpeg' WHERE id = '8622e082-1235-4dcf-8090-509957521d3a';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2022/06/romanews-roma-gianluca-petrachi-trigoria.jpg' WHERE id = 'd58b37d7-991c-4308-af9e-1ccf73f7db90';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2024/03/photo_2024-03-21_09-14-08.jpg' WHERE id = '8d60174c-52c3-408f-a101-ab4b215684de';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/Screenshot-2026-10-12-at-20-35-15-Instagram-2f25447424d9.png' WHERE id = '1136f824-1aa2-4759-90ef-c7c4e669b33b';
+UPDATE public.articles SET image_url = 'https://net-storage-auto.tcccdn.com/storage/vocegiallorossa.it/img_notizie/thumb3/e0/e0d04bfb3992ee4d2cb031e902030b94-75321-oooz0000.jpeg' WHERE id = '07433988-6967-477e-87d7-79d4ce4fa6a5';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2299560476-bad5703e6ebe.jpg' WHERE id = '78b25c43-5a16-40f7-b2fe-725537cdd4a6';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2026/09/Screenshot-2026-09-30-174210.png' WHERE id = 'e537e536-e5d5-4bdf-b31d-063301b598b6';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/202603/9dcf512779d1f0da10d8e943d8ed3b60-scaled-e1773866266823.jpg' WHERE id = '574ee73c-6045-4351-9158-eea829ea30a2';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-80984106-bbb53b49b778.jpg' WHERE id = 'd493d57b-914c-43e1-8d03-7b18f5b97b96';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2026/09/photo_2026-09-11_17-20-03-e1789140114570.jpg' WHERE id = 'b8954929-a5a4-4916-a712-5f85294e26c8';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2025/11/photo_1_2025-11-03_12-58-01.jpg' WHERE id = 'dcfaa7ef-15a3-475c-8e15-6f91be7b7391';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2299661156-fd3d29bc50a7.jpg' WHERE id = '32fc7859-df72-466a-ab06-d1fcc9e40873';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/09/GettyImages-2295028046-f388a410f65c.jpg' WHERE id = '5a4ddcf9-b76f-41fa-89a5-d6b2527cb06d';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2024/10/photo_2024-10-25_18-08-26.jpg' WHERE id = '1ba42cdb-b4be-40c3-b3ac-68a9fb028e78';
+UPDATE public.articles SET image_url = 'https://net-storage-auto.tcccdn.com/storage/vocegiallorossa.it/img_notizie/thumb3/cb/cbd9d154a2587670a502e652f77a1af6-06127-oooz0000.jpeg' WHERE id = 'e06cd659-2a39-459b-8721-daa5d9aaed89';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2288879152-eca3d4bdd564.jpg' WHERE id = 'f57aa8e3-9138-4410-b558-6e1215332622';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2275304568-1a946a66c0b1.jpg' WHERE id = 'f3861738-2a8d-4492-bb29-2cec60e5cb01';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2025/02/photo_2025-02-18_10-39-22.jpg' WHERE id = '455a3f11-325e-4de6-a8b6-dd7a10a08ef9';
+UPDATE public.articles SET image_url = 'https://net-storage-auto.tcccdn.com/storage/vocegiallorossa.it/img_notizie/thumb3/f0/f0eb4d5d3acaee6038d79b320b3d1541-08480-oooz0000.jpeg' WHERE id = '2e3f2c20-61ca-484d-8f5d-f48731f499f9';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2299653373-4d5d10aeca56.jpg' WHERE id = 'b293dac0-2839-440a-9be4-899fb4ebd26d';
+UPDATE public.articles SET image_url = 'https://www.romanews.eu/wp-content/uploads/2026/10/photo_5935924474622447722_y.jpg' WHERE id = '470840e0-3091-4ac4-980b-01f45f5ca0c1';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/2026/10/GettyImages-2299724694-6b29327cf993.jpg' WHERE id = '57e8997d-42ab-45a5-827f-54fae68dabb7';
+UPDATE public.articles SET image_url = 'https://static.forzaroma.info/202305/a6e2b07a69900f56775ddbdb9e4e3cd1-e1710828926279.jpg' WHERE id = '7689404a-605b-4ed4-aec6-951d21c9ea1f';

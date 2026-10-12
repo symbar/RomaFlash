@@ -313,7 +313,13 @@ export default function Home() {
                     {/* FIRST ITEM HERO LAYOUT */}
                     {index === 0 ? (
                       <>
-                        <div className="h-60 sm:h-72 md:h-80 bg-gradient-to-tr from-gray-900 via-gray-800 to-black relative overflow-hidden flex flex-col justify-end p-6 border-b border-border">
+                        <div
+                          className={`h-60 sm:h-72 md:h-80 relative overflow-hidden flex flex-col justify-end p-6 border-b border-border ${
+                            article.image_url
+                              ? 'bg-gray-900'
+                              : 'bg-gradient-to-tr from-gray-50 via-white to-primary/10'
+                          }`}
+                        >
                           {article.image_url ? (
                             <div className="absolute inset-0">
                               <ArticleImage src={article.image_url} alt={displayTitle} variant="hero" />
@@ -332,7 +338,11 @@ export default function Home() {
                                 </span>
                               )}
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight drop-shadow-md">
+                            <h2
+                              className={`text-2xl md:text-3xl font-bold leading-tight ${
+                                article.image_url ? 'text-white drop-shadow-md' : 'text-gray-900'
+                              }`}
+                            >
                               {displayTitle}
                             </h2>
                           </div>

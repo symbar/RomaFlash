@@ -50,7 +50,7 @@ export async function onRequestGet(context: any) {
     const title = article.title || "RomaFlash | Notizia AS Roma";
     const excerpt =
       article.ai_summary?.excerpt ||
-      "Notizie sull'AS Roma riassunte dall'AI su RomaFlash.";
+      "Notizie sull'AS Roma in tempo reale su RomaFlash.";
     const content = article.ai_summary?.content || excerpt;
     const category = article.ai_summary?.category || "AS Roma";
     const publishedAt = article.published_at || new Date().toISOString();

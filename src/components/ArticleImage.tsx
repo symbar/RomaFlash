@@ -342,10 +342,12 @@ export default function ArticleImage({
           onError={handleError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
-        {/* RomaFlash Wolf Logo Badge (Top-Left) */}
-        <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1 shadow-md border border-[#f0b516]/50 pointer-events-none">
-          <WolfLogo className="w-full h-full" />
-        </div>
+        {/* RomaFlash Wolf Logo Badge (Top-Left) - Nascosto solo per L'Analista nelle card piccole */}
+        {!isAnalyst && (
+          <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1 shadow-md border border-[#f0b516]/50 pointer-events-none">
+            <WolfLogo className="w-full h-full" />
+          </div>
+        )}
 
         {/* Dynamic Match Overlay (Logos + Score) */}
         {matchInfo && <AnalystMatchOverlay info={matchInfo} variant="card" />}

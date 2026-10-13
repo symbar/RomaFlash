@@ -137,13 +137,49 @@ function AnalystMatchOverlay({
   const isCard = variant === 'card';
   const isHero = variant === 'hero';
 
+  // Modalità Card Compatta (miniatura nella griglia/feed)
+  if (isCard) {
+    return (
+      <div className="absolute top-2.5 right-2 z-20 pointer-events-none">
+        <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 rounded-full bg-[#0a120f]/85 backdrop-blur-xs border border-[#f0b516]/40 shadow-md">
+          {info.homeLogo && (
+            <img
+              src={info.homeLogo}
+              alt={info.homeName}
+              className="w-3.5 h-3.5 object-contain shrink-0"
+            />
+          )}
+          <span className="text-white font-extrabold uppercase text-[9px] tracking-wide">
+            {info.homeName.replace(/AS\s+/i, '')}
+          </span>
+          <span className="px-1 py-0.2 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[9px] border border-[#f0b516]/30">
+            {info.homeScore !== undefined && info.awayScore !== undefined
+              ? `${info.homeScore}-${info.awayScore}`
+              : 'VS'}
+          </span>
+          <span className="text-white font-extrabold uppercase text-[9px] tracking-wide">
+            {info.awayName.replace(/AS\s+/i, '')}
+          </span>
+          {info.awayLogo && (
+            <img
+              src={info.awayLogo}
+              alt={info.awayName}
+              className="w-3.5 h-3.5 object-contain shrink-0"
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Modalità Hero (in evidenza) e Notizia interna
   return (
     <>
       {/* Pitch Team Crest Badges (Home half left, Away half right) */}
       {info.homeLogo && (
         <div
           className={`absolute left-[6%] sm:left-[9%] top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-xs shadow-2xl border border-[#f0b516]/65 pointer-events-none transition-transform duration-500 group-hover:scale-105 ${
-            isCard ? 'w-10 h-10 p-1.5' : 'w-14 h-14 sm:w-16 sm:h-16 p-2.5 sm:p-3'
+            isHero ? 'w-12 h-12 sm:w-16 sm:h-16 p-2 sm:p-3' : 'w-14 h-14 sm:w-18 sm:h-18 p-2.5 sm:p-3.5'
           }`}
           title={info.homeName}
         >
@@ -158,7 +194,7 @@ function AnalystMatchOverlay({
       {info.awayLogo && (
         <div
           className={`absolute right-[6%] sm:right-[9%] top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-xs shadow-2xl border border-white/35 pointer-events-none transition-transform duration-500 group-hover:scale-105 ${
-            isCard ? 'w-10 h-10 p-1.5' : 'w-14 h-14 sm:w-16 sm:h-16 p-2.5 sm:p-3'
+            isHero ? 'w-12 h-12 sm:w-16 sm:h-16 p-2 sm:p-3' : 'w-14 h-14 sm:w-18 sm:h-18 p-2.5 sm:p-3.5'
           }`}
           title={info.awayName}
         >
@@ -175,9 +211,7 @@ function AnalystMatchOverlay({
         className={`absolute z-20 pointer-events-none ${
           isHero
             ? 'top-4 right-4 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
-            : isCard
-              ? 'top-2.5 right-2 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
-              : 'top-3.5 left-1/2 -translate-x-1/2'
+            : 'top-3.5 left-1/2 -translate-x-1/2'
         }`}
       >
         <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#0a120f]/90 backdrop-blur-md border border-[#f0b516]/55 shadow-2xl">

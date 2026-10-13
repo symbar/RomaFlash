@@ -30,6 +30,9 @@ export function getArticleImageUrl(article: any): string | null {
   }
 
   if (isAnalyst) {
+    if (article.image_url && article.image_url.includes('/analista/')) {
+      return article.image_url;
+    }
     return '/images/analista/lavagna-tattica.jpg';
   }
 
@@ -53,9 +56,37 @@ export default function ArticleImage({
   variant = 'card',
   className = '',
 }: ArticleImageProps) {
+  const [imgSrc, setImgSrc] = useState<string | null>(src || null);
   const [hasError, setHasError] = useState(false);
 
-  if (!src || hasError) return null;
+  React.useEffect(() => {
+    setImgSrc(src || null);
+    setHasError(false);
+  }, [src]);
+
+  const handleError = () => {
+    if (imgSrc && imgSrc !== '/images/archive/roma-1.jpg') {
+      setImgSrc('/images/archive/roma-1.jpg');
+    } else {
+      setHasError(true);
+    }
+  };
+
+  if (!imgSrc || hasError) {
+    if (variant === 'hero') {
+      return (
+        <div className={`relative w-full h-full overflow-hidden bg-gradient-to-br from-[#2a070c] via-[#1a0407] to-gray-900 ${className}`}>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
+          <div className="absolute top-4 left-4 z-20 w-8 h-8 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-md border border-[#f0b516]/50 pointer-events-none">
+            <WolfLogo className="w-full h-full" />
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
+
+  const isExternal = imgSrc.startsWith('http://') || imgSrc.startsWith('https://');
 
   if (variant === 'card') {
     return (
@@ -63,11 +94,11 @@ export default function ArticleImage({
         className={`relative w-full aspect-[16/9] overflow-hidden bg-gray-100 border-b border-border/60 ${className}`}
       >
         <img
-          src={src}
+          src={imgSrc}
           alt={alt}
           loading="lazy"
-          referrerPolicy="no-referrer"
-          onError={() => setHasError(true)}
+          {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
+          onError={handleError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         {/* RomaFlash Wolf Logo Badge (Top-Left) */}
@@ -82,11 +113,11 @@ export default function ArticleImage({
     return (
       <div className={`relative w-full h-full overflow-hidden ${className}`}>
         <img
-          src={src}
+          src={imgSrc}
           alt={alt}
           loading="eager"
-          referrerPolicy="no-referrer"
-          onError={() => setHasError(true)}
+          {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
+          onError={handleError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
         {/* Gradient shadow for text readability */}
@@ -105,11 +136,11 @@ export default function ArticleImage({
       className={`relative w-full aspect-video md:aspect-[21/9] rounded-2xl overflow-hidden shadow-lg border border-border/80 bg-black/5 my-6 ${className}`}
     >
       <img
-        src={src}
+        src={imgSrc}
         alt={alt}
         loading="eager"
-        referrerPolicy="no-referrer"
-        onError={() => setHasError(true)}
+        {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
+        onError={handleError}
         className="w-full h-full object-cover"
       />
       {/* RomaFlash Wolf Logo Badge (Top-Left) */}

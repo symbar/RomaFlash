@@ -395,6 +395,20 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
       throw new Error("Invalid JSON from Gemini")
     }
 
+    const homeLogo = homeTeam.team?.logos?.[0]?.href || (homeTeam.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${homeTeam.team.id}.png` : 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png')
+    const awayLogo = awayTeam.team?.logos?.[0]?.href || (awayTeam.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${awayTeam.team.id}.png` : 'https://a.espncdn.com/i/teamlogos/soccer/500/109.png')
+
+    aiSummary.match_info = {
+      home_name: homeName,
+      away_name: awayName,
+      home_score: homeScore,
+      away_score: awayScore,
+      home_logo: homeLogo,
+      away_logo: awayLogo,
+      competition: competitionName,
+      event_id: targetMatch.eventId,
+    }
+
     const articleTitle = aiSummary.title || `L'Analista | ${homeName} ${homeScore}-${awayScore} ${awayName}`
     const tacticalBoardImg = `/images/analista/lavagna-tattica.jpg`
 

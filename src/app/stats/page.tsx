@@ -491,11 +491,11 @@ export default function StatsBackofficePage() {
                   </span>
                   {art.ai_summary?.x_tweet_id && (
                     <a
-                      href="https://x.com/romaflashoffici"
+                      href={art.ai_summary?.x_tweet_url || "https://x.com/romaflashoffici"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-5 h-5 rounded bg-black text-white text-[10px] font-black shrink-0"
-                      title="Pubblicato su X (@romaflashoffici)"
+                      className="inline-flex items-center justify-center w-5 h-5 rounded bg-black text-white text-[10px] font-black shrink-0 hover:opacity-80 transition-opacity"
+                      title={art.ai_summary?.x_tweet_url ? "Apri tweet su X" : "Pubblicato su X (@romaflashoffici)"}
                     >
                       𝕏
                     </a>

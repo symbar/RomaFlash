@@ -21,7 +21,7 @@ function resolvePublicImageUrl(rawUrl?: string | null): string | null {
 async function postToX(
   tweetText: string,
   imageUrl?: string | null
-): Promise<{ id?: string; error?: string }> {
+): Promise<{ id?: string; url?: string; error?: string }> {
   const bufferApiKey = Deno.env.get('BUFFER_API_KEY')
   const bufferChannelId = Deno.env.get('BUFFER_CHANNEL_ID') || '6acbee4e778b240e2fdc27e7'
 
@@ -53,6 +53,7 @@ async function postToX(
             post {
               id
               text
+              externalLink
             }
           }
           ... on MutationError {
@@ -78,9 +79,9 @@ async function postToX(
         }),
       })
       const mediaData = await mediaRes.json()
-      const mediaPostId = mediaData?.data?.createPost?.post?.id
-      if (mediaPostId) {
-        return { id: mediaPostId }
+      const mediaPost = mediaData?.data?.createPost?.post
+      if (mediaPost?.id) {
+        return { id: mediaPost.id, url: mediaPost.externalLink || undefined }
       }
       console.warn(
         '[X AUTO-POST] Invio con immagine non riuscito, fallback a link card:',
@@ -105,6 +106,7 @@ async function postToX(
           post {
             id
             text
+            externalLink
           }
         }
         ... on MutationError {
@@ -131,9 +133,9 @@ async function postToX(
     })
 
     const data = await res.json()
-    const postId = data?.data?.createPost?.post?.id
-    if (postId) {
-      return { id: postId }
+    const post = data?.data?.createPost?.post
+    if (post?.id) {
+      return { id: post.id, url: post.externalLink || undefined }
     }
     const errMsg = data?.data?.createPost?.message || JSON.stringify(data)
     console.error('Errore Buffer API:', errMsg)
@@ -458,6 +460,9 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
         console.log(`[X AUTO-POST] Articolo L'Analista pubblicato su X! ID: ${xRes.id}`)
         xTweetId = xRes.id
         aiSummary.x_tweet_id = xRes.id
+        if (xRes.url) {
+          aiSummary.x_tweet_url = xRes.url
+        }
         aiSummary.x_posted_at = new Date().toISOString()
         await supabase
           .from('articles')

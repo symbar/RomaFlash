@@ -128,7 +128,7 @@ Ecco la roadmap completa e aggiornata con tutte le 10 Fasi originali, i traguard
 *   **2. Audio-Notizie (Ascolta l'Articolo):** Sintesi vocale Text-to-Speech (micro-podcast di 30 secondi) per ascoltare le news in mobilità.
 *   **3. Calciomercato Tabellone & Rumor-Meter:** Sezione/Widget dedicato al mercato (Acquisti, Cessioni, Trattative) con termometro di affidabilità fonte (0-100%).
 *   **4. Diretta Testuale & Social Wall (Live Match):** Feed in tempo reale durante la partita per seguire l'andamento del match.
-*   **5. Editoriali e "Il Tattico" (Analisi AI):** Persona AI ("L'Analista") che pubblica analisi tattiche post-partita basate su statistiche reali (xG, possesso).
+*   ~~**5. Editoriali e "Il Tattico" (Analisi AI):** Rubrica post-partita "L'Analista | La Lavagna Tattica" basata sui dati statistici reali ESPN (possesso, tiri, passaggi, contrasti, intercettazioni) con grafica dedicata The Athletic, auto-post su X e push notification.~~ ✅ **(Completato)**
 *   **6. Le Pagelle Aggregate:** Media matematica ponderata dei voti assegnati ai giocatori dalle principali testate (Gazzetta, Corriere dello Sport, Il Messaggero).
 
 ---

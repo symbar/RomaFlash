@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     default: "RomaFlash | L'essenza delle notizie giallorosse",
     template: "%s | RomaFlash",
   },
-  description: "Notizie sull'AS Roma in tempo reale. Probabili formazioni, calciomercato, calendario e classifica. Veloce, pulito, senza pubblicità.",
+  description: "L'essenza delle notizie giallorosse. Notizie sull'AS Roma in tempo reale, probabili formazioni, calendario e classifica.",
   manifest: "/manifest.json",
   icons: {
     icon: "/icon",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     url: "https://romaflash.app",
     siteName: "RomaFlash",
     title: "RomaFlash | L'essenza delle notizie giallorosse",
-    description: "Notizie sull'AS Roma in tempo reale. Veloce, pulito, senza pubblicità.",
+    description: "L'essenza delle notizie giallorosse",
     images: [
       {
         url: "https://romaflash.app/icon",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "RomaFlash | L'essenza delle notizie giallorosse",
-    description: "Notizie sull'AS Roma in tempo reale. Veloce, pulito, senza pubblicità.",
+    description: "L'essenza delle notizie giallorosse",
     images: ["https://romaflash.app/icon"],
   },
 };

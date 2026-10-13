@@ -1,7 +1,7 @@
 {
   "name": "RomaFlash",
   "short_name": "RomaFlash",
-  "description": "Notizie essenziali sull'AS Roma in tempo reale.",
+  "description": "L'essenza delle notizie giallorosse",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#8e1f2f",

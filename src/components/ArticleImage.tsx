@@ -18,10 +18,19 @@ export function getArticleImageUrl(article: any): string | null {
     article.ai_summary?.category === 'Il Punto della Giornata' ||
     article.title?.startsWith('Il Punto della Giornata');
 
+  const isAnalyst =
+    article.original_url?.startsWith('romaflash-analyst') ||
+    article.ai_summary?.category === "L'Analista" ||
+    article.title?.startsWith("L'Analista");
+
   const idStr = String(article.id || article.original_url || article.title || '');
   let hash = 0;
   for (let i = 0; i < idStr.length; i++) {
     hash = (hash * 31 + idStr.charCodeAt(i)) >>> 0;
+  }
+
+  if (isAnalyst) {
+    return '/images/analista/lavagna-tattica.jpg';
   }
 
   if (isDailyBriefing) {

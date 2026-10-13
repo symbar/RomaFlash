@@ -121,6 +121,7 @@ const categoryMapEn: Record<string, string> = {
   'Dichiarazioni': 'Quotes',
   'Club': 'Club',
   'Social': 'Social',
+  "L'Analista": 'The Analyst',
   'Altro': 'More'
 };
 
@@ -139,9 +140,23 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Language>('it');
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang');
+    if (urlLang === 'en' || urlLang === 'it') {
+      setLangState(urlLang);
+      localStorage.setItem('romaflash_lang', urlLang);
+      return;
+    }
+
     const saved = localStorage.getItem('romaflash_lang') as Language | null;
     if (saved === 'it' || saved === 'en') {
       setLangState(saved);
+    } else if (
+      typeof navigator !== 'undefined' &&
+      navigator.language &&
+      !navigator.language.toLowerCase().startsWith('it')
+    ) {
+      setLangState('en');
     }
   }, []);
 

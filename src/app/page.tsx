@@ -324,7 +324,7 @@ export default function Home() {
                         >
                           {articleImageUrl ? (
                             <div className="absolute inset-0">
-                              <ArticleImage src={articleImageUrl} alt={displayTitle} variant="hero" />
+                              <ArticleImage src={articleImageUrl} alt={displayTitle} variant="hero" article={article} />
                             </div>
                           ) : article.ai_summary?.youtube_id ? (
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/maxresdefault.jpg`} className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-700" alt="Video" />
@@ -369,7 +369,7 @@ export default function Home() {
                       /* STANDARD CARD LAYOUT WITH TOP FULL-WIDTH IMAGE */
                       <>
                         {articleImageUrl ? (
-                          <ArticleImage src={articleImageUrl} alt={displayTitle} variant="card" />
+                          <ArticleImage src={articleImageUrl} alt={displayTitle} variant="card" article={article} />
                         ) : article.ai_summary?.youtube_id ? (
                           <div className="h-48 relative overflow-hidden bg-black">
                             <img src={`https://img.youtube.com/vi/${article.ai_summary.youtube_id}/hqdefault.jpg`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" alt="Video" />

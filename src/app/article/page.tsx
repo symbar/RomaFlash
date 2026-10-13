@@ -290,7 +290,7 @@ function ArticleContent() {
               </h1>
 
               {getArticleImageUrl(article) && !article.ai_summary?.youtube_id && (
-                <ArticleImage src={getArticleImageUrl(article)} alt={displayTitle} variant="article" />
+                <ArticleImage src={getArticleImageUrl(article)} alt={displayTitle} variant="article" article={article} />
               )}
               
               {article.ai_summary?.youtube_id && (

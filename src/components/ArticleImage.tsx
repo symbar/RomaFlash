@@ -169,8 +169,8 @@ function AnalystMatchOverlay({
         )}
 
         {/* Micro-Pillola Matchup in alto centrata */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-[#0a120f]/85 backdrop-blur-xs border border-[#f0b516]/45 shadow-md">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none whitespace-nowrap">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0a120f]/90 backdrop-blur-xs border border-[#f0b516]/45 shadow-md whitespace-nowrap shrink-0">
             {info.homeLogo && (
               <img
                 src={info.homeLogo}
@@ -178,15 +178,19 @@ function AnalystMatchOverlay({
                 className="w-3.5 h-3.5 object-contain shrink-0"
               />
             )}
-            <span className="text-white font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide">
+            <span className="text-white font-extrabold uppercase text-[10px] tracking-wide whitespace-nowrap shrink-0">
               {info.homeName.replace(/AS\s+/i, '')}
             </span>
-            <span className="px-1 py-0.2 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[9px] sm:text-[10px] border border-[#f0b516]/30">
-              {info.homeScore !== undefined && info.awayScore !== undefined
-                ? `${info.homeScore}-${info.awayScore}`
-                : 'VS'}
+            <span className="whitespace-nowrap shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[10px] leading-none border border-[#f0b516]/35 tracking-tight">
+              {info.homeScore !== undefined && info.awayScore !== undefined ? (
+                <span className="inline-block whitespace-nowrap select-none">
+                  {info.homeScore}&#8209;{info.awayScore}
+                </span>
+              ) : (
+                'VS'
+              )}
             </span>
-            <span className="text-white font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide">
+            <span className="text-white font-extrabold uppercase text-[10px] tracking-wide whitespace-nowrap shrink-0">
               {info.awayName.replace(/AS\s+/i, '')}
             </span>
             {info.awayLogo && (
@@ -238,38 +242,42 @@ function AnalystMatchOverlay({
 
       {/* Floating Matchup HUD Banner */}
       <div
-        className={`absolute z-20 pointer-events-none ${
+        className={`absolute z-20 pointer-events-none whitespace-nowrap ${
           isHero
             ? 'top-4 right-4 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
             : 'top-3.5 left-1/2 -translate-x-1/2'
         }`}
       >
-        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#0a120f]/90 backdrop-blur-md border border-[#f0b516]/55 shadow-2xl">
+        <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-[#0a120f]/90 backdrop-blur-md border border-[#f0b516]/55 shadow-2xl whitespace-nowrap shrink-0">
           {info.homeLogo && (
             <img
               src={info.homeLogo}
               alt={info.homeName}
-              className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+              className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0"
             />
           )}
-          <span className="text-white font-black uppercase text-[10px] sm:text-xs tracking-wider">
+          <span className="text-white font-black uppercase text-[10px] sm:text-xs tracking-wider whitespace-nowrap shrink-0">
             {info.homeName}
           </span>
 
-          <span className="px-1.5 py-0.5 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[11px] sm:text-xs border border-[#f0b516]/40 shadow-xs">
-            {info.homeScore !== undefined && info.awayScore !== undefined
-              ? `${info.homeScore} - ${info.awayScore}`
-              : 'VS'}
+          <span className="whitespace-nowrap shrink-0 inline-flex items-center justify-center px-2 py-0.5 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-xs sm:text-sm leading-none border border-[#f0b516]/40 shadow-xs tracking-tight">
+            {info.homeScore !== undefined && info.awayScore !== undefined ? (
+              <span className="inline-block whitespace-nowrap select-none">
+                {info.homeScore}&#8209;{info.awayScore}
+              </span>
+            ) : (
+              'VS'
+            )}
           </span>
 
-          <span className="text-white font-black uppercase text-[10px] sm:text-xs tracking-wider">
+          <span className="text-white font-black uppercase text-[10px] sm:text-xs tracking-wider whitespace-nowrap shrink-0">
             {info.awayName}
           </span>
           {info.awayLogo && (
             <img
               src={info.awayLogo}
               alt={info.awayName}
-              className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
+              className="w-4 h-4 sm:w-5 sm:h-5 object-contain shrink-0"
             />
           )}
         </div>

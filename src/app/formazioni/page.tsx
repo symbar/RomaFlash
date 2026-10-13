@@ -212,19 +212,48 @@ function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: an
     return playersInColumn;
   });
 
-  const colHeight = (count: number) => {
-    if (count === 1) return 'h-[70%] justify-center';
+  const getColStyle = (count: number, colIdx: number, totalCols: number) => {
+    if (count === 1) {
+      if (colIdx === totalCols - 2) {
+        // Second-to-last column with 1 player (CAM / Trequartista like Messias)
+        return 'h-[65%] justify-center pt-5 md:pt-8';
+      }
+      if (colIdx === totalCols - 1) {
+        // Last column with 1 player (Punta / Striker like Osmajic or Castro S.)
+        return 'h-[65%] justify-center pb-5 md:pb-8';
+      }
+      return 'h-[65%] justify-center'; // Portiere (GK)
+    }
     if (count === 2) return 'h-[60%] justify-around';
-    if (count === 3) return 'h-[75%] justify-around';
+    if (count === 3) return 'h-[78%] justify-around';
+    if (count === 4) {
+      // Stagger DEF (wider) and MID (narrower) so they don't share identical Y coordinates
+      if (colIdx <= 1) {
+        return 'h-[94%] justify-between py-1';
+      }
+      return 'h-[76%] justify-around py-1';
+    }
     return 'h-full justify-around';
   };
 
   return (
-    <div className={`flex-1 flex ${isAway ? 'flex-row-reverse pl-2 md:pl-4' : 'pr-2 md:pr-4'} items-center justify-between relative z-10`} style={{ transformStyle: 'preserve-3d' }}>
+    <div
+      className={`flex-1 flex ${isAway ? 'flex-row-reverse pl-1.5 md:pl-5' : 'pr-1.5 md:pr-5'} items-center justify-between relative z-10`}
+      style={{ transformStyle: 'preserve-3d' }}
+    >
       {columns.map((colPlayers, colIdx) => (
-        <div key={colIdx} className={`flex flex-col w-1/5 ${colHeight(colPlayers.length)}`} style={{ transformStyle: 'preserve-3d' }}>
+        <div
+          key={colIdx}
+          className={`flex-1 flex flex-col items-center ${getColStyle(colPlayers.length, colIdx, columns.length)}`}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
           {colPlayers.map((player, pIdx) => (
-            <PlayerDot key={pIdx} name={player.name || player} isAway={isAway} ballottaggio={player.ballottaggio} />
+            <PlayerDot
+              key={pIdx}
+              name={player.name || player}
+              isAway={isAway}
+              ballottaggio={player.ballottaggio}
+            />
           ))}
         </div>
       ))}
@@ -233,12 +262,30 @@ function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: an
 }
 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
-  // -45deg cancels the floor's 45deg rotation for flat legibility
+  const isLong = name.length > 9;
   return (
-    <div className="flex flex-col items-center justify-center z-10 w-full" style={{ transform: 'translateZ(15px) rotateX(-45deg)', transformOrigin: 'bottom center' }}>
-      <span className="text-[9px] md:text-[13px] font-bold text-white bg-black/85 px-1 py-0.5 md:px-2.5 md:py-0.5 rounded md:rounded-md backdrop-blur-md whitespace-nowrap shadow-lg border border-white/25 max-w-[58px] md:max-w-none truncate block text-center">
-        {name}
-      </span>
+    <div
+      className="flex flex-col items-center justify-center z-10 w-full [transform:translateZ(10px)_rotateX(-20deg)] md:[transform:translateZ(14px)_rotateX(-36deg)]"
+      style={{ transformOrigin: 'bottom center' }}
+    >
+      <div
+        className={`inline-flex items-center justify-center gap-0.5 px-1 py-0.5 md:px-2 md:py-0.5 rounded md:rounded-md shadow-md border whitespace-nowrap backdrop-blur-md leading-tight text-center ${
+          isAway
+            ? 'bg-black/90 text-white border-white/30'
+            : 'bg-[#8e1f2f]/95 text-white border-[#f0b516]/50'
+        }`}
+      >
+        {ballottaggio && (
+          <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-400 shrink-0" title="Ballottaggio" />
+        )}
+        <span
+          className={`${
+            isLong ? 'text-[7.5px] md:text-[11px]' : 'text-[8.5px] md:text-[12px]'
+          } font-bold tracking-tight block max-w-[80px] md:max-w-none text-center`}
+        >
+          {name}
+        </span>
+      </div>
     </div>
   );
 }
@@ -393,8 +440,8 @@ export default function FormazioniPage() {
           className="space-y-6"
         >
           {/* Match Header */}
-          <div className="flex flex-col items-center justify-center pt-4">
-            <div className="flex items-center justify-center gap-4 md:gap-8">
+          <div className="flex flex-col items-center justify-center pt-2 pb-1">
+            <div className="flex items-center justify-center gap-4 md:gap-8 mb-2">
               <div className="flex items-center gap-2">
                 <img src={matchState.homeLogo} alt={matchState.homeTeam} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
                 <span className={`font-bold text-lg md:text-2xl ${matchState.homeTeam === 'Roma' ? 'text-primary' : 'text-gray-900'}`}>{matchState.homeTeam}</span>
@@ -405,15 +452,22 @@ export default function FormazioniPage() {
                 <img src={matchState.awayLogo} alt={matchState.awayTeam} className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               </div>
             </div>
+            {(matchState.date || matchState.stadium) && (
+              <div className="flex items-center gap-2 text-[10px] md:text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {matchState.date && <span>{matchState.date}</span>}
+                {matchState.date && matchState.stadium && <span>•</span>}
+                {matchState.stadium && <span>{matchState.stadium}</span>}
+              </div>
+            )}
           </div>
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
           {/* bg-[#15803d] prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
-          <div className="relative w-full h-[280px] md:h-[460px] rounded-3xl overflow-hidden shadow-xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          <div className="relative w-full h-[330px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) */}
-            <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex" 
-                 style={{ transform: 'rotateX(45deg) translateY(0%)', transformStyle: 'preserve-3d' }}>
+            <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex [transform:rotateX(20deg)] md:[transform:rotateX(36deg)]" 
+                 style={{ transformStyle: 'preserve-3d' }}>
                
                {/* --- FIELD LINES (Pure white #FFFFFF) --- */}
                <div className="absolute inset-2 md:inset-8 border-2 md:border-4 border-white/90 z-0 shadow-sm"></div>
@@ -434,21 +488,13 @@ export default function FormazioniPage() {
                <div className="absolute top-[38%] bottom-[38%] right-[54px] md:right-[118px] w-6 md:w-14 border-l-2 md:border-l-4 border-white/90 rounded-l-[100%] z-0 opacity-80"></div>
 
                {/* --- PLAYERS GRID (On the 3D floor) --- */}
-               <div className="absolute inset-2 md:inset-8 flex px-1 py-1 md:py-8 z-10" style={{ transformStyle: 'preserve-3d' }}>
+               <div className="absolute inset-1.5 md:inset-6 flex px-0.5 py-1 md:py-6 z-10" style={{ transformStyle: 'preserve-3d' }}>
                  {/* Home (Left) */}
                  <DynamicFormationGrid starters={homeState.starters} formationStr={homeState.formation} />
 
                  {/* Away (Right) */}
                  <DynamicFormationGrid starters={awayState.starters} formationStr={awayState.formation} isAway />
                </div>
-            </div>
-            
-            {/* Info Bar Overlay (Top Left/Right) */}
-            <div className="absolute top-3 left-4 md:top-4 md:left-6 text-[10px] md:text-sm font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
-              {matchState.date}
-            </div>
-            <div className="absolute top-3 right-4 md:top-4 md:right-6 text-[10px] md:text-sm font-bold text-white uppercase tracking-widest drop-shadow-md z-20">
-              {matchState.stadium}
             </div>
           </div>
 

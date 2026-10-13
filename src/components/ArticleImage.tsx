@@ -14,7 +14,7 @@ interface ArticleImageProps {
 const SERIE_A_LOGOS: Record<string, string> = {
   roma: 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png',
   fiorentina: 'https://a.espncdn.com/i/teamlogos/soccer/500/109.png',
-  como: 'https://a.espncdn.com/i/teamlogos/soccer/500/2573.png',
+  como: 'https://a.espncdn.com/i/teamlogos/soccer/500/2572.png',
   juventus: 'https://a.espncdn.com/i/teamlogos/soccer/500/111.png',
   milan: 'https://a.espncdn.com/i/teamlogos/soccer/500/103.png',
   inter: 'https://a.espncdn.com/i/teamlogos/soccer/500/110.png',
@@ -140,35 +140,65 @@ function AnalystMatchOverlay({
   // Modalità Card Compatta (miniatura nella griglia/feed)
   if (isCard) {
     return (
-      <div className="absolute top-2.5 right-2 z-20 pointer-events-none">
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 rounded-full bg-[#0a120f]/85 backdrop-blur-xs border border-[#f0b516]/40 shadow-md">
-          {info.homeLogo && (
+      <>
+        {/* Stemmi circolari sui due lati del campo (Home sinistra, Away destra) */}
+        {info.homeLogo && (
+          <div
+            className="absolute left-[7%] sm:left-[9%] top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-xs shadow-lg border border-[#f0b516]/60 pointer-events-none w-8 h-8 sm:w-9 sm:h-9 p-1 sm:p-1.5 transition-transform duration-500 group-hover:scale-105"
+            title={info.homeName}
+          >
             <img
               src={info.homeLogo}
               alt={info.homeName}
-              className="w-3.5 h-3.5 object-contain shrink-0"
+              className="w-full h-full object-contain filter drop-shadow"
             />
-          )}
-          <span className="text-white font-extrabold uppercase text-[9px] tracking-wide">
-            {info.homeName.replace(/AS\s+/i, '')}
-          </span>
-          <span className="px-1 py-0.2 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[9px] border border-[#f0b516]/30">
-            {info.homeScore !== undefined && info.awayScore !== undefined
-              ? `${info.homeScore}-${info.awayScore}`
-              : 'VS'}
-          </span>
-          <span className="text-white font-extrabold uppercase text-[9px] tracking-wide">
-            {info.awayName.replace(/AS\s+/i, '')}
-          </span>
-          {info.awayLogo && (
+          </div>
+        )}
+
+        {info.awayLogo && (
+          <div
+            className="absolute right-[7%] sm:right-[9%] top-1/2 -translate-y-1/2 z-10 flex items-center justify-center rounded-full bg-black/70 backdrop-blur-xs shadow-lg border border-white/40 pointer-events-none w-8 h-8 sm:w-9 sm:h-9 p-1 sm:p-1.5 transition-transform duration-500 group-hover:scale-105"
+            title={info.awayName}
+          >
             <img
               src={info.awayLogo}
               alt={info.awayName}
-              className="w-3.5 h-3.5 object-contain shrink-0"
+              className="w-full h-full object-contain filter drop-shadow"
             />
-          )}
+          </div>
+        )}
+
+        {/* Micro-Pillola Matchup in alto centrata */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-[#0a120f]/85 backdrop-blur-xs border border-[#f0b516]/45 shadow-md">
+            {info.homeLogo && (
+              <img
+                src={info.homeLogo}
+                alt={info.homeName}
+                className="w-3.5 h-3.5 object-contain shrink-0"
+              />
+            )}
+            <span className="text-white font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide">
+              {info.homeName.replace(/AS\s+/i, '')}
+            </span>
+            <span className="px-1 py-0.2 rounded bg-[#182620] text-[#f0b516] font-mono font-black text-[9px] sm:text-[10px] border border-[#f0b516]/30">
+              {info.homeScore !== undefined && info.awayScore !== undefined
+                ? `${info.homeScore}-${info.awayScore}`
+                : 'VS'}
+            </span>
+            <span className="text-white font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide">
+              {info.awayName.replace(/AS\s+/i, '')}
+            </span>
+            {info.awayLogo && (
+              <img
+                src={info.awayLogo}
+                alt={info.awayName}
+                className="w-3.5 h-3.5 object-contain shrink-0"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 

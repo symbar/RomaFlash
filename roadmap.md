@@ -118,13 +118,13 @@ Ecco la roadmap completa e aggiornata con tutte le 10 Fasi originali, i traguard
 > Funzionalità ispirate dai grandi portali sportivi ma rivisitate in chiave moderna, pulita e potenziata dall'AI.
 
 *   ~~**1. Probabili Formazioni dal Vivo (Fantacalcio.it):**~~ ✅ **(Completato)**
-    * Widget campo da calcio 3D isometrico ottimizzato mobile (`h-[280px]`).
-    * Modulo tattico ufficiale per Roma e avversario.
-    * Titolari con percentuali di titolarità e panchine complete.
-    * Ballottaggi ufficiali a coppie con Donut Chart percentuali.
-    * Liste infortuni con date rientro stimate, squalifiche e diffide.
-    * Presentazione editoriale squadre dinamica basata su dati reali di giornata.
-    * Visualizzazione appaiata side-by-side (`grid-cols-2`) anche su PWA mobile.
+    * ~~Widget campo da calcio 3D isometrico ottimizzato mobile (`h-[360px]`).~~ ✅
+    * ~~Modulo tattico ufficiale per Roma e avversario.~~ ✅
+    * ~~Titolari con percentuali di titolarità e panchine complete.~~ ✅
+    * ~~Ballottaggi ufficiali a coppie con Donut Chart percentuali.~~ ✅
+    * ~~Liste infortuni con date rientro stimate, squalifiche e diffide.~~ ✅
+    * ~~Presentazione editoriale squadre dinamica basata su dati reali di giornata.~~ ✅
+    * ~~Visualizzazione appaiata side-by-side (`grid-cols-2`) anche su PWA mobile.~~ ✅
 *   **2. Audio-Notizie (Ascolta l'Articolo):** Sintesi vocale Text-to-Speech (micro-podcast di 30 secondi) per ascoltare le news in mobilità.
 *   **3. Calciomercato Tabellone & Rumor-Meter:** Sezione/Widget dedicato al mercato (Acquisti, Cessioni, Trattative) con termometro di affidabilità fonte (0-100%).
 *   **4. Diretta Testuale & Social Wall (Live Match):** Feed in tempo reale durante la partita per seguire l'andamento del match.

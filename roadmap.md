@@ -54,6 +54,8 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.2 Filtro "Le Più Lette" (Trending):** Sezione o tab per scoprire le notizie che hanno generato più letture e interesse nelle ultime 24h e 7 giorni.
 *   **5.3 Biglietteria Contestuale:** Tasto discreto *"🎟️ Biglietti Ufficiali"* che rimanda al ticketing AS Roma quando l'articolo riguarda un match imminente all'Olimpico.
 *   **5.4 Gestione Intelligente delle Fonti (Prompting AI):** Raffinamento dei prompt per citare la testata giornalistica originale solo in caso di interviste esclusive o scoop di mercato.
+*   **5.5 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
+*   **5.6 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
 
 ---
 

@@ -301,9 +301,10 @@ serve(async (req) => {
     // Formatta la scheda statistiche per il prompt
     const statsContext = `
 Competizione: ${competitionName}
-Partita: ${homeName} ${homeScore} - ${awayScore} ${awayName}
+Partita: ${homeName} (squadra di CASA) ${homeScore} - ${awayScore} ${awayName} (squadra in TRASFERTA)
+Sede del match: campo/stadio di ${homeName}
 
-STATISTICHE ${homeName}:
+STATISTICHE ${homeName} (CASA):
 - Possesso palla: ${homeStats['Possession'] || homeStats['possession'] || 'N/D'}%
 - Tiri totali: ${homeStats['SHOTS'] || homeStats['shots'] || 'N/D'}
 - Tiri in porta: ${homeStats['ON GOAL'] || homeStats['shotsOnTarget'] || 'N/D'}
@@ -315,7 +316,7 @@ STATISTICHE ${homeName}:
 - Falli: ${homeStats['Fouls'] || 'N/D'}
 - Parate del portiere: ${homeStats['Saves'] || 'N/D'}
 
-STATISTICHE ${awayName}:
+STATISTICHE ${awayName} (TRASFERTA):
 - Possesso palla: ${awayStats['Possession'] || awayStats['possession'] || 'N/D'}%
 - Tiri totali: ${awayStats['SHOTS'] || awayStats['shots'] || 'N/D'}
 - Tiri in porta: ${awayStats['ON GOAL'] || awayStats['shotsOnTarget'] || 'N/D'}
@@ -333,11 +334,15 @@ Sei "L'Analista" di RomaFlash, il match analyst ufficiale dell'app di riferiment
 Il tuo compito è scrivere la rubrica editoriale post-partita "L'Analista | La Lavagna Tattica".
 Usa un tono competente, lucido, appassionato ma rigoroso e analitico (stile The Athletic e L'Ultimo Uomo). Niente lamentele arbitrali o frasi fatte da bar sport: analizza COSA dicono i numeri e le scelte sul campo.
 
+IMPORTANTE SUL FATTORE CAMPO:
+La partita si è giocata nello stadio di ${homeName} (squadra di casa). ${awayName} ha giocato in trasferta.
+NON usare espressioni che alludano allo stadio della squadra ospite (es. NON scrivere "la legge del Bernabéu" se il Real Madrid è ospite della Roma all'Olimpico). Rispetta rigorosamente chi gioca in casa e chi fuori.
+
 Ecco i dati reali e ufficiali del match appena terminato:
 ${statsContext}
 
 Istruzioni per l'output:
-1. "title": Un titolo accattivante e professionale che inizi con "L'Analista | [Nome Partita Risultato]: [frase che riassume la chiave tattica]" (es: "L'Analista | Roma-Fiorentina 1-0: il dominio del possesso e la diga a centrocampo").
+1. "title": Un titolo accattivante e professionale che inizi con "L'Analista | [Nome Partita Risultato]: [frase che riassume la chiave tattica]" (es: "L'Analista | Roma-Fiorentina 1-0: il dominio del possesso e la diga a centrocampo"). Non menzionare mai lo stadio della squadra ospite.
 2. "excerpt": Breve sintesi d'impatto di 2 frasi sui numeri e sul piano gara.
 3. "content": Articolo completo organizzato rigorosamente con questi 4 paragrafi ben distinti, usando i grassetti per i sottotitoli:
    - **Il Verdetto dei Numeri**: I dati salienti della sfida (possesso palla, tiri nello specchio, precisione dei passaggi e contrasti) spiegati nel loro significato tattico.

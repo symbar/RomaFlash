@@ -203,8 +203,44 @@ function TeamList({ teamName, formation, players, isAway }: { teamName: string, 
 }
 
 
+function getCondensedPattern(formationStr: string): number[] {
+  const rawParts = (formationStr || '4-4-2').split('-').map(Number).filter(n => !isNaN(n) && n > 0);
+  if (rawParts.length === 0) return [1, 4, 4, 2];
+  if (rawParts.length <= 3) {
+    // Già strutturato su 3 linee (es. 4-4-2, 4-3-3, 3-5-2, 3-4-3, 5-3-2)
+    return [1, ...rawParts];
+  }
+  
+  // Moduli a 4 o più linee (es. 4-4-1-1, 3-4-2-1, 4-2-3-1, 4-3-1-2, 3-4-1-2, 4-1-4-1):
+  // Raggruppiamo l'attacco appaiando punte e trequartisti, garantendo 4 colonne totali (Portiere + Difesa + Centrocampo + Attacco).
+  // In questo modo su mobile tutti i giocatori sono perfettamente visibili senza sovrapposizioni.
+  const def = rawParts[0];
+  let mid: number;
+  let att: number;
+
+  if (rawParts.length === 4) {
+    if (rawParts[1] === 1 && rawParts[2] >= 3) {
+      // Es. 4-1-4-1: un mediano + 4 centrocampisti avanzati -> centrocampo a 5, punta singola
+      mid = rawParts[1] + rawParts[2];
+      att = rawParts[3];
+    } else {
+      // Es. 4-4-1-1 -> [4, 4, 2] (Messias e Osmajic appaiati)
+      // Es. 3-4-2-1 -> [3, 4, 3] (Soulè, Mora, Castro appaiati)
+      // Es. 4-2-3-1 -> [4, 2, 4] (3 trequartisti + 1 punta appaiati in attacco)
+      // Es. 4-3-1-2 -> [4, 3, 3] (trequartista e le due punte appaiati)
+      mid = rawParts[1];
+      att = rawParts.slice(2).reduce((sum, n) => sum + n, 0);
+    }
+  } else {
+    mid = rawParts[1];
+    att = rawParts.slice(2).reduce((sum, n) => sum + n, 0);
+  }
+
+  return [1, def, mid, att];
+}
+
 function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: any[], formationStr: string, isAway?: boolean }) {
-  const pattern = [1, ...formationStr.split('-').map(Number)];
+  const pattern = getCondensedPattern(formationStr);
   let currentIndex = 0;
   const columns = pattern.map(count => {
     const playersInColumn = starters.slice(currentIndex, currentIndex + count);
@@ -213,38 +249,44 @@ function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: an
   });
 
   const getColStyle = (count: number, colIdx: number, totalCols: number) => {
-    if (count === 1) {
-      if (colIdx === totalCols - 2) {
-        // Second-to-last column with 1 player (CAM / Trequartista like Messias)
-        return 'h-[65%] justify-center pt-5 md:pt-8';
-      }
-      if (colIdx === totalCols - 1) {
-        // Last column with 1 player (Punta / Striker like Osmajic or Castro S.)
-        return 'h-[65%] justify-center pb-5 md:pb-8';
-      }
-      return 'h-[65%] justify-center'; // Portiere (GK)
+    if (colIdx === 0) {
+      // Portiere (GK)
+      return 'h-[55%] justify-center';
     }
-    if (count === 2) return 'h-[60%] justify-around';
-    if (count === 3) return 'h-[78%] justify-around';
+    if (count === 1) {
+      return 'h-[55%] justify-center';
+    }
+    if (count === 2) {
+      // Due giocatori (es. coppia d'attacco appaiata come Messias - Osmajic)
+      return 'h-[50%] justify-around py-1';
+    }
+    if (count === 3) {
+      // Tre giocatori (es. difesa a 3 o tridente d'attacco)
+      return colIdx === 1 ? 'h-[80%] justify-between py-1.5' : 'h-[68%] justify-around py-1';
+    }
     if (count === 4) {
-      // Stagger DEF (wider) and MID (narrower) so they don't share identical Y coordinates
-      if (colIdx <= 1) {
+      // Quattro giocatori: alterniamo l'altezza tra Difesa e Centrocampo (zig-zag)
+      // così difensori e centrocampisti non condividono le stesse coordinate Y verticali
+      if (colIdx === 1) {
         return 'h-[94%] justify-between py-1';
       }
-      return 'h-[76%] justify-around py-1';
+      return 'h-[78%] justify-around py-2';
+    }
+    if (count >= 5) {
+      return 'h-[96%] justify-between py-0.5';
     }
     return 'h-full justify-around';
   };
 
   return (
     <div
-      className={`flex-1 flex ${isAway ? 'flex-row-reverse pl-1.5 md:pl-5' : 'pr-1.5 md:pr-5'} items-center justify-between relative z-10`}
+      className={`flex-1 flex ${isAway ? 'flex-row-reverse pl-2 md:pl-6' : 'pr-2 md:pr-6'} items-center justify-between relative z-10 h-full`}
       style={{ transformStyle: 'preserve-3d' }}
     >
       {columns.map((colPlayers, colIdx) => (
         <div
           key={colIdx}
-          className={`flex-1 flex flex-col items-center ${getColStyle(colPlayers.length, colIdx, columns.length)}`}
+          className={`${colIdx === 0 ? 'w-6 sm:w-8 md:w-14 shrink-0' : 'flex-1'} flex flex-col items-center ${getColStyle(colPlayers.length, colIdx, columns.length)}`}
           style={{ transformStyle: 'preserve-3d' }}
         >
           {colPlayers.map((player, pIdx) => (
@@ -262,7 +304,7 @@ function DynamicFormationGrid({ starters, formationStr, isAway }: { starters: an
 }
 
 function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?: boolean, isAway?: boolean }) {
-  const isLong = name.length > 9;
+  const isLong = name.length > 8;
   return (
     <div
       className="flex flex-col items-center justify-center z-10 w-full [transform:translateZ(10px)_rotateX(-20deg)] md:[transform:translateZ(14px)_rotateX(-36deg)]"
@@ -271,17 +313,18 @@ function PlayerDot({ name, ballottaggio, isAway }: { name: string, ballottaggio?
       <div
         className={`inline-flex items-center justify-center gap-0.5 px-1 py-0.5 md:px-2 md:py-0.5 rounded md:rounded-md shadow-md border whitespace-nowrap backdrop-blur-md leading-tight text-center ${
           isAway
-            ? 'bg-black/90 text-white border-white/30'
-            : 'bg-[#8e1f2f]/95 text-white border-[#f0b516]/50'
+            ? 'bg-black/95 text-white border-white/40'
+            : 'bg-[#8e1f2f]/95 text-white border-[#f0b516]/60'
         }`}
+        title={name}
       >
         {ballottaggio && (
           <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-purple-400 shrink-0" title="Ballottaggio" />
         )}
         <span
           className={`${
-            isLong ? 'text-[7.5px] md:text-[11px]' : 'text-[8.5px] md:text-[12px]'
-          } font-bold tracking-tight block max-w-[80px] md:max-w-none text-center`}
+            isLong ? 'text-[7px] sm:text-[7.5px] md:text-[11px]' : 'text-[8px] sm:text-[8.5px] md:text-[12px]'
+          } font-bold tracking-tight block max-w-[50px] sm:max-w-[62px] md:max-w-none truncate text-center`}
         >
           {name}
         </span>
@@ -463,7 +506,7 @@ export default function FormazioniPage() {
 
           {/* THE PITCH - TRUE 3D HORIZONTAL */}
           {/* bg-[#15803d] prevents any black corners from showing if the transformed floor doesn't fully cover the box */}
-          <div className="relative w-full h-[330px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
+          <div className="relative w-full h-[360px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl bg-[#15803d] border-4 border-card mb-8 flex items-center justify-center" style={{ perspective: '1200px' }}>
             
             {/* The 3D Floor (Contains Grass, Lines AND Players) */}
             <div className="absolute w-full h-full bg-gradient-to-t from-[#15803d] to-[#16a34a] flex [transform:rotateX(20deg)] md:[transform:rotateX(36deg)]" 

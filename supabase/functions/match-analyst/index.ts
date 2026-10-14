@@ -452,7 +452,14 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
         .replace(/#RomaFlash/gi, '')
         .trim()
       const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`
-      const fullTweet = `${cleanBase}\n\n📋 Leggi l'analisi tattica completa: ${articleUrl}\n\n${hashtagsLine}`
+      
+      const linkLine = `\n\n📋 Analisi tattica: ${articleUrl}`
+      const tagsLine = `\n\n${hashtagsLine}`
+      const maxBaseLength = 275 - linkLine.length - tagsLine.length
+      const truncatedBase = cleanBase.length > maxBaseLength 
+        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...' 
+        : cleanBase
+      const fullTweet = `${truncatedBase}${linkLine}${tagsLine}`
 
       console.log(`[X AUTO-POST] Pubblicazione L'Analista su X...`)
       const xRes = await postToX(fullTweet, tacticalBoardImg)

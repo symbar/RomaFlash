@@ -588,13 +588,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             continue; // Salta il salvataggio in caso di errore di parsing
           }
 
-          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 10 immagini proprietarie RomaFlash
+          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 13 immagini proprietarie RomaFlash
           let imageUrl: string;
           if (!isImageRejected && inlineImagePart && isCleanRealPhoto && candidateImageUrl) {
             imageUrl = candidateImageUrl;
             usedImageUrls.add(candidateImageUrl);
           } else {
-            const randomIdx = Math.floor(Math.random() * 10) + 1;
+            const randomIdx = Math.floor(Math.random() * 13) + 1;
             imageUrl = `/images/archive/roma-${randomIdx}.jpg`;
             console.log(`[IMAGE FILTER] Immagine fonte scartata (grafica/logo/mancante) -> assegnata ${imageUrl}`);
           }

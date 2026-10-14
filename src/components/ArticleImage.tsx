@@ -122,8 +122,8 @@ export function getArticleImageUrl(article: any): string | null {
     return article.image_url;
   }
 
-  // Fallback to one of the 10 custom RomaFlash archive images only when image_url is missing
-  const archiveIdx = (hash % 10) + 1;
+  // Fallback to one of the 13 custom RomaFlash archive images only when image_url is missing
+  const archiveIdx = (hash % 13) + 1;
   return `/images/archive/roma-${archiveIdx}.jpg`;
 }
 

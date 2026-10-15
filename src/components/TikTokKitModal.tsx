@@ -355,16 +355,6 @@ export function buildTikTokCaption(article: any): string {
 
   const body = paragraphs.join("\n\n");
 
-  // Call to action & Coinvolgimento community nei commenti (fondamentale per l'algoritmo di TikTok)
-  const pollQuestion = article.ai_summary?.poll?.question?.trim();
-  let callToAction = "💬 Voi cosa ne pensate? Scrivetecelo nei commenti! 👇";
-  if (pollQuestion) {
-    callToAction = `💬 DIBATTITO GIALLOROSSO:\n${pollQuestion}\n👉 Dite la vostra nei commenti!`;
-  }
-
-  // Riferimento al portale RomaFlash
-  const brandLine = "📲 Resta sempre aggiornato sull'AS Roma: visita romaflash.app";
-
   // Hashtag dinamici e fissi ottimizzati per TikTok
   const extraTags = (article.ai_summary?.dynamic_hashtags || "")
     .replace(/#ASRoma/gi, "")
@@ -390,19 +380,19 @@ export function buildTikTokCaption(article: any): string {
   // Intestazione con emoji
   const header = `🐺 ${title} 🟡🔴`;
 
-  // Assembliamo la didascalia completa
-  let caption = `${header}\n\n${body}\n\n${callToAction}\n\n${brandLine}\n\n${hashtags}`;
+  // Assembliamo la didascalia: Titolo + Notizia approfondita + Hashtag
+  let caption = `${header}\n\n${body}\n\n${hashtags}`;
 
   // Se supera 2.100 caratteri (TikTok accetta fino a 2.200 - 4.000 car.), tronchiamo delicatamente sul punto fermo
   if (caption.length > 2100) {
-    const maxBodyLen = 2100 - (header.length + callToAction.length + brandLine.length + hashtags.length + 30);
+    const maxBodyLen = 2100 - (header.length + hashtags.length + 20);
     if (maxBodyLen > 100) {
       let cut = body.slice(0, maxBodyLen);
       const lastDot = cut.lastIndexOf(".");
       if (lastDot > 100) {
         cut = cut.slice(0, lastDot + 1);
       }
-      caption = `${header}\n\n${cut}\n\n${callToAction}\n\n${brandLine}\n\n${hashtags}`;
+      caption = `${header}\n\n${cut}\n\n${hashtags}`;
     }
   }
 
@@ -641,7 +631,7 @@ export default function TikTokKitModal({
                 placeholder="Didascalia approfondita per TikTok..."
               />
               <p className="text-[10px] text-gray-400 leading-tight">
-                💡 Didascalia estesa con spiegazione completa, domanda per i commenti e hashtag per il feed &quot;Per Te&quot;. Modificabile prima di copiare.
+                💡 Didascalia estesa con spiegazione completa della notizia e hashtag per il feed &quot;Per Te&quot;. Modificabile prima di copiare.
               </p>
             </div>
           </div>

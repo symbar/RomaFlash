@@ -19,12 +19,13 @@ import {
   FileText,
   Vote,
   TrendingUp,
+  ThumbsUp,
 } from "lucide-react";
 
 const ADMIN_PIN = "1927";
 const STORAGE_PIN_KEY = "romaflash_admin_unlocked_pin";
 
-type SortMode = "most_read" | "least_read" | "recent" | "most_voted";
+type SortMode = "recent" | "most_read" | "least_read" | "most_liked" | "most_voted";
 
 export default function StatsBackofficePage() {
   const [pinInput, setPinInput] = useState("");
@@ -34,9 +35,11 @@ export default function StatsBackofficePage() {
 
   const [articles, setArticles] = useState<any[]>([]);
   const [pollVotesMap, setPollVotesMap] = useState<Record<string, number>>({});
+  const [reactionsMap, setReactionsMap] = useState<Record<string, { total: number; like: number; love: number }>>({});
   const [totalPollVotes, setTotalPollVotes] = useState(0);
+  const [totalReactions, setTotalReactions] = useState(0);
   const [loadingData, setLoadingData] = useState(false);
-  const [sortMode, setSortMode] = useState<SortMode>("most_read");
+  const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [tiktokArticle, setTiktokArticle] = useState<any | null>(null);
 
@@ -55,13 +58,14 @@ export default function StatsBackofficePage() {
   const fetchBackofficeData = async () => {
     setLoadingData(true);
     try {
-      const [articlesRes, votesRes] = await Promise.all([
+      const [articlesRes, votesRes, reactionsRes] = await Promise.all([
         supabase
           .from("articles")
           .select("id, title, published_at, views, image_url, original_url, ai_summary, sources(name)")
           .order("published_at", { ascending: false })
           .limit(200),
         supabase.from("poll_votes").select("article_id"),
+        supabase.from("article_reactions").select("article_id, reaction_type"),
       ]);
 
       if (articlesRes.data) {
@@ -75,6 +79,20 @@ export default function StatsBackofficePage() {
         }
         setPollVotesMap(counts);
         setTotalPollVotes(votesRes.data.length);
+      }
+
+      if (reactionsRes.data) {
+        const counts: Record<string, { total: number; like: number; love: number }> = {};
+        for (const r of reactionsRes.data) {
+          if (!counts[r.article_id]) {
+            counts[r.article_id] = { total: 0, like: 0, love: 0 };
+          }
+          counts[r.article_id].total += 1;
+          if (r.reaction_type === "like") counts[r.article_id].like += 1;
+          else if (r.reaction_type === "love") counts[r.article_id].love += 1;
+        }
+        setReactionsMap(counts);
+        setTotalReactions(reactionsRes.data.length);
       }
     } finally {
       setLoadingData(false);
@@ -207,6 +225,13 @@ export default function StatsBackofficePage() {
           new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
       );
     }
+    if (sortMode === "most_liked") {
+      return copy.sort(
+        (a, b) =>
+          ((reactionsMap[b.id]?.total) || 0) - ((reactionsMap[a.id]?.total) || 0) ||
+          (b.views || 0) - (a.views || 0)
+      );
+    }
     if (sortMode === "most_voted") {
       return copy.sort(
         (a, b) =>
@@ -218,7 +243,7 @@ export default function StatsBackofficePage() {
       (a, b) =>
         new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
     );
-  }, [articles, sortMode, pollVotesMap]);
+  }, [articles, sortMode, pollVotesMap, reactionsMap]);
 
   if (checkingAuth) {
     return (
@@ -321,7 +346,7 @@ export default function StatsBackofficePage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
         <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
             <span>Letture Totali</span>
@@ -337,14 +362,14 @@ export default function StatsBackofficePage() {
 
         <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
-            <span>Media per Articolo</span>
-            <TrendingUp className="w-4 h-4 text-orange-500" />
+            <span>Like & Reazioni</span>
+            <ThumbsUp className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl md:text-3xl font-black text-gray-900">
-            {metrics.avgViews}
+            {totalReactions}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            letture / notizia
+            reazioni totali tifosi
           </div>
         </div>
 
@@ -363,14 +388,27 @@ export default function StatsBackofficePage() {
 
         <div className="bg-white border border-border rounded-2xl p-4 shadow-xs">
           <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
+            <span>Media per Articolo</span>
+            <TrendingUp className="w-4 h-4 text-orange-500" />
+          </div>
+          <div className="text-2xl md:text-3xl font-black text-gray-900">
+            {metrics.avgViews}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">
+            letture / notizia
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-2xl p-4 shadow-xs col-span-2 sm:col-span-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-gray-500 mb-1">
             <span>Articoli in DB</span>
-            <FileText className="w-4 h-4 text-blue-600" />
+            <FileText className="w-4 h-4 text-purple-600" />
           </div>
           <div className="text-2xl md:text-3xl font-black text-gray-900">
             {metrics.articlesCount}
           </div>
           <div className="text-[11px] text-gray-500 mt-1">
-            {metrics.articles24hCount} pubblicati nelle ultime 24h
+            {metrics.articles24hCount} nelle 24h
           </div>
         </div>
       </div>
@@ -411,6 +449,19 @@ export default function StatsBackofficePage() {
         <div className="flex overflow-x-auto gap-2 scrollbar-hide">
           <button
             type="button"
+            onClick={() => setSortMode("recent")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "recent"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            Più Recenti
+          </button>
+
+          <button
+            type="button"
             onClick={() => setSortMode("most_read")}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
               sortMode === "most_read"
@@ -437,6 +488,19 @@ export default function StatsBackofficePage() {
 
           <button
             type="button"
+            onClick={() => setSortMode("most_liked")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "most_liked"
+                ? "bg-primary text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <ThumbsUp className="w-3.5 h-3.5" />
+            Più Like
+          </button>
+
+          <button
+            type="button"
             onClick={() => setSortMode("most_voted")}
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
               sortMode === "most_voted"
@@ -447,19 +511,6 @@ export default function StatsBackofficePage() {
             <Vote className="w-3.5 h-3.5" />
             Più Votati (Sondaggi)
           </button>
-
-          <button
-            type="button"
-            onClick={() => setSortMode("recent")}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-              sortMode === "recent"
-                ? "bg-primary text-white shadow-xs"
-                : "bg-white text-gray-600 border border-border hover:text-gray-900"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            Più Recenti
-          </button>
         </div>
       </div>
 
@@ -468,6 +519,7 @@ export default function StatsBackofficePage() {
         {sortedArticles.map((art, idx) => {
           const views = art.views || 0;
           const votes = pollVotesMap[art.id] || 0;
+          const likes = reactionsMap[art.id]?.total || 0;
           const category = art.ai_summary?.category || "Altro";
           const sourceName = art.sources?.name || "RomaFlash";
           const pubDate = new Date(art.published_at).toLocaleString("it-IT", {
@@ -483,7 +535,7 @@ export default function StatsBackofficePage() {
               key={art.id}
               className="bg-white border border-border rounded-xl p-3.5 shadow-xs flex flex-col gap-2"
             >
-              {/* Riga Superiore: Posizione + Social + Categoria a sinistra | Letture + Voti + Azioni a destra */}
+              {/* Riga Superiore: Posizione + Social + Categoria a sinistra | Letture + Like + Voti + Azioni a destra */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-[11px] font-black text-gray-400">
@@ -536,6 +588,18 @@ export default function StatsBackofficePage() {
                   >
                     <Eye className="w-3 h-3" />
                     {views}
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                      likes > 0
+                        ? "bg-blue-500/10 text-blue-700"
+                        : "bg-gray-50 text-gray-400"
+                    }`}
+                    title="Like e reazioni"
+                  >
+                    <ThumbsUp className="w-3 h-3" />
+                    {likes}
                   </span>
 
                   <span
@@ -610,6 +674,7 @@ export default function StatsBackofficePage() {
                 <th className="py-3 px-3 text-center">Social</th>
                 <th className="py-3 px-3 text-center">Categoria</th>
                 <th className="py-3 px-3 text-center">Letture</th>
+                <th className="py-3 px-3 text-center">Like</th>
                 <th className="py-3 px-3 text-center">Voti Poll</th>
                 <th className="py-3 px-3 text-right">Data</th>
                 <th className="py-3 px-3 w-20 text-center">Azioni</th>
@@ -619,6 +684,7 @@ export default function StatsBackofficePage() {
               {sortedArticles.map((art, idx) => {
                 const views = art.views || 0;
                 const votes = pollVotesMap[art.id] || 0;
+                const likes = reactionsMap[art.id]?.total || 0;
                 const category = art.ai_summary?.category || "Altro";
                 const sourceName = art.sources?.name || "RomaFlash";
                 const hasX = Boolean(art.ai_summary?.x_tweet_id);
@@ -699,6 +765,19 @@ export default function StatsBackofficePage() {
                       >
                         <Eye className="w-3 h-3" />
                         {views}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                          likes > 0
+                            ? "bg-blue-500/10 text-blue-700"
+                            : "text-gray-400"
+                        }`}
+                        title={likes > 0 ? `${likes} like e reazioni` : "Nessuna reazione"}
+                      >
+                        <ThumbsUp className="w-3 h-3" />
+                        {likes}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-center">

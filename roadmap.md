@@ -63,8 +63,6 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 
 ### 6. SEO, Motori di Ricerca & Ottimizzazione per LLM (GEO)
 
-*   **6.1 Pre-rendering Edge SSR per Notizie (Fase 1 - Priorità Immediata - SEO & LLM Visibility):**  
-    Iniezione lato Edge tramite Cloudflare Pages Function per `/article`: generazione al millisecondo zero di HTML completo con `<title>` reale, testo della notizia in tag semantici, metatag OpenGraph/Twitter Cards dinamici (con foto reale dell'articolo) e schema `NewsArticle` per Googlebot, ChatGPT Search, Perplexity, Claude, Meta AI, Google Discover e card social (WhatsApp, X, Facebook).
-*   **6.2 URL SEO-Friendly con Slug Semantici (Fase 2 - Evolutiva):**  
-    Passaggio dagli indirizzi con solo ID `/article?id=UUID` a percorsi parlanti ricchi di parole chiave (es. `/notizia/titolo-notizia-UUID` o `/notizie/[slug]`), con redirect 301 automatici dai vecchi link per massimizzare il CTR organico e il posizionamento sui motori di ricerca.
+*   ~~**6.1 Pre-rendering Edge SSR per Notizie (Fase 1 - SEO & LLM Visibility):** Iniezione lato Edge tramite Cloudflare Pages Function per `/article`: generazione al millisecondo zero di HTML completo con `<title>` reale, testo della notizia in tag semantici, metatag OpenGraph/Twitter Cards dinamici (con foto reale dell'articolo) e schema `NewsArticle` per Googlebot, ChatGPT Search, Perplexity, Claude, Meta AI, Google Discover e card social (WhatsApp, X, Facebook).~~ ✅ **(Completato)**
+*   ~~**6.2 URL SEO-Friendly con Slug Semantici (Fase 2 - Evolutiva):** Passaggio da `/article?id=UUID` ai percorsi parlanti ricchi di keyword `/notizie/[titolo-notizia-UUID]`, con compatibilità retroattiva, generazione dinamica nella sitemap XML e link card interattive su X stile Sky Sport (immagine cliccabile con link a RomaFlash).~~ ✅ **(Completato)**
 *   **6.3 Supporta RomaFlash (Offrimi un Caffè):** Tasto etico e discreto nel footer o nella sidebar (*"Offri un caffè al progetto"*) tramite Stripe / Ko-Fi per sostenere i costi dei server e dell'AI.

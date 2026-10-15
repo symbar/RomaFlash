@@ -7,11 +7,22 @@ export async function onRequestGet(context: any) {
   const sbUrl = env?.NEXT_PUBLIC_SUPABASE_URL || SUPABASE_URL;
   const sbKey = env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY;
 
-  let articles: Array<{ id: string; published_at: string }> = [];
+  let articles: Array<{ id: string; title?: string; published_at: string }> = [];
+
+  function generateSlug(title: string, id: string): string {
+    const cleanTitle = (title || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 75);
+    return cleanTitle ? `${cleanTitle}-${id}` : id;
+  }
 
   try {
     const res = await fetch(
-      `${sbUrl}/rest/v1/articles?select=id,published_at&order=published_at.desc&limit=500`,
+      `${sbUrl}/rest/v1/articles?select=id,title,published_at&order=published_at.desc&limit=500`,
       {
         headers: {
           apikey: sbKey,
@@ -60,12 +71,15 @@ export async function onRequestGet(context: any) {
 
   const articlesXml = articles
     .map(
-      (a) => `  <url>
-    <loc>https://romaflash.app/article?id=${a.id}</loc>
+      (a) => {
+        const slug = generateSlug(a.title || "", a.id);
+        return `  <url>
+    <loc>https://romaflash.app/notizie/${slug}</loc>
     <lastmod>${new Date(a.published_at || nowIso).toISOString()}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
-  </url>`
+  </url>`;
+      }
     )
     .join("\n");
 

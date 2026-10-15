@@ -12,6 +12,7 @@ import GlobalHeader from '@/components/GlobalHeader';
 import GlobalRightSidebar from '@/components/GlobalRightSidebar';
 import { useLanguage } from '@/components/LanguageContext';
 import ArticleImage, { getArticleImageUrl } from '@/components/ArticleImage';
+import { generateArticleSlug } from '@/lib/slug';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -310,7 +311,7 @@ export default function Home() {
                     className={`relative overflow-hidden group cursor-pointer transition-all duration-300 flex flex-col ${
                       index === 0 ? 'md:col-span-2 shadow-sm hover:shadow-md' : 'shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]'
                     } bg-card border border-border rounded-2xl`}
-                    onClick={() => router.push(`/article?id=${article.id}`)}
+                    onClick={() => router.push(`/notizie/${generateArticleSlug(article.title, article.id)}`)}
                   >
                     {/* FIRST ITEM HERO LAYOUT */}
                     {index === 0 ? (
@@ -400,7 +401,7 @@ export default function Home() {
                           </div>
                           <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-gray-500 font-medium">
                             <span>{formatDate(article.published_at, lang)}</span>
-                            <ShareButton title={displayTitle} text={displayExcerpt} url={`https://romaflash.app/article?id=${article.id}`} />
+                            <ShareButton title={displayTitle} text={displayExcerpt} url={`https://romaflash.app/notizie/${generateArticleSlug(article.title, article.id)}`} />
                           </div>
                         </div>
                       </>

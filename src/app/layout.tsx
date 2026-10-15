@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "RomaFlash | L'essenza delle notizie giallorosse",
     description: "L'essenza delle notizie giallorosse",
     images: ["https://romaflash.app/icon"],

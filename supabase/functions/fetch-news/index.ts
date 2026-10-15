@@ -19,6 +19,17 @@ function resolvePublicImageUrl(rawUrl?: string | null): string | null {
   return null
 }
 
+function generateArticleSlug(title: string, id: string): string {
+  const cleanTitle = (title || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 75);
+  return cleanTitle ? `${cleanTitle}-${id}` : id;
+}
+
 async function postToX(
   tweetText: string,
   imageUrl?: string | null
@@ -193,7 +204,9 @@ serve(async (req) => {
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      const articleSlug = generateArticleSlug(art.title, art.id);
+      const articleUrl = `https://romaflash.app/notizie/${articleSlug}`;
+      const hashtags = `#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
       
       let baseText = cleanBase;
       if (baseText.length < 180 && aiSummary.excerpt) {
@@ -203,16 +216,18 @@ serve(async (req) => {
         }
       }
 
-      const maxBaseLength = 278 - footer.length;
+      // Su X, qualsiasi URL occupa esattamente 23 caratteri (t.co shortener)
+      // Spazio disponibile per il testo: 280 - 23 (url) - hashtags.length - 6 (a capo)
+      const maxBaseLength = Math.max(120, 280 - 23 - hashtags.length - 6);
       let truncatedBase = baseText;
       if (baseText.length > maxBaseLength) {
         const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+        truncatedBase = (lastSpace > 80 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
       }
-      const fullTweet = `${truncatedBase}${footer}`;
+      const fullTweet = `${truncatedBase}\n\n${articleUrl}\n\n${hashtags}`;
 
-      console.log(`[X MANUAL REPUBLISH] Invio tweet nativo per articolo ${art.id}: "${fullTweet}"`);
-      const xRes = await postToX(fullTweet, art.image_url);
+      console.log(`[X MANUAL REPUBLISH] Invio tweet card per articolo ${art.id}: "${fullTweet}"`);
+      const xRes = await postToX(fullTweet, null); // null per generare la Large Summary Card interattiva di X (cliccabile sull'immagine)
 
       if (xRes.id) {
         aiSummary.x_tweet_id = xRes.id;
@@ -717,7 +732,9 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 .replace(/#ASRoma/gi, '')
                 .replace(/#RomaFlash/gi, '')
                 .trim();
-              const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+              const articleSlug = generateArticleSlug(newTitle, insertedArticle.id);
+              const articleUrl = `https://romaflash.app/notizie/${articleSlug}`;
+              const hashtags = `#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
               
               let baseText = cleanBase;
               if (baseText.length < 180 && aiSummary.excerpt) {
@@ -727,16 +744,18 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 }
               }
 
-              const maxBaseLength = 278 - footer.length;
+              // Su X, qualsiasi URL occupa esattamente 23 caratteri (t.co shortener)
+              // Spazio disponibile per il testo: 280 - 23 (url) - hashtags.length - 6 (a capo)
+              const maxBaseLength = Math.max(120, 280 - 23 - hashtags.length - 6);
               let truncatedBase = baseText;
               if (baseText.length > maxBaseLength) {
                 const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-                truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+                truncatedBase = (lastSpace > 80 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
               }
-              const fullTweet = `${truncatedBase}${footer}`;
+              const fullTweet = `${truncatedBase}\n\n${articleUrl}\n\n${hashtags}`;
 
-              console.log(`[X AUTO-POST] Pubblicazione tweet nativo (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
-              const xRes = await postToX(fullTweet, imageUrl);
+              console.log(`[X AUTO-POST] Pubblicazione tweet card (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
+              const xRes = await postToX(fullTweet, null); // null per generare la Large Summary Card interattiva di X (cliccabile sull'immagine)
               if (xRes.id) {
                 console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
                 tweetsTodayCount++;

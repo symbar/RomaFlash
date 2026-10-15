@@ -14,6 +14,7 @@ import PollWidget from '@/components/PollWidget';
 import ArticleReactions from '@/components/ArticleReactions';
 import { useLanguage } from '@/components/LanguageContext';
 import ArticleImage, { getArticleImageUrl } from '@/components/ArticleImage';
+import { generateArticleSlug } from '@/lib/slug';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -32,7 +33,11 @@ function ArticleContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { lang, t, getArticleTitle, getArticleExcerpt, getArticleContent, getArticlePoll, translateCategory } = useLanguage();
-  const id = searchParams.get('id');
+  const queryId = searchParams.get('id');
+  const pathId = typeof window !== 'undefined'
+    ? window.location.pathname.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || null
+    : null;
+  const id = queryId || pathId;
 
   // Recupera i dati pre-renderizzati lato server da Cloudflare Edge SSR (idratazione istantanea)
   const initialEmbeddedArticle = (() => {
@@ -41,7 +46,7 @@ function ArticleContent() {
       const el = document.getElementById('__ROMAFLASH_ARTICLE_DATA__');
       if (el && el.textContent) {
         const parsed = JSON.parse(el.textContent);
-        if (parsed && parsed.id === id) {
+        if (parsed && (!id || parsed.id === id)) {
           return parsed;
         }
       }
@@ -299,7 +304,7 @@ function ArticleContent() {
                   <ShareButton 
                     title={displayTitle} 
                     text={displayExcerpt} 
-                    url={`https://romaflash.app/article?id=${article.id}`} 
+                    url={`https://romaflash.app/notizie/${generateArticleSlug(article.title, article.id)}`} 
                   />
                 </div>
               </div>

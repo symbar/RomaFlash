@@ -57,6 +57,7 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.4 Gestione Intelligente delle Fonti (Prompting AI):** Raffinamento dei prompt per citare la testata giornalistica originale solo in caso di interviste esclusive o scoop di mercato.
 *   **5.5 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
 *   **5.6 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
+*   ~~**5.7 Riformulazione Post su X (Zero Link Esterni & Recap Nativo):** Rimozione del link esterno a `romaflash.app` per evitare la penalizzazione dell'algoritmo di X; generazione di un recap incisivo e autosufficiente dell'articolo entro i 280 caratteri, accompagnato dall'immagine d'impatto.~~ ✅ **(Completato)**
 
 ---
 

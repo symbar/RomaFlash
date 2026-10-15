@@ -351,7 +351,7 @@ Istruzioni per l'output:
    - **Promossi & Da Rivedere**: Sintesi tecnica finale con i punti di forza confermati e gli aspetti da registrare.
 4. "sentiment": "Positivo" | "Negativo" | "Neutro" (in base alla prestazione della Roma e al risultato).
 5. "category": "L'Analista"
-6. "tweet_text": Un post serale/post-gara incisivo per X (massimo 160 caratteri, con emoji 📊♟️🟡🔴, SENZA hashtag e SENZA link).
+6. "tweet_text": Un'analisi tattica post-gara densa, approfondita e incisiva per X che sfrutti appieno i 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con emoji 📊♟️🟡🔴, SENZA hashtag e SENZA link), spiegando i numeri chiave e la chiave tattica del match.
 7. "dynamic_hashtags": 2 hashtag caldi sulla partita (es. "#RomaFiorentina #SerieA" o "#ChampionsLeague #Gasperini"), SENZA #ASRoma e #RomaFlash.
 8. "en": Versione inglese completa con gli stessi 4 paragrafi in "content", "title" ("The Analyst | ...") e "excerpt".
 
@@ -457,10 +457,21 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
         .replace(/#RomaFlash/gi, '')
         .trim()
       const footer = `\n\n⚡ RomaFlash  #ASRoma #AnalisiTattica${extraTags ? ` ${extraTags}` : ''}`
-      const maxBaseLength = 275 - footer.length
-      const truncatedBase = cleanBase.length > maxBaseLength 
-        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...' 
-        : cleanBase
+      
+      let baseText = cleanBase
+      if (baseText.length < 180 && aiSummary.excerpt) {
+        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim()
+        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
+          baseText = `${baseText} ${cleanExcerpt}`.trim()
+        }
+      }
+
+      const maxBaseLength = 278 - footer.length
+      let truncatedBase = baseText
+      if (baseText.length > maxBaseLength) {
+        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3)
+        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...'
+      }
       const fullTweet = `${truncatedBase}${footer}`
 
       console.log(`[X AUTO-POST] Pubblicazione L'Analista nativo su X...`)

@@ -194,10 +194,21 @@ serve(async (req) => {
         .replace(/#RomaFlash/gi, '')
         .trim();
       const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
-      const maxBaseLength = 275 - footer.length;
-      const truncatedBase = cleanBase.length > maxBaseLength
-        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
-        : cleanBase;
+      
+      let baseText = cleanBase;
+      if (baseText.length < 180 && aiSummary.excerpt) {
+        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
+        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
+          baseText = `${baseText} ${cleanExcerpt}`.trim();
+        }
+      }
+
+      const maxBaseLength = 278 - footer.length;
+      let truncatedBase = baseText;
+      if (baseText.length > maxBaseLength) {
+        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+      }
       const fullTweet = `${truncatedBase}${footer}`;
 
       console.log(`[X MANUAL REPUBLISH] Invio tweet nativo per articolo ${art.id}: "${fullTweet}"`);
@@ -513,7 +524,7 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
 8. AUTO-PUBBLICAZIONE X / TWITTER ("tweet_text" e "dynamic_hashtags"):
    Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash in modalità 100% nativa.
-   Scrivi in "tweet_text" un recap nativo completo, denso e magnetico per X (tra 140 e 210 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema). Deve riassumere il fatto centrale, il dato o il virgolettato chiave in modo chiaro e autosufficiente per chi legge il post su X.
+   Scrivi in "tweet_text" un recap nativo completo, denso, approfondito e ricco di dettagli per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema). Non limitarti a una frase breve: racconta il fatto centrale, i dettagli, i numeri o il virgolettato chiave in modo che chi legge su X abbia una vera e propria notizia completa ed esaustiva.
    Scrivi in "dynamic_hashtags" 1 o 2 hashtag caldi e pertinenti alla notizia specifica (es. "#Dybala", "#RomaInter", "#Calciomercato"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
    Se ti è stata allegata un'immagine, controllala con estrema severità.
@@ -707,10 +718,21 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 .replace(/#RomaFlash/gi, '')
                 .trim();
               const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
-              const maxBaseLength = 275 - footer.length;
-              const truncatedBase = cleanBase.length > maxBaseLength
-                ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
-                : cleanBase;
+              
+              let baseText = cleanBase;
+              if (baseText.length < 180 && aiSummary.excerpt) {
+                const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
+                if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
+                  baseText = `${baseText} ${cleanExcerpt}`.trim();
+                }
+              }
+
+              const maxBaseLength = 278 - footer.length;
+              let truncatedBase = baseText;
+              if (baseText.length > maxBaseLength) {
+                const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
+                truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+              }
               const fullTweet = `${truncatedBase}${footer}`;
 
               console.log(`[X AUTO-POST] Pubblicazione tweet nativo (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);

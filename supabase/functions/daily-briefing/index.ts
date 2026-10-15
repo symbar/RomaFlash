@@ -192,7 +192,7 @@ ${articlesContext}
 Istruzioni per l'output JSON:
 Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
-Includi anche "tweet_text": un recap serale magnetico e completo per X (tra 140 e 210 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che riassuma in pillole dense i temi più importanti della giornata da Trigoria.
+Includi anche "tweet_text": un recap serale completo, denso e approfondito per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che riassuma in pillole dense i temi più importanti della giornata da Trigoria.
 Includi anche "dynamic_hashtags": 1-2 hashtag caldi sui temi principali della giornata (es. "#Trigoria #SerieA"), SENZA includere #ASRoma e #RomaFlash.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {
@@ -285,10 +285,21 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
         .replace(/#RomaFlash/gi, '')
         .trim();
       const footer = `\n\n⚡ RomaFlash  #ASRoma #PuntodellaGiornata${extraTags ? ` ${extraTags}` : ''}`;
-      const maxBaseLength = 275 - footer.length;
-      const truncatedBase = cleanBase.length > maxBaseLength
-        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
-        : cleanBase;
+      
+      let baseText = cleanBase;
+      if (baseText.length < 180 && aiSummary.excerpt) {
+        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
+        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
+          baseText = `${baseText} ${cleanExcerpt}`.trim();
+        }
+      }
+
+      const maxBaseLength = 278 - footer.length;
+      let truncatedBase = baseText;
+      if (baseText.length > maxBaseLength) {
+        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+      }
       const fullTweet = `${truncatedBase}${footer}`;
 
       console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata nativo su X...`);

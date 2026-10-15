@@ -447,15 +447,15 @@ Nel dubbio, imposta SEMPRE "is_duplicate": true!
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo in italiano (diverso dall'originale).
 2. Scrivi un breve riassunto di 2 righe (excerpt) in italiano per la homepage.
-3. Riscrivi l'intero articolo in italiano in modo discorsivo, fluido e professionale.
+3. Riscrivi l'intero articolo in italiano in modo discorsivo, fluido e professionale. Se l'articolo contiene interviste o dichiarazioni (di calciatori, mister o dirigenti), PRESERVA e RIPORTA SEMPRE TRA VIRGOLETTE ("...") le loro parole esatte e i virgolettati originali, evitando di parafrasarli.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
 8. AUTO-PUBBLICAZIONE X / TWITTER ("tweet_text" e "dynamic_hashtags"):
-   Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash.
-   Scrivi in "tweet_text" un post magnetico in italiano per X (massimo 170 caratteri, con 1-2 emoji pertinenti, SENZA URL e SENZA hashtag perché verranno aggiunti dal sistema).
-   Scrivi in "dynamic_hashtags" 2 hashtag caldi e pertinenti alla notizia specifica (es. "#ComoRoma #Gasperini", "#Dybala #SerieA", "#RomaRealMadrid #ChampionsLeague", "#Calciomercato #Svilar"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
+   Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash in modalità 100% nativa.
+   Scrivi in "tweet_text" un recap nativo completo, denso e magnetico per X (tra 140 e 210 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema). Deve riassumere il fatto centrale, il dato o il virgolettato chiave in modo chiaro e autosufficiente per chi legge il post su X.
+   Scrivi in "dynamic_hashtags" 1 o 2 hashtag caldi e pertinenti alla notizia specifica (es. "#Dybala", "#RomaInter", "#Calciomercato"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
    Se ti è stata allegata un'immagine, controllala con estrema severità.
    Imposta "is_clean_real_photo": false SE l'immagine contiene UNO QUALSIASI di questi elementi:
@@ -639,18 +639,22 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
               source.name === 'AS Roma (Ufficiale)';
 
             if (insertedArticle?.id && !isSocialPost) {
-              const articleUrl = `https://romaflash.app/article?id=${insertedArticle.id}`;
               const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}`)
+                .replace(/https?:\/\/\S+/gi, '')
                 .replace(/#[a-zA-Z0-9_]+/g, '')
                 .trim();
               const extraTags = (aiSummary.dynamic_hashtags || '')
                 .replace(/#ASRoma/gi, '')
                 .replace(/#RomaFlash/gi, '')
                 .trim();
-              const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`;
-              const fullTweet = `${cleanBase}\n\n👉 Leggi qui: ${articleUrl}\n\n${hashtagsLine}`;
+              const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+              const maxBaseLength = 275 - footer.length;
+              const truncatedBase = cleanBase.length > maxBaseLength
+                ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
+                : cleanBase;
+              const fullTweet = `${truncatedBase}${footer}`;
 
-              console.log(`[X AUTO-POST] Pubblicazione tweet (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
+              console.log(`[X AUTO-POST] Pubblicazione tweet nativo (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
               const xRes = await postToX(fullTweet, imageUrl);
               if (xRes.id) {
                 console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);

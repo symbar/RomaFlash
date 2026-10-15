@@ -448,25 +448,22 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
     // Auto-Post su X tramite Buffer
     let xTweetId: string | undefined = undefined
     if (savedArticle?.id) {
-      const articleUrl = `https://romaflash.app/article?id=${savedArticle.id}`
       const cleanBase = (aiSummary.tweet_text || `📊♟️ ${articleTitle}\n\n${aiSummary.excerpt}`)
+        .replace(/https?:\/\/\S+/gi, '')
         .replace(/#[a-zA-Z0-9_]+/g, '')
         .trim()
       const extraTags = (aiSummary.dynamic_hashtags || '')
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim()
-      const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`
-      
-      const linkLine = `\n\n📋 Analisi tattica: ${articleUrl}`
-      const tagsLine = `\n\n${hashtagsLine}`
-      const maxBaseLength = 275 - linkLine.length - tagsLine.length
+      const footer = `\n\n⚡ RomaFlash  #ASRoma #AnalisiTattica${extraTags ? ` ${extraTags}` : ''}`
+      const maxBaseLength = 275 - footer.length
       const truncatedBase = cleanBase.length > maxBaseLength 
         ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...' 
         : cleanBase
-      const fullTweet = `${truncatedBase}${linkLine}${tagsLine}`
+      const fullTweet = `${truncatedBase}${footer}`
 
-      console.log(`[X AUTO-POST] Pubblicazione L'Analista su X...`)
+      console.log(`[X AUTO-POST] Pubblicazione L'Analista nativo su X...`)
       const xRes = await postToX(fullTweet, tacticalBoardImg)
       if (xRes.id) {
         console.log(`[X AUTO-POST] Articolo L'Analista pubblicato su X! ID: ${xRes.id}`)

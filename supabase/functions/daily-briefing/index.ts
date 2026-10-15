@@ -192,7 +192,8 @@ ${articlesContext}
 Istruzioni per l'output JSON:
 Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
-Includi anche "tweet_text": un post serale accattivante per X (massimo 165 caratteri, con emoji 🌙🐺🟡🔴, SENZA link e SENZA hashtag perché verranno aggiunti dal sistema) e "dynamic_hashtags": 2 hashtag caldi sui temi principali della giornata (es. "#ComoRoma #ChampionsLeague", "#Gasperini #SerieA"), SENZA includere #ASRoma e #RomaFlash.
+Includi anche "tweet_text": un recap serale magnetico e completo per X (tra 140 e 210 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che riassuma in pillole dense i temi più importanti della giornata da Trigoria.
+Includi anche "dynamic_hashtags": 1-2 hashtag caldi sui temi principali della giornata (es. "#Trigoria #SerieA"), SENZA includere #ASRoma e #RomaFlash.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {
   "excerpt": "Breve frase ad effetto che riassume l'umore generale della giornata (es: 'Giornata frenetica a Trigoria tra infortuni e dichiarazioni infuocate.')",
@@ -275,18 +276,22 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
     // Auto-Pubblicazione su X (12° slot riservato a Il Punto della Giornata)
     let xTweetId: string | undefined = undefined;
     if (savedBriefing?.id) {
-      const articleUrl = `https://romaflash.app/article?id=${savedBriefing.id}`;
       const cleanBase = (aiSummary.tweet_text || `🌙🐺 ${briefingArticle.title}\n\n${aiSummary.excerpt}`)
+        .replace(/https?:\/\/\S+/gi, '')
         .replace(/#[a-zA-Z0-9_]+/g, '')
         .trim();
       const extraTags = (aiSummary.dynamic_hashtags || '')
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const hashtagsLine = extraTags ? `#ASRoma #RomaFlash ${extraTags}` : `#ASRoma #RomaFlash`;
-      const fullTweet = `${cleanBase}\n\n📖 Leggi il recap completo: ${articleUrl}\n\n${hashtagsLine}`;
+      const footer = `\n\n⚡ RomaFlash  #ASRoma #PuntodellaGiornata${extraTags ? ` ${extraTags}` : ''}`;
+      const maxBaseLength = 275 - footer.length;
+      const truncatedBase = cleanBase.length > maxBaseLength
+        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
+        : cleanBase;
+      const fullTweet = `${truncatedBase}${footer}`;
 
-      console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata su X...`);
+      console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata nativo su X...`);
       const xRes = await postToX(fullTweet, briefingImageUrl);
       if (xRes.id) {
         console.log(`[X AUTO-POST] Punto della Giornata pubblicato su X! ID: ${xRes.id}`);

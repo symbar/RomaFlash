@@ -33,9 +33,27 @@ function ArticleContent() {
   const router = useRouter();
   const { lang, t, getArticleTitle, getArticleExcerpt, getArticleContent, getArticlePoll, translateCategory } = useLanguage();
   const id = searchParams.get('id');
-  const [article, setArticle] = useState<any>(null);
+
+  // Recupera i dati pre-renderizzati lato server da Cloudflare Edge SSR (idratazione istantanea)
+  const initialEmbeddedArticle = (() => {
+    if (typeof document === 'undefined') return null;
+    try {
+      const el = document.getElementById('__ROMAFLASH_ARTICLE_DATA__');
+      if (el && el.textContent) {
+        const parsed = JSON.parse(el.textContent);
+        if (parsed && parsed.id === id) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return null;
+  })();
+
+  const [article, setArticle] = useState<any>(initialEmbeddedArticle);
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialEmbeddedArticle);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
 
   useEffect(() => {
@@ -69,15 +87,23 @@ function ArticleContent() {
 
     async function fetchArticle() {
       if (!id) return;
-      const { data } = await supabase
-        .from('articles')
-        .select('*, sources(name)')
-        .eq('id', id)
-        .single();
-      
-      if (data) {
-        setArticle(data);
 
+      let currentArticle = article;
+
+      if (!currentArticle || currentArticle.id !== id) {
+        const { data } = await supabase
+          .from('articles')
+          .select('*, sources(name)')
+          .eq('id', id)
+          .single();
+        
+        if (data) {
+          currentArticle = data;
+          setArticle(data);
+        }
+      }
+      
+      if (currentArticle) {
         // Tracciamento silenzioso di ogni lettura umana (filtro anti-bot + 2s di permanenza reale)
         const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
         const isBot =
@@ -86,21 +112,21 @@ function ArticleContent() {
 
         if (!isBot) {
           viewTimer = setTimeout(() => {
-            supabase.rpc('increment_article_view', { target_article_id: data.id }).then(() => {});
+            supabase.rpc('increment_article_view', { target_article_id: currentArticle.id }).then(() => {});
           }, 2000);
         }
         
-        if (data.ai_summary?.category) {
+        if (currentArticle.ai_summary?.category) {
           const { data: recentData } = await supabase
             .from('articles')
             .select('id, title, published_at, ai_summary')
-            .neq('id', data.id)
+            .neq('id', currentArticle.id)
             .order('published_at', { ascending: false })
             .limit(20);
             
           if (recentData) {
             const related = recentData
-              .filter(a => a.ai_summary?.category === data.ai_summary.category)
+              .filter(a => a.ai_summary?.category === currentArticle.ai_summary.category)
               .slice(0, 3);
             setRelatedArticles(related);
           }

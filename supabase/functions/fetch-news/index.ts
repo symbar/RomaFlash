@@ -443,7 +443,7 @@ serve(async (req) => {
             try {
               const pageRes = await fetch(item.link, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-                signal: AbortSignal.timeout(4000)
+                signal: AbortSignal.timeout(6000)
               });
               const pageHtml = await pageRes.text();
               const ogMatch = pageHtml.match(/<meta\s+(?:property|name)=["']og:image["']\s+content=["']([^"']+)["']/i) ||
@@ -467,7 +467,7 @@ serve(async (req) => {
             try {
               const imgRes = await fetch(candidateImageUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-                signal: AbortSignal.timeout(3500)
+                signal: AbortSignal.timeout(7000)
               });
               if (imgRes.ok) {
                 const contentType = imgRes.headers.get('content-type') || 'image/jpeg';

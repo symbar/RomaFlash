@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Download, Copy, Check, Share2 } from "lucide-react";
+import { X, Download, Copy, Check, Share2, RotateCcw } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
 
 export function TikTokIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
@@ -327,6 +327,88 @@ function renderSingleSlide(
   return canvas.toDataURL("image/jpeg", 0.94);
 }
 
+export function buildTikTokCaption(article: any): string {
+  if (!article) return "";
+
+  const title = (article.title || "").trim();
+
+  // Testo principale / Spiegazione approfondita
+  let fullContent = (article.ai_summary?.content || article.content || "").trim();
+  const excerpt = (article.ai_summary?.excerpt || "").trim();
+
+  // Se content non è presente o è troppo stringato (< 180 caratteri), integralo con l'excerpt
+  if (!fullContent) {
+    fullContent = excerpt;
+  } else if (
+    excerpt &&
+    fullContent.length < 200 &&
+    !fullContent.toLowerCase().includes(excerpt.substring(0, 30).toLowerCase())
+  ) {
+    fullContent = `${excerpt}\n\n${fullContent}`;
+  }
+
+  // Pulisci e formatta i paragrafi in modo ordinato
+  const paragraphs = fullContent
+    .split(/\n+/)
+    .map((p: string) => p.trim())
+    .filter(Boolean);
+
+  const body = paragraphs.join("\n\n");
+
+  // Call to action & Coinvolgimento community nei commenti (fondamentale per l'algoritmo di TikTok)
+  const pollQuestion = article.ai_summary?.poll?.question?.trim();
+  let callToAction = "💬 Voi cosa ne pensate? Scrivetecelo nei commenti! 👇";
+  if (pollQuestion) {
+    callToAction = `💬 DIBATTITO GIALLOROSSO:\n${pollQuestion}\n👉 Dite la vostra nei commenti!`;
+  }
+
+  // Riferimento al portale RomaFlash
+  const brandLine = "📲 Resta sempre aggiornato sull'AS Roma: visita romaflash.app";
+
+  // Hashtag dinamici e fissi ottimizzati per TikTok
+  const extraTags = (article.ai_summary?.dynamic_hashtags || "")
+    .replace(/#ASRoma/gi, "")
+    .replace(/#RomaFlash/gi, "")
+    .replace(/#Romanisti/gi, "")
+    .replace(/#CurvaSudRoma/gi, "")
+    .replace(/#SerieA/gi, "")
+    .replace(/#PerTe/gi, "")
+    .replace(/#ForYou/gi, "")
+    .replace(/#Calcio/gi, "")
+    .trim();
+
+  const formattedExtraTags = extraTags
+    ? extraTags
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((t: string) => (t.startsWith("#") ? t.toLowerCase() : `#${t.toLowerCase()}`))
+        .join(" ")
+    : "";
+
+  const hashtags = `#asroma #romaflash #seriea #calcio #perte #foryou${formattedExtraTags ? ` ${formattedExtraTags}` : ""}`;
+
+  // Intestazione con emoji
+  const header = `🐺 ${title} 🟡🔴`;
+
+  // Assembliamo la didascalia completa
+  let caption = `${header}\n\n${body}\n\n${callToAction}\n\n${brandLine}\n\n${hashtags}`;
+
+  // Se supera 2.100 caratteri (TikTok accetta fino a 2.200 - 4.000 car.), tronchiamo delicatamente sul punto fermo
+  if (caption.length > 2100) {
+    const maxBodyLen = 2100 - (header.length + callToAction.length + brandLine.length + hashtags.length + 30);
+    if (maxBodyLen > 100) {
+      let cut = body.slice(0, maxBodyLen);
+      const lastDot = cut.lastIndexOf(".");
+      if (lastDot > 100) {
+        cut = cut.slice(0, lastDot + 1);
+      }
+      caption = `${header}\n\n${cut}\n\n${callToAction}\n\n${brandLine}\n\n${hashtags}`;
+    }
+  }
+
+  return caption;
+}
+
 export default function TikTokKitModal({
   article,
   onClose,
@@ -335,6 +417,12 @@ export default function TikTokKitModal({
   const [slideUrl, setSlideUrl] = useState<string>("");
   const [generating, setGenerating] = useState<boolean>(true);
   const [copied, setCopied] = useState(false);
+  const [captionText, setCaptionText] = useState<string>("");
+
+  useEffect(() => {
+    if (!article) return;
+    setCaptionText(buildTikTokCaption(article));
+  }, [article]);
 
   useEffect(() => {
     if (!article) return;
@@ -378,19 +466,6 @@ export default function TikTokKitModal({
 
   if (!article || typeof document === "undefined") return null;
 
-  const extraTags = (article.ai_summary?.dynamic_hashtags || "")
-    .replace(/#ASRoma/gi, "")
-    .replace(/#RomaFlash/gi, "")
-    .replace(/#Romanisti/gi, "")
-    .replace(/#CurvaSudRoma/gi, "")
-    .replace(/#SerieA/gi, "")
-    .replace(/#PerTe/gi, "")
-    .trim();
-
-  const hashtags = `#asroma #romaflash ${extraTags ? `${extraTags.toLowerCase()} ` : ""}#seriea #perte`;
-  const cleanExcerpt = (article.ai_summary?.excerpt || article.title || "").trim();
-  const tiktokCaption = `${article.title} 🟡🔴🐺\n${cleanExcerpt}\n\n${hashtags}`;
-
   const handleDownload = () => {
     if (!slideUrl) return;
     const a = document.createElement("a");
@@ -417,7 +492,7 @@ export default function TikTokKitModal({
         await navigator.share({
           files: [file],
           title: article.title,
-          text: tiktokCaption,
+          text: captionText,
         });
         if (onMarkShared && article?.id) {
           onMarkShared(article.id, true);
@@ -432,7 +507,7 @@ export default function TikTokKitModal({
 
   const handleCopyCaption = async () => {
     try {
-      await navigator.clipboard.writeText(tiktokCaption);
+      await navigator.clipboard.writeText(captionText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
@@ -515,36 +590,59 @@ export default function TikTokKitModal({
             </button>
 
             {/* Caption Box */}
-            <div className="bg-gray-50 border border-border rounded-xl p-3 mt-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                  Didascalia + Hashtag per TikTok
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyCaption}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                    copied
-                      ? "bg-green-600 text-white"
-                      : "bg-primary/10 text-primary hover:bg-primary/20"
-                  }`}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      Copiato!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      Copia Testo
-                    </>
-                  )}
-                </button>
+            <div className="bg-gray-50 border border-border rounded-xl p-3 mt-1 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">
+                    Didascalia TikTok
+                  </span>
+                  <span className="text-[10px] font-semibold text-gray-500 bg-gray-200/80 px-2 py-0.5 rounded-full shrink-0">
+                    {captionText.length} car.
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setCaptionText(buildTikTokCaption(article))}
+                    title="Ripristina didascalia originale"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg hover:bg-gray-200/60 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span className="hidden sm:inline">Ripristina</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyCaption}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                      copied
+                        ? "bg-green-600 text-white"
+                        : "bg-primary/10 text-primary hover:bg-primary/20"
+                    }`}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        Copiato!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        Copia Testo
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-              <pre className="text-xs text-gray-800 whitespace-pre-wrap font-sans leading-relaxed max-h-48 overflow-y-auto">
-                {tiktokCaption}
-              </pre>
+              <textarea
+                value={captionText}
+                onChange={(e) => setCaptionText(e.target.value)}
+                rows={9}
+                className="w-full text-xs text-gray-800 bg-white border border-gray-200 rounded-lg p-3 font-sans leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-xs"
+                placeholder="Didascalia approfondita per TikTok..."
+              />
+              <p className="text-[10px] text-gray-400 leading-tight">
+                💡 Didascalia estesa con spiegazione completa, domanda per i commenti e hashtag per il feed &quot;Per Te&quot;. Modificabile prima di copiare.
+              </p>
             </div>
           </div>
         </div>

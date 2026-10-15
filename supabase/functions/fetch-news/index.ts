@@ -160,6 +160,65 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // Supporto ripubblicazione manuale o test di un articolo specifico su X in formato nativo
+    let reqBody: any = null;
+    try {
+      if (req.method === 'POST') {
+        reqBody = await req.json();
+      }
+    } catch {
+      // Nessun body JSON fornito, prosegue con scraping normale
+    }
+
+    if (reqBody?.republishXArticleId) {
+      const { data: art, error: artError } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', reqBody.republishXArticleId)
+        .single();
+
+      if (artError || !art) {
+        return new Response(JSON.stringify({ error: "Articolo non trovato", details: artError }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        });
+      }
+
+      const aiSummary = art.ai_summary || {};
+      const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${art.title}\n\n${aiSummary.excerpt}`)
+        .replace(/https?:\/\/\S+/gi, '')
+        .replace(/#[a-zA-Z0-9_]+/g, '')
+        .trim();
+      const extraTags = (aiSummary.dynamic_hashtags || '')
+        .replace(/#ASRoma/gi, '')
+        .replace(/#RomaFlash/gi, '')
+        .trim();
+      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      const maxBaseLength = 275 - footer.length;
+      const truncatedBase = cleanBase.length > maxBaseLength
+        ? cleanBase.substring(0, maxBaseLength - 3).trim() + '...'
+        : cleanBase;
+      const fullTweet = `${truncatedBase}${footer}`;
+
+      console.log(`[X MANUAL REPUBLISH] Invio tweet nativo per articolo ${art.id}: "${fullTweet}"`);
+      const xRes = await postToX(fullTweet, art.image_url);
+
+      if (xRes.id) {
+        aiSummary.x_tweet_id = xRes.id;
+        if (xRes.url) aiSummary.x_tweet_url = xRes.url;
+        aiSummary.x_posted_at = new Date().toISOString();
+        await supabase.from('articles').update({ ai_summary: aiSummary }).eq('id', art.id);
+        return new Response(JSON.stringify({ success: true, tweetId: xRes.id, tweetUrl: xRes.url, fullTweet }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else {
+        return new Response(JSON.stringify({ success: false, error: xRes.error, fullTweet }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        });
+      }
+    }
+
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) throw new Error("GEMINI_API_KEY non configurata")
 

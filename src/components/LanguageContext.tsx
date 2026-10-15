@@ -60,7 +60,10 @@ const translations: Record<Language, Record<string, string>> = {
     'countdown.days': 'G',
     'countdown.hours': 'O',
     'countdown.minutes': 'M',
-    'countdown.seconds': 'S',
+    'article.prev': 'Notizia precedente',
+    'article.next': 'Notizia successiva',
+    'article.swipe_hint': 'Scorri col pollice per cambiare notizia',
+    'article.latest_news_alert': 'Sei sulla notizia più recente',
     'disclaimer.text': 'Questo sito non rappresenta una testata giornalistica in quanto viene aggiornato senza alcuna periodicità. Non può considerarsi un prodotto editoriale ai sensi della legge n° 62 del 7.03.2001. Non affiliato all\'AS Roma.',
   },
   en: {
@@ -108,6 +111,10 @@ const translations: Record<Language, Record<string, string>> = {
     'countdown.hours': 'H',
     'countdown.minutes': 'M',
     'countdown.seconds': 'S',
+    'article.prev': 'Previous article',
+    'article.next': 'Next article',
+    'article.swipe_hint': 'Swipe to browse news',
+    'article.latest_news_alert': 'You are on the latest news',
     'disclaimer.text': 'This site is not an official news organization as it is updated without regular periodicity (Italian Law no. 62 of 07.03.2001). Unofficial fan platform, not affiliated with AS Roma.',
   }
 };

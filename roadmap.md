@@ -32,7 +32,7 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
 *   **3.1 Audio-Notizie (Ascolta l'Articolo):** Sintesi vocale Text-to-Speech nativa (micro-podcast di 30-45 secondi generato dall'AI) con player integrato per ascoltare il riassunto dell'articolo in auto o con gli auricolari.
 *   **3.2 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le 5 notizie più calde della giornata in formato pillola.
-*   **3.3 Swipe Orizzontale fra Articoli (Stile TikTok/Reels):** Navigazione a swipe col pollice da un articolo all'altro senza dover tornare alla home page.
+*   ~~**3.3 Swipe Orizzontale fra Articoli (Stile TikTok/Reels):** Navigazione a swipe col pollice da un articolo all'altro senza dover tornare alla home page con transizioni fluide, prefetching e scorciatoie da tastiera.~~ ✅ **(Completato)**
 *   **3.4 Generatore "Condividi come Storia Instagram":** Tasto per il lettore che trasforma istantaneamente la notizia in una card verticale (9:16) brandizzata RomaFlash da condividere su Instagram Stories o WhatsApp.
 *   **3.5 Fedeltà delle Interviste & Virgolettati Reali:** Aggiornamento del prompt di sintesi di Gemini per preservare e riportare fedelmente tra virgolette (`"..."`) le dichiarazioni testuali esatte rilasciate dai protagonisti (calciatori, mister, dirigenti), evitando che l'AI parafrasi o annacqui le parole originali durante la riscrittura.
 
@@ -42,7 +42,7 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
 Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso di appartenenza.
 
-*   **4.1 Reazioni Rapide con Emoji (Muro del Tifoso):** Barra di reazioni istantanee sotto ogni articolo (🐺 *Cuore Giallorosso*, 🔥 *Gasato*, 😡 *Arrabbiato*, 👏 *Applausi*) con contatore animato in tempo reale (senza complessità di moderazione commenti).
+*   ~~**4.1 Reazioni Rapide con Emoji (Muro del Tifoso):** Barra di reazioni istantanee sotto ogni articolo con pulsante Like stile Facebook (👍 Mi piace, ❤️ Love, 😆 Ahahah, 😮 Wow, 😢 Sigh, 😡 Grrr) con dock fluttuante su hover/long-press, persistenza utente e contatori aggiornati in tempo reale tramite Supabase Realtime.~~ ✅ **(Completato)**
 *   **4.2 Notizie Salvate (I Miei Preferiti / Pocket):** Tasto segnalibro per salvare le interviste lunghe o gli approfondimenti tattici e rileggerli comodamente in una sezione dedicata.
 *   **4.3 Cori della Curva Sud (Audio & Testi):** Raccolta dei cori più famosi della Curva Sud (*Roma Roma Roma*, *Grazie Roma*, *Campo Testaccio*, *Mai Sola Mai*) con traccia audio e testo scorrevole per i tifosi.
 *   **4.4 Tempo di Lettura Dinamico:** Micro-badge *"⏱️ 1 min di lettura"* calcolato sul testo per incentivare il click rapido.

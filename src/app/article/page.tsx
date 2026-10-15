@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalRightSidebar from '@/components/GlobalRightSidebar';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import { Tweet } from 'react-tweet';
@@ -14,7 +14,6 @@ import PollWidget from '@/components/PollWidget';
 import ArticleReactions from '@/components/ArticleReactions';
 import { useLanguage } from '@/components/LanguageContext';
 import ArticleImage, { getArticleImageUrl } from '@/components/ArticleImage';
-import { motion, AnimatePresence } from 'framer-motion';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -65,115 +64,11 @@ function ArticleContent() {
     }
   };
 
-  const [prevArticle, setPrevArticle] = useState<any>(null);
-  const [nextArticle, setNextArticle] = useState<any>(null);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
-  const [swipeHint, setSwipeHint] = useState<'left' | 'right' | 'first' | 'last' | null>(null);
-  const [touchOffset, setTouchOffset] = useState<number>(0);
-
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-  const isSwipingHorizontallyRef = useRef<boolean | null>(null);
-
-  const navigateToArticle = (targetId: string, direction: 'left' | 'right') => {
-    setSlideDirection(direction);
-    setSwipeHint(null);
-    setTouchOffset(0);
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-    router.push(`/article?id=${targetId}`);
-  };
-
-  // Navigazione da tastiera per desktop (Frecce Sinistra / Destra)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
-      if (e.key === 'ArrowRight' && nextArticle) {
-        navigateToArticle(nextArticle.id, 'left');
-      } else if (e.key === 'ArrowLeft' && prevArticle) {
-        navigateToArticle(prevArticle.id, 'right');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextArticle, prevArticle]);
-
-  // Touch Swipe handlers per navigazione stile TikTok/Reels con pollice
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length !== 1) return;
-    touchStartRef.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-      time: Date.now(),
-    };
-    isSwipingHorizontallyRef.current = null;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStartRef.current || e.touches.length !== 1) return;
-    const deltaX = e.touches[0].clientX - touchStartRef.current.x;
-    const deltaY = e.touches[0].clientY - touchStartRef.current.y;
-
-    if (isSwipingHorizontallyRef.current === null) {
-      // Se lo scroll verticale è predominante, lascia il controllo allo scorrimento nativo
-      if (Math.abs(deltaY) > 8 && Math.abs(deltaY) >= Math.abs(deltaX)) {
-        isSwipingHorizontallyRef.current = false;
-        setTouchOffset(0);
-        setSwipeHint(null);
-        return;
-      }
-      // Se il movimento orizzontale è netto, attiva la modalità swipe
-      if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
-        isSwipingHorizontallyRef.current = true;
-      }
-    }
-
-    if (isSwipingHorizontallyRef.current) {
-      // Resistenza elastica stile iOS / TikTok
-      const dampedX = deltaX * 0.35;
-      setTouchOffset(dampedX);
-
-      if (deltaX < -25) {
-        setSwipeHint(nextArticle ? 'left' : 'last');
-      } else if (deltaX > 25) {
-        setSwipeHint(prevArticle ? 'right' : 'first');
-      } else {
-        setSwipeHint(null);
-      }
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaTime = Date.now() - touchStartRef.current.time;
-
-    if (isSwipingHorizontallyRef.current) {
-      const isQuickSwipe = Math.abs(deltaX) > 40 && deltaTime < 350;
-      const isLongSwipe = Math.abs(deltaX) > 70;
-
-      if (isQuickSwipe || isLongSwipe) {
-        if (deltaX < 0 && nextArticle) {
-          // Swipe verso sinistra -> Notizia successiva
-          navigateToArticle(nextArticle.id, 'left');
-        } else if (deltaX > 0 && prevArticle) {
-          // Swipe verso destra -> Notizia precedente
-          navigateToArticle(prevArticle.id, 'right');
-        }
-      }
-    }
-
-    touchStartRef.current = null;
-    isSwipingHorizontallyRef.current = null;
-    setTouchOffset(0);
-    setSwipeHint(null);
-  };
-
   useEffect(() => {
     let viewTimer: NodeJS.Timeout | null = null;
 
     async function fetchArticle() {
       if (!id) return;
-      setLoading(true);
       const { data } = await supabase
         .from('articles')
         .select('*, sources(name)')
@@ -182,38 +77,6 @@ function ArticleContent() {
       
       if (data) {
         setArticle(data);
-
-        // Fetch asincrono degli articoli adiacenti per navigazione swipe istantanea
-        const [{ data: pData }, { data: nData }] = await Promise.all([
-          supabase
-            .from('articles')
-            .select('id, title, published_at, ai_summary')
-            .gt('published_at', data.published_at)
-            .order('published_at', { ascending: true })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from('articles')
-            .select('id, title, published_at, ai_summary')
-            .lt('published_at', data.published_at)
-            .order('published_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ]);
-
-        if (pData) {
-          setPrevArticle(pData);
-          router.prefetch(`/article?id=${pData.id}`);
-        } else {
-          setPrevArticle(null);
-        }
-
-        if (nData) {
-          setNextArticle(nData);
-          router.prefetch(`/article?id=${nData.id}`);
-        } else {
-          setNextArticle(null);
-        }
 
         // Tracciamento silenzioso di ogni lettura umana (filtro anti-bot + 2s di permanenza reale)
         const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
@@ -371,19 +234,7 @@ function ArticleContent() {
         <GlobalHeader title="Notizia" />
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          <motion.div
-            key={article.id}
-            initial={{ opacity: 0, x: slideDirection === 'left' ? 50 : slideDirection === 'right' ? -50 : 0 }}
-            animate={{ opacity: 1, x: touchOffset }}
-            transition={{
-              x: { type: 'spring', damping: 28, stiffness: 320 },
-              opacity: { duration: 0.18 }
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            className="flex-1 lg:w-[65%] xl:w-[70%] order-2 lg:order-1 flex flex-col relative"
-          >
+          <div className="flex-1 lg:w-[65%] xl:w-[70%] order-2 lg:order-1 flex flex-col">
             <header className="py-4 mb-6 border-b border-border/50">
               <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-primary hover:opacity-80 font-semibold mb-6 transition-opacity cursor-pointer">
                 <ArrowLeft className="w-5 h-5" />
@@ -528,125 +379,6 @@ function ArticleContent() {
               <PollWidget articleId={article.id} poll={displayPoll} />
             )}
 
-            {/* Navigazione Orizzontale tra Articoli (Stile TikTok/Reels con Swipe) */}
-            <nav className="mt-8 mb-6 p-4 md:p-5 rounded-2xl bg-gradient-to-r from-gray-50 via-white to-gray-50 border border-border shadow-xs" aria-label="Navigazione articoli">
-              <div className="flex items-center justify-between gap-3 sm:gap-4">
-                {prevArticle ? (
-                  <button
-                    type="button"
-                    onClick={() => navigateToArticle(prevArticle.id, 'right')}
-                    className="flex-1 flex items-center gap-2.5 p-3 rounded-xl bg-white border border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all text-left group cursor-pointer shadow-2xs"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-primary group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                      <ChevronLeft className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">
-                        {t('article.prev')}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900 truncate block group-hover:text-primary transition-colors">
-                        {getArticleTitle(prevArticle)}
-                      </span>
-                    </div>
-                  </button>
-                ) : (
-                  <div className="flex-1 p-3 rounded-xl bg-gray-50/70 border border-dashed border-gray-200 text-center text-xs text-gray-400 font-medium">
-                    {t('article.latest_news_alert')}
-                  </div>
-                )}
-
-                {nextArticle ? (
-                  <button
-                    type="button"
-                    onClick={() => navigateToArticle(nextArticle.id, 'left')}
-                    className="flex-1 flex items-center justify-end gap-2.5 p-3 rounded-xl bg-white border border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all text-right group cursor-pointer shadow-2xs"
-                  >
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">
-                        {t('article.next')}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900 truncate block group-hover:text-primary transition-colors">
-                        {getArticleTitle(nextArticle)}
-                      </span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-primary group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                  </button>
-                ) : (
-                  <div className="flex-1 p-3 rounded-xl bg-gray-50/70 border border-dashed border-gray-200 text-center text-xs text-gray-400 font-medium">
-                    {lang === 'it' ? 'Hai raggiunto l\'ultima notizia' : 'You reached the oldest news'}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-gray-400">
-                <span className="text-amber-500">👈</span>
-                <span>{t('article.swipe_hint')}</span>
-                <span className="text-amber-500">👉</span>
-              </div>
-            </nav>
-
-            {/* Visual Indicator durante lo Swipe col pollice */}
-            <AnimatePresence>
-              {swipeHint && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 10 }}
-                  className={`fixed top-24 z-50 px-4 py-2 rounded-full shadow-2xl backdrop-blur-md text-xs font-bold flex items-center gap-2 border pointer-events-none select-none ${
-                    swipeHint === 'left'
-                      ? 'right-6 bg-primary text-white border-primary/20'
-                      : swipeHint === 'right'
-                      ? 'left-6 bg-primary text-white border-primary/20'
-                      : 'left-1/2 -translate-x-1/2 bg-gray-900/90 text-white border-white/20'
-                  }`}
-                >
-                  {swipeHint === 'left' && (
-                    <>
-                      <span>{t('article.next')}</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </>
-                  )}
-                  {swipeHint === 'right' && (
-                    <>
-                      <ChevronLeft className="w-4 h-4" />
-                      <span>{t('article.prev')}</span>
-                    </>
-                  )}
-                  {swipeHint === 'first' && <span>{t('article.latest_news_alert')}</span>}
-                  {swipeHint === 'last' && <span>{lang === 'it' ? 'Ultima notizia disponibile' : 'Oldest news reached'}</span>}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Barra Fluttuante Mobile per Switch Immediato (sempre accessibile con il pollice) */}
-            <div className="lg:hidden fixed bottom-18 left-1/2 -translate-x-1/2 z-40 bg-gray-900/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-lg border border-white/15 flex items-center gap-2.5 text-xs font-semibold select-none">
-              <button
-                type="button"
-                disabled={!prevArticle}
-                onClick={() => prevArticle && navigateToArticle(prevArticle.id, 'right')}
-                className={`flex items-center gap-1 py-1 px-1.5 rounded-full ${prevArticle ? 'hover:text-amber-400 active:scale-95 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
-                aria-label={t('article.prev')}
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span className="text-[11px]">Prec</span>
-              </button>
-              <span className="w-1 h-1 rounded-full bg-white/30" />
-              <span className="text-[10px] text-gray-300 font-normal">Swipe 👈 👉</span>
-              <span className="w-1 h-1 rounded-full bg-white/30" />
-              <button
-                type="button"
-                disabled={!nextArticle}
-                onClick={() => nextArticle && navigateToArticle(nextArticle.id, 'left')}
-                className={`flex items-center gap-1 py-1 px-1.5 rounded-full ${nextArticle ? 'hover:text-amber-400 active:scale-95 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
-                aria-label={t('article.next')}
-              >
-                <span className="text-[11px]">Succ</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
             {relatedArticles.length > 0 && (
               <section className="mt-16 pt-8 border-t border-border/50">
                 <h3 className="text-xl font-serif font-bold mb-6 text-foreground flex items-center gap-2">
@@ -674,7 +406,7 @@ function ArticleContent() {
                 </div>
               </section>
             )}
-          </motion.div>
+          </div>
           <GlobalRightSidebar />
         </div>
       </div>

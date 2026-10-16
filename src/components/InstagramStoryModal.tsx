@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Download, Copy, Check, Share2, Sparkles, Film, Image as ImageIcon } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
@@ -535,7 +535,7 @@ export default function InstagramStoryModal({
 
   const articleUrl = getArticleUrl(article);
   const isReel = format === "reel";
-  const reelCaption = useMemo(() => buildReelCaption(article), [article]);
+  const reelCaption = buildReelCaption(article);
 
   const handleCopyLink = async () => {
     try {
@@ -562,7 +562,8 @@ export default function InstagramStoryModal({
     const a = document.createElement("a");
     a.href = dataUrl;
     const prefix = isReel ? "romaflash-reel" : "romaflash-story";
-    a.download = `${prefix}-${article.id.slice(0, 8)}.jpg`;
+    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
+    a.download = `${prefix}-${shortId}.jpg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

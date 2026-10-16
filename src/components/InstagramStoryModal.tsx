@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { X, Download, Copy, Check, Share2, Sparkles, Film, Image as ImageIcon } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
@@ -186,6 +186,39 @@ function extractHighlight(article: any): { quote: string; author: string } | nul
   }
 
   return null;
+}
+
+/**
+ * Genera la didascalia ottimizzata per i Reels di Instagram:
+ * - Titolo dell'articolo
+ * - Estratto riassuntivo
+ * - Domanda/Call To Action per spingere i commenti
+ * - Riferimento al sito
+ * - 3-4 hashtag caldi mirati (#ASRoma #RomaFlash ...)
+ */
+export function buildReelCaption(article: any): string {
+  const title = (article?.title || "").trim();
+  const excerpt = (article?.ai_summary?.excerpt || "").trim();
+  const dynamicTags = (article?.ai_summary?.dynamic_hashtags || "")
+    .split(/\s+/)
+    .filter((t: string) => t.startsWith("#"))
+    .slice(0, 2)
+    .join(" ");
+
+  let cta = "Cosa ne pensi? Dì la tua nei commenti! 👇🐺";
+  const cat = article?.ai_summary?.category;
+  if (cat === "Dichiarazioni") {
+    cta = "Sei d'accordo con queste parole? Scrivilo nei commenti! 👇🐺";
+  } else if (cat === "Probabili Formazioni") {
+    cta = "Chi faresti giocare titolare sabato? Scrivilo qui sotto! 👇🐺";
+  } else if (cat === "Calciomercato") {
+    cta = "Operazione giusta per la Roma? Commenta con la tua opinione! 👇🐺";
+  }
+
+  const tags = `#ASRoma #RomaFlash ${dynamicTags || "#SerieA"}`.trim();
+  const articleUrl = getArticleUrl(article);
+
+  return `${title}\n\n${excerpt ? excerpt + "\n\n" : ""}${cta}\n\n🔗 Leggi l'articolo completo su: ${articleUrl}\n\n${tags}`;
 }
 
 /**
@@ -454,6 +487,7 @@ export default function InstagramStoryModal({
   const [storyFile, setStoryFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCaption, setCopiedCaption] = useState(false);
   const [sharedSuccess, setSharedSuccess] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -497,12 +531,23 @@ export default function InstagramStoryModal({
 
   const articleUrl = getArticleUrl(article);
   const isReel = format === "reel";
+  const reelCaption = useMemo(() => buildReelCaption(article), [article]);
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(articleUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 3000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleCopyCaption = async () => {
+    try {
+      await navigator.clipboard.writeText(reelCaption);
+      setCopiedCaption(true);
+      setTimeout(() => setCopiedCaption(false), 3000);
     } catch {
       // ignore
     }
@@ -520,10 +565,18 @@ export default function InstagramStoryModal({
   };
 
   const handleShare = async () => {
-    // 1. Copia preventiva istantanea negli appunti senza await bloccanti
+    // 1. Copia preventiva istantanea negli appunti senza await bloccanti:
+    // in modalità Reel copia la didascalia completa con hashtag; in modalità Storia copia il link
+    const textToCopy = isReel ? reelCaption : articleUrl;
     try {
-      navigator.clipboard?.writeText(articleUrl);
-      setCopiedLink(true);
+      navigator.clipboard?.writeText(textToCopy);
+      if (isReel) {
+        setCopiedCaption(true);
+        setTimeout(() => setCopiedCaption(false), 4000);
+      } else {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 4000);
+      }
     } catch {
       // ignore
     }
@@ -553,7 +606,7 @@ export default function InstagramStoryModal({
     handleDownload();
     if (isMobile) {
       setTimeout(() => {
-        window.location.href = isReel ? "instagram://camera" : "instagram://camera";
+        window.location.href = "instagram://camera";
       }, 300);
     } else {
       window.open("https://www.instagram.com/", "_blank");
@@ -651,38 +704,70 @@ export default function InstagramStoryModal({
           {/* Istruzioni e Azioni (Destra) */}
           <div className="md:col-span-7 space-y-4">
             
-            {/* Box Link generato con tasto copia */}
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  Link Articolo (per Sticker Storia o Bio):
-                </span>
-                <span className="text-[10px] text-amber-400 font-mono">
-                  {copiedLink ? "Copiato!" : "Da incollare"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
+            {/* Box Dinamico: Didascalia per Reel OPPURE Link per Storia */}
+            {isReel ? (
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                    Didascalia &amp; Hashtag (già pronti per il Reel):
+                  </span>
+                  <span className="text-[10px] text-pink-400 font-mono">
+                    {copiedCaption ? "Copiata!" : "Pronta da incollare"}
+                  </span>
+                </div>
+                <textarea
                   readOnly
-                  value={articleUrl}
-                  className="flex-1 bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none"
+                  rows={4}
+                  value={reelCaption}
+                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded-lg p-2.5 resize-none focus:outline-none font-sans leading-relaxed"
                 />
                 <button
                   type="button"
-                  onClick={handleCopyLink}
-                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    copiedLink
+                  onClick={handleCopyCaption}
+                  className={`w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    copiedCaption
                       ? "bg-emerald-600 text-white"
-                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+                      : "bg-gradient-to-r from-purple-900 to-pink-900 hover:opacity-95 text-pink-200 border border-purple-500/40"
                   }`}
                 >
-                  {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedLink ? "Copiato" : "Copia"}
+                  {copiedCaption ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedCaption ? "Didascalia Copiata negli Appunti!" : "Copia Didascalia + Hashtag"}</span>
                 </button>
               </div>
-            </div>
+            ) : (
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    Link Articolo (per Sticker Storia):
+                  </span>
+                  <span className="text-[10px] text-amber-400 font-mono">
+                    {copiedLink ? "Copiato!" : "Da incollare"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={articleUrl}
+                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      copiedLink
+                        ? "bg-emerald-600 text-white"
+                        : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+                    }`}
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedLink ? "Copiato" : "Copia"}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Guida Differenziata */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">
@@ -767,10 +852,17 @@ export default function InstagramStoryModal({
               </div>
             )}
 
+            {copiedCaption && !sharedSuccess && (
+              <div className="p-2.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-semibold flex items-center gap-2">
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>Didascalia e hashtag copiati! Fai &quot;Incolla&quot; nel campo testo del Reel.</span>
+              </div>
+            )}
+
             {copiedLink && !sharedSuccess && (
               <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 shrink-0" />
-                <span>Link copiato negli appunti! Pronto per lo sticker o la Bio.</span>
+                <span>Link copiato negli appunti! Pronto per lo sticker della Storia.</span>
               </div>
             )}
 

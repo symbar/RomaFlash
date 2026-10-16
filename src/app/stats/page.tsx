@@ -631,7 +631,10 @@ export default function StatsBackofficePage() {
 
                   <button
                     type="button"
-                    onClick={() => setInstagramArticle(art)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInstagramArticle(art);
+                    }}
                     className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
                     title="Genera Storia Instagram 9:16"
                   >
@@ -821,7 +824,10 @@ export default function StatsBackofficePage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setInstagramArticle(art)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInstagramArticle(art);
+                          }}
                           className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
                           title="Genera Storia Instagram 9:16"
                         >

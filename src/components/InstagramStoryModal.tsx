@@ -458,21 +458,25 @@ function renderStoryCanvas(
   ctx.fillText(isReel ? "ROMAFLASH • @ROMAFLASH 🐺" : "@ROMAFLASH 🐺", STORY_W / 2, footerY);
   ctx.restore();
 
-  const dataUrl = canvas.toDataURL("image/png");
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
   const filePromise = new Promise<File | null>((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        resolve(null);
-        return;
-      }
-      const prefix = isReel ? "romaflash-reel" : "romaflash-story";
-      const file = new File(
-        [blob],
-        `${prefix}-${article?.id ? String(article.id).slice(0, 8) : "news"}.png`,
-        { type: "image/png" }
-      );
-      resolve(file);
-    }, "image/png");
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          resolve(null);
+          return;
+        }
+        const prefix = isReel ? "romaflash-reel" : "romaflash-story";
+        const file = new File(
+          [blob],
+          `${prefix}-${article?.id ? String(article.id).slice(0, 8) : "news"}.jpg`,
+          { type: "image/jpeg" }
+        );
+        resolve(file);
+      },
+      "image/jpeg",
+      0.95
+    );
   });
 
   return { dataUrl, filePromise };
@@ -558,14 +562,14 @@ export default function InstagramStoryModal({
     const a = document.createElement("a");
     a.href = dataUrl;
     const prefix = isReel ? "romaflash-reel" : "romaflash-story";
-    a.download = `${prefix}-${article.id.slice(0, 8)}.png`;
+    a.download = `${prefix}-${article.id.slice(0, 8)}.jpg`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
 
   const handleShare = async () => {
-    // 1. Copia preventiva istantanea negli appunti senza await bloccanti:
+    // 1. Copia preventiva istantanea negli appunti:
     // in modalità Reel copia la didascalia completa con hashtag; in modalità Storia copia il link
     const textToCopy = isReel ? reelCaption : articleUrl;
     try {
@@ -581,7 +585,11 @@ export default function InstagramStoryModal({
       // ignore
     }
 
-    // 2. Chiamata sincrona a navigator.share: mantiene il gesto utente valido su iOS Safari e Android Chrome!
+    // 2. Chiamata a navigator.share:
+    // FONDAMENTALE: passare SOLO `files: [storyFile]` senza title, text o url!
+    // Se viene passato title o text, i sistemi mobili (Android/iOS) inviano a Instagram un intent di tipo testo/link,
+    // e Instagram apre il suo browser in-app che fallisce con l'errore "This page couldn't load".
+    // Passando esclusivamente il file immagine JPEG, Instagram apre direttamente il composer delle Storie / Feed / Reel.
     if (
       storyFile &&
       typeof navigator !== "undefined" &&
@@ -591,7 +599,6 @@ export default function InstagramStoryModal({
       try {
         await navigator.share({
           files: [storyFile],
-          title: article.title,
         });
         setSharedSuccess(true);
         setTimeout(() => setSharedSuccess(false), 4000);
@@ -602,7 +609,7 @@ export default function InstagramStoryModal({
       }
     }
 
-    // 3. Fallback pulito: scarica direttamente il file PNG senza redirect esterni
+    // 3. Fallback per browser o dispositivi che non supportano la condivisione file via intent:
     handleDownload();
   };
 
@@ -768,27 +775,27 @@ export default function InstagramStoryModal({
                 <span>{isReel ? "🎬" : "📱"}</span> Come pubblicare {isReel ? "il Reel" : "la Storia"}:
               </div>
               {isReel ? (
-                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
+                <ol className="list-decimal list-inside space-y-1.5 text-slate-400 text-[11.5px] leading-relaxed">
                   <li>
-                    Salva l'immagine e tocca <strong className="text-white">"Apri App Instagram"</strong>.
+                    Tocca <strong className="text-white">&quot;Condividi Grafica&quot;</strong> (oppure <strong className="text-white">&quot;Scarica Immagine&quot;</strong>). La didascalia con gli hashtag viene copiata negli appunti!
                   </li>
                   <li>
-                    Crea un <strong className="text-pink-400">Reel</strong> usando questa foto per 5-7 secondi e aggiungi un audio in sottofondo.
+                    Apri Instagram, tocca <strong className="text-pink-400">+ &gt; Reel</strong>, scegli questa grafica dalla galleria e seleziona un audio di tendenza.
                   </li>
                   <li>
-                    Nella didascalia invita a commentare o a vedere la Storia per l'articolo completo!
+                    Nel campo didascalia fai <strong className="text-white">Incolla</strong> per avere testo, invito ai commenti e hashtag pronti!
                   </li>
                 </ol>
               ) : (
-                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
+                <ol className="list-decimal list-inside space-y-1.5 text-slate-400 text-[11.5px] leading-relaxed">
                   <li>
-                    Tocca <strong className="text-white">"Condividi su Instagram"</strong> e scegli <strong>Instagram &gt; Storie</strong> (link copiato in automatico!).
+                    Tocca <strong className="text-white">&quot;Condividi Grafica&quot;</strong> (oppure <strong className="text-white">&quot;Scarica Immagine&quot;</strong>). Il link dell&apos;articolo viene copiato in automatico negli appunti!
                   </li>
                   <li>
-                    Su Instagram tocca l'icona degli sticker e seleziona <strong className="text-amber-400">Link</strong>.
+                    Apri Instagram, tocca <strong className="text-amber-400">+ &gt; Storia</strong> e seleziona questa grafica dalla galleria.
                   </li>
                   <li>
-                    Fai <strong className="text-white">Incolla</strong> e pubblica la tua storia!
+                    Tocca l&apos;icona degli sticker, scegli <strong className="text-amber-400">Link</strong>, fai <strong className="text-white">Incolla</strong> e posizionalo sopra lo sticker grafico!
                   </li>
                 </ol>
               )}
@@ -847,7 +854,7 @@ export default function InstagramStoryModal({
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5 text-amber-400" />
-              <span>Scarica file PNG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
+              <span>Scarica Immagine JPG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
             </button>
 
             {sharedSuccess && (

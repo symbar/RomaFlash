@@ -1,7 +1,7 @@
 # Roadmap di Sviluppo: RomaFlash PWA 🐺
 
 > [!NOTE]
-> Questa roadmap include **esclusivamente le funzionalità aperte e le nuove idee strategiche** per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma. Tutti i traguardi precedenti (oltre 30 feature) sono già stati completati e deployati in produzione.
+> Questa roadmap include **esclusivamente le funzionalità aperte e le nuove idee strategiche** approvate per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma. Tutte le funzionalità completate o scartate sono state archiviate.
 
 ---
 
@@ -30,11 +30,8 @@ Potenziamento delle sezioni dati e post-partita sfruttando fonti specializzate e
 
 Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
-*   **3.1 Audio-Notizie (Ascolta l'Articolo):** Sintesi vocale Text-to-Speech nativa (micro-podcast di 30-45 secondi generato dall'AI) con player integrato per ascoltare il riassunto dell'articolo in auto o con gli auricolari.
-*   **3.2 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le 5 notizie più calde della giornata in formato pillola.
-*   **3.3 Swipe Orizzontale fra Articoli (Stile TikTok/Reels):** Navigazione a swipe col pollice da un articolo all'altro senza dover tornare alla home page.
-*   **3.4 Generatore "Condividi come Storia Instagram":** Tasto per il lettore che trasforma istantaneamente la notizia in una card verticale (9:16) brandizzata RomaFlash da condividere su Instagram Stories o WhatsApp.
-*   ~~**3.5 Fedeltà delle Interviste & Virgolettati Reali:** Aggiornamento del prompt di sintesi di Gemini per preservare e riportare fedelmente tra virgolette (`"..."`) le dichiarazioni testuali esatte rilasciate dai protagonisti (calciatori, mister, dirigenti), evitando che l'AI parafrasi o annacqui le parole originali durante la riscrittura; formattazione visiva con Quote Card Giallorossa in app e supporto semantico `<blockquote>` per SEO/Edge SSR.~~ ✅ **(Completato)**
+*   **3.1 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le notizie più calde in formato pillola.
+*   **3.2 Generatore "Condividi come Storia Instagram":** Tasto per il lettore che trasforma istantaneamente la notizia in una card verticale (9:16) brandizzata RomaFlash da condividere su Instagram Stories o WhatsApp.
 
 ---
 
@@ -42,10 +39,7 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
 Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso di appartenenza.
 
-*   ~~**4.1 Reazioni Rapide con Emoji (Muro del Tifoso):** Barra di reazioni istantanee sotto ogni articolo con pulsante Like stile Facebook (👍 Mi piace, ❤️ Love, 😆 Ahahah, 😮 Wow, 😢 Sigh, 😡 Grrr) con dock fluttuante su hover/long-press, persistenza utente e contatori aggiornati in tempo reale tramite Supabase Realtime.~~ ✅ **(Completato)**
-*   **4.2 Notizie Salvate (I Miei Preferiti / Pocket):** Tasto segnalibro per salvare le interviste lunghe o gli approfondimenti tattici e rileggerli comodamente in una sezione dedicata.
-*   **4.3 Cori della Curva Sud (Audio & Testi):** Raccolta dei cori più famosi della Curva Sud (*Roma Roma Roma*, *Grazie Roma*, *Campo Testaccio*, *Mai Sola Mai*) con traccia audio e testo scorrevole per i tifosi.
-*   **4.4 Tempo di Lettura Dinamico:** Micro-badge *"⏱️ 1 min di lettura"* calcolato sul testo per incentivare il click rapido.
+*   **4.1 Tempo di Lettura Dinamico:** Micro-badge *"⏱️ 1 min di lettura"* calcolato sul testo per incentivare il click rapido.
 
 ---
 
@@ -57,12 +51,3 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.4 Gestione Intelligente delle Fonti (Prompting AI):** Raffinamento dei prompt per citare la testata giornalistica originale solo in caso di interviste esclusive o scoop di mercato.
 *   **5.5 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
 *   **5.6 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
-*   ~~**5.7 Riformulazione Post su X (Zero Link Esterni & Recap Nativo):** Rimozione del link esterno a `romaflash.app` per evitare la penalizzazione dell'algoritmo di X; generazione di un recap incisivo e autosufficiente dell'articolo entro i 280 caratteri, accompagnato dall'immagine d'impatto.~~ ✅ **(Completato)**
-
----
-
-### 6. SEO, Motori di Ricerca & Ottimizzazione per LLM (GEO)
-
-*   ~~**6.1 Pre-rendering Edge SSR per Notizie (Fase 1 - SEO & LLM Visibility):** Iniezione lato Edge tramite Cloudflare Pages Function per `/article`: generazione al millisecondo zero di HTML completo con `<title>` reale, testo della notizia in tag semantici, metatag OpenGraph/Twitter Cards dinamici (con foto reale dell'articolo) e schema `NewsArticle` per Googlebot, ChatGPT Search, Perplexity, Claude, Meta AI, Google Discover e card social (WhatsApp, X, Facebook).~~ ✅ **(Completato)**
-*   ~~**6.2 URL SEO-Friendly con Slug Semantici (Fase 2 - Evolutiva):** Passaggio da `/article?id=UUID` ai percorsi parlanti ricchi di keyword `/notizie/[titolo-notizia-UUID]`, con compatibilità retroattiva, generazione dinamica nella sitemap XML e link card interattive su X stile Sky Sport (immagine cliccabile con link a RomaFlash).~~ ✅ **(Completato)**
-*   **6.3 Supporta RomaFlash (Offrimi un Caffè):** Tasto etico e discreto nel footer o nella sidebar (*"Offri un caffè al progetto"*) tramite Stripe / Ko-Fi per sostenere i costi dei server e dell'AI.

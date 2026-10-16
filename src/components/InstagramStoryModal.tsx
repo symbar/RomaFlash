@@ -192,7 +192,7 @@ function extractHighlight(article: any): { quote: string; author: string } | nul
 function renderStoryCanvas(
   article: any,
   bgImg: HTMLImageElement | null
-): string {
+): { dataUrl: string; filePromise: Promise<File | null> } {
   const canvas = document.createElement("canvas");
   canvas.width = STORY_W;
   canvas.height = STORY_H;
@@ -404,7 +404,23 @@ function renderStoryCanvas(
   ctx.fillText("@ROMAFLASH 🐺", STORY_W / 2, footerY);
   ctx.restore();
 
-  return canvas.toDataURL("image/png");
+  const dataUrl = canvas.toDataURL("image/png");
+  const filePromise = new Promise<File | null>((resolve) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        resolve(null);
+        return;
+      }
+      const file = new File(
+        [blob],
+        `romaflash-story-${article?.id ? String(article.id).slice(0, 8) : "news"}.png`,
+        { type: "image/png" }
+      );
+      resolve(file);
+    }, "image/png");
+  });
+
+  return { dataUrl, filePromise };
 }
 
 export default function InstagramStoryModal({
@@ -412,15 +428,15 @@ export default function InstagramStoryModal({
   onClose,
 }: InstagramStoryModalProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [storyFile, setStoryFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
   const [sharedSuccess, setSharedSuccess] = useState(false);
-  const [canWebShare, setCanWebShare] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Verifica supporto Web Share API con file
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      setCanWebShare(true);
+    if (typeof navigator !== "undefined") {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     }
   }, []);
 
@@ -435,8 +451,13 @@ export default function InstagramStoryModal({
     loadImageElement(proxiedImgUrl).then((bgImg) => {
       if (!isMounted) return;
       try {
-        const url = renderStoryCanvas(article, bgImg);
-        setDataUrl(url);
+        const { dataUrl, filePromise } = renderStoryCanvas(article, bgImg);
+        setDataUrl(dataUrl);
+        filePromise.then((file: File | null) => {
+          if (isMounted && file) {
+            setStoryFile(file);
+          }
+        });
       } catch (err) {
         console.error("Errore generazione Storia Instagram:", err);
       } finally {
@@ -474,38 +495,43 @@ export default function InstagramStoryModal({
   };
 
   const handleShare = async () => {
-    if (!dataUrl) return;
-
-    // Copia sempre preventivamente il link negli appunti per comodità dell'utente
+    // 1. Copia preventiva istantanea negli appunti senza await bloccanti
     try {
-      await navigator.clipboard.writeText(articleUrl);
+      navigator.clipboard?.writeText(articleUrl);
       setCopiedLink(true);
     } catch {
       // ignore
     }
 
-    try {
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], `romaflash-story-${article.id.slice(0, 8)}.png`, {
-        type: "image/png",
-      });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // 2. Chiamata sincrona a navigator.share: mantiene il gesto utente valido su iOS Safari e Android Chrome!
+    if (
+      storyFile &&
+      typeof navigator !== "undefined" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [storyFile] })
+    ) {
+      try {
         await navigator.share({
-          files: [file],
+          files: [storyFile],
           title: article.title,
         });
         setSharedSuccess(true);
         setTimeout(() => setSharedSuccess(false), 4000);
-      } else {
-        // Fallback per browser che non supportano condivisione file
-        handleDownload();
+        return;
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        console.warn("navigator.share fallito, uso fallback:", err);
       }
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
-        handleDownload();
-      }
+    }
+
+    // 3. Fallback: scarica la foto e apri Instagram via deep link (o web)
+    handleDownload();
+    if (isMobile) {
+      setTimeout(() => {
+        window.location.href = "instagram://camera";
+      }, 300);
+    } else {
+      window.open("https://www.instagram.com/", "_blank");
     }
   };
 
@@ -599,28 +625,28 @@ export default function InstagramStoryModal({
               </div>
             </div>
 
-            {/* Guida Rapida in 3 Passi */}
+            {/* Guida Rapida */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">
               <div className="font-bold text-white flex items-center gap-1.5">
-                <span>📱</span> Come pubblicare in 5 secondi:
+                <span>📱</span> Come pubblicare la Storia in 5 secondi:
               </div>
               <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
                 <li>
-                  Tocca <strong className="text-white">"Condividi su Instagram"</strong> (apre direttamente l'app).
+                  Tocca <strong className="text-white">"Condividi su Instagram"</strong> e scegli <strong>Instagram &gt; Storie</strong> (il link dell'articolo viene copiato in automatico!).
                 </li>
                 <li>
-                  Su Instagram tocca l'icona degli sticker e seleziona <strong className="text-amber-400">Link</strong>.
+                  <em>Oppure:</em> salva l'immagine e tocca <strong className="text-white">"Apri App Instagram"</strong> per andare dritto alla fotocamera/storie.
                 </li>
                 <li>
-                  Fai <strong className="text-white">Incolla</strong> (il link è già pronto nei tuoi appunti) e pubblica!
+                  Negli sticker seleziona <strong className="text-amber-400">Link</strong>, fai <strong>Incolla</strong> e condividi!
                 </li>
               </ol>
             </div>
 
             {/* Pulsanti Azione Principali */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
               
-              {/* Tasto 1: Condividi su Instagram (Mobile) */}
+              {/* Tasto 1: Condividi con Foto su Instagram */}
               <button
                 type="button"
                 onClick={handleShare}
@@ -631,18 +657,35 @@ export default function InstagramStoryModal({
                 <span>Condividi su Instagram</span>
               </button>
 
-              {/* Tasto 2: Scarica PNG (Desktop) */}
-              <button
-                type="button"
-                onClick={handleDownload}
-                disabled={loading || !dataUrl}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold text-xs border border-slate-700 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              {/* Tasto 2: Apri direttamente Instagram App */}
+              <a
+                href={isMobile ? "instagram://camera" : "https://www.instagram.com/"}
+                target={isMobile ? "_self" : "_blank"}
+                rel="noopener noreferrer"
+                onClick={() => {
+                  try {
+                    navigator.clipboard?.writeText(articleUrl);
+                    setCopiedLink(true);
+                  } catch {}
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-800 to-indigo-900 hover:opacity-90 active:scale-95 text-white font-bold text-xs border border-purple-500/30 shadow-md transition-all text-center"
               >
-                <Download className="w-4 h-4 text-amber-400" />
-                <span>Scarica PNG (1080×1920)</span>
-              </button>
+                <InstagramIcon className="w-4 h-4 text-pink-400" />
+                <span>{isMobile ? "Apri App Instagram" : "Apri Instagram Web"}</span>
+              </a>
 
             </div>
+
+            {/* Pulsante Secondario: Scarica PNG */}
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={loading || !dataUrl}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5 text-amber-400" />
+              <span>Salva Immagine PNG (1080×1920)</span>
+            </button>
 
             {sharedSuccess && (
               <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">

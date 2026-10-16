@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Download, Copy, Check, Share2, Sparkles, AlertCircle } from "lucide-react";
+import { X, Download, Copy, Check, Share2, Sparkles, Film, Image as ImageIcon } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
 import { getArticleUrl } from "@/lib/slug";
 
@@ -30,8 +30,10 @@ interface InstagramStoryModalProps {
   onClose: () => void;
 }
 
+export type InstagramFormat = "story" | "reel";
+
 const STORY_W = 1080;
-const STORY_H = 1920; // 9:16 portrait format for Instagram Stories
+const STORY_H = 1920; // 9:16 portrait format for Instagram Stories and Reels
 
 const WOLF_LOGO_SVG_PATH =
   "M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6";
@@ -89,9 +91,9 @@ function toProxiedUrl(url: string | null | undefined): string {
 }
 
 /**
- * Disegna il logo tondo ufficiale di RomaFlash (anello dorato, carminio e Lupetto).
+ * Disegna il logo tondo ufficiale di RomaFlash (posizionato a sinistra).
  */
-function drawTopCenterCircularLogo(
+function drawCircularLogo(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
@@ -187,11 +189,14 @@ function extractHighlight(article: any): { quote: string; author: string } | nul
 }
 
 /**
- * Disegna la Storia Instagram completa a 1080x1920 (9:16).
+ * Disegna la grafica 9:16 (1080x1920) per Storia o Reel.
+ * - In "story": include lo sticker adesivo "Tocca per l'articolo".
+ * - In "reel": layout 100% pulito ed editoriale senza sticker, solo logo a sinistra e titolo/citazione.
  */
 function renderStoryCanvas(
   article: any,
-  bgImg: HTMLImageElement | null
+  bgImg: HTMLImageElement | null,
+  format: InstagramFormat
 ): { dataUrl: string; filePromise: Promise<File | null> } {
   const canvas = document.createElement("canvas");
   canvas.width = STORY_W;
@@ -204,21 +209,21 @@ function renderStoryCanvas(
 
   // 2. Foto Hero (nella metà superiore 56%)
   if (bgImg && bgImg.width > 0 && bgImg.height > 0) {
-    const targetH = 1120; // Copre i primi 1120px prima di sfumare nel buio
+    const targetH = 1140; // Copre i primi 1140px prima di sfumare nel buio
     const scale = Math.max(STORY_W / bgImg.width, targetH / bgImg.height);
     const drawW = bgImg.width * scale;
     const drawH = bgImg.height * scale;
     const offsetX = (STORY_W - drawW) * 0.5;
-    const offsetY = Math.min(0, (targetH - drawH) * 0.15); // Leggero focus verso l'alto
+    const offsetY = Math.min(0, (targetH - drawH) * 0.15);
     ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
   }
 
   // 3. Gradiente cinematografico a più livelli per leggibilità perfetta
   const grad = ctx.createLinearGradient(0, 0, 0, STORY_H);
-  grad.addColorStop(0, "rgba(0, 0, 0, 0.45)");
-  grad.addColorStop(0.18, "rgba(0, 0, 0, 0.1)");
-  grad.addColorStop(0.42, "rgba(12, 2, 4, 0.4)");
-  grad.addColorStop(0.56, "rgba(14, 2, 5, 0.82)");
+  grad.addColorStop(0, "rgba(0, 0, 0, 0.5)");
+  grad.addColorStop(0.18, "rgba(0, 0, 0, 0.12)");
+  grad.addColorStop(0.42, "rgba(12, 2, 4, 0.42)");
+  grad.addColorStop(0.56, "rgba(14, 2, 5, 0.85)");
   grad.addColorStop(0.68, "rgba(15, 2, 4, 0.96)");
   grad.addColorStop(1, "#0a0103");
   ctx.fillStyle = grad;
@@ -238,11 +243,14 @@ function renderStoryCanvas(
   ctx.fillStyle = radial;
   ctx.fillRect(0, STORY_H - 600, STORY_W, 600);
 
-  // 4. Logo Tondo Ufficiale in alto al centro (safe zone Instagram)
-  drawTopCenterCircularLogo(ctx, STORY_W / 2, 160, 80);
-
-  // 5. Sezione Inferiore: Titolo + Box Citazione + Sticker Link
+  // 4. Logo Tondo Ufficiale sulla SINISTRA (richiesta utente)
   const padX = 84;
+  const logoR = 76;
+  const logoCx = padX + logoR;
+  const logoCy = 175;
+  drawCircularLogo(ctx, logoCx, logoCy, logoR);
+
+  // 5. Sezione Inferiore: Titolo + Box Citazione
   const maxW = STORY_W - padX * 2; // 912px
 
   const titleRaw = (article?.title || "Ultime Notizie AS Roma")
@@ -264,7 +272,6 @@ function renderStoryCanvas(
 
   const highlight = extractHighlight(article);
 
-  // Calcolo ingombri verticali per allineare armonicamente in basso
   const lineHeight = Math.round(titleFontSize * 1.22);
   const titleHeight = titleLines.length * lineHeight;
 
@@ -273,23 +280,34 @@ function renderStoryCanvas(
   let quoteBoxH = 0;
   if (highlight?.quote) {
     ctx.font = "italic 32px Georgia, serif";
-    const quoteMaxW = maxW - 48; // margine interno al box
+    const quoteMaxW = maxW - 48;
     quoteLines = wrapText(ctx, `"${highlight.quote}"`, quoteMaxW);
     quoteBoxH = quoteLines.length * 44 + (highlight.author ? 44 : 28);
   }
 
-  // Posizionamento dal basso verso l'alto
+  // Posizionamento differenziato tra Storia (con sticker) e Reel (100% pulito)
+  const isReel = format === "reel";
   const stickerH = 80;
   const stickerY = 1680;
-  const footerY = 1810;
+  const footerY = isReel ? 1760 : 1810;
 
-  let currentY = highlight?.quote
-    ? stickerY - 40 - quoteBoxH - 32 - titleHeight
-    : stickerY - 60 - titleHeight;
+  let currentY: number;
 
-  // Assicuriamoci che non inizi troppo in alto
-  if (currentY < 1050) {
-    currentY = 1050;
+  if (isReel) {
+    // Layout Reel: nessun sticker, centratura armonica nella parte inferiore
+    currentY = highlight?.quote
+      ? footerY - 90 - quoteBoxH - 36 - titleHeight
+      : footerY - 130 - titleHeight;
+  } else {
+    // Layout Storia: posizionato sopra lo sticker link
+    currentY = highlight?.quote
+      ? stickerY - 40 - quoteBoxH - 32 - titleHeight
+      : stickerY - 60 - titleHeight;
+  }
+
+  // Limite superiore di sicurezza
+  if (currentY < 1040) {
+    currentY = 1040;
   }
 
   // Disegna Titolo
@@ -316,7 +334,6 @@ function renderStoryCanvas(
     const boxY = currentY;
     const boxW = maxW;
 
-    // Sfondo semi-trasparente del box
     ctx.save();
     ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
     ctx.beginPath();
@@ -352,56 +369,60 @@ function renderStoryCanvas(
     ctx.restore();
   }
 
-  // 6. Sticker Link Visual Mock (Simulazione adesivo Instagram)
-  ctx.save();
-  const stW = 620;
-  const stX = (STORY_W - stW) / 2;
-  const stY = stickerY;
+  // 6. Sticker Link Visual Mock: SOLO PER IL FORMATO STORIA (in Reel NON si disegna)
+  if (!isReel) {
+    ctx.save();
+    const stW = 620;
+    const stX = (STORY_W - stW) / 2;
+    const stY = stickerY;
 
-  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 8;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 8;
 
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.roundRect(stX, stY, stW, stickerH, 40);
-  ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.roundRect(stX, stY, stW, stickerH, 40);
+    ctx.fill();
 
-  ctx.shadowColor = "transparent";
+    ctx.shadowColor = "transparent";
 
-  // Icona catena link rossa
-  ctx.fillStyle = "#8e1b23";
-  ctx.beginPath();
-  ctx.arc(stX + 46, stY + stickerH / 2, 18, 0, Math.PI * 2);
-  ctx.fill();
+    // Icona catena link rossa
+    ctx.fillStyle = "#8e1b23";
+    ctx.beginPath();
+    ctx.arc(stX + 46, stY + stickerH / 2, 18, 0, Math.PI * 2);
+    ctx.fill();
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 20px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("🔗", stX + 46, stY + stickerH / 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 20px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🔗", stX + 46, stY + stickerH / 2);
 
-  // Testo Sticker
-  ctx.font = "900 24px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#0f172a";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-  ctx.fillText("TOCCA PER L'ARTICOLO", stX + 80, stY + stickerH / 2 - 2);
+    // Testo Sticker
+    ctx.font = "900 24px system-ui, -apple-system, sans-serif";
+    ctx.fillStyle = "#0f172a";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText("TOCCA PER L'ARTICOLO", stX + 80, stY + stickerH / 2 - 2);
 
-  ctx.font = "600 20px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#64748b";
-  ctx.fillText("•  romaflash.app", stX + 400, stY + stickerH / 2 - 2);
+    ctx.font = "600 20px system-ui, -apple-system, sans-serif";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("•  romaflash.app", stX + 400, stY + stickerH / 2 - 2);
 
-  ctx.restore();
+    ctx.restore();
+  }
 
   // 7. Footer @romaflash 🐺
   ctx.save();
-  ctx.font = "bold 22px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+  ctx.font = isReel
+    ? "bold 24px system-ui, -apple-system, sans-serif"
+    : "bold 22px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = isReel ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.45)";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.letterSpacing = "2px";
-  ctx.fillText("@ROMAFLASH 🐺", STORY_W / 2, footerY);
+  ctx.fillText(isReel ? "ROMAFLASH • @ROMAFLASH 🐺" : "@ROMAFLASH 🐺", STORY_W / 2, footerY);
   ctx.restore();
 
   const dataUrl = canvas.toDataURL("image/png");
@@ -411,9 +432,10 @@ function renderStoryCanvas(
         resolve(null);
         return;
       }
+      const prefix = isReel ? "romaflash-reel" : "romaflash-story";
       const file = new File(
         [blob],
-        `romaflash-story-${article?.id ? String(article.id).slice(0, 8) : "news"}.png`,
+        `${prefix}-${article?.id ? String(article.id).slice(0, 8) : "news"}.png`,
         { type: "image/png" }
       );
       resolve(file);
@@ -427,6 +449,7 @@ export default function InstagramStoryModal({
   article,
   onClose,
 }: InstagramStoryModalProps) {
+  const [format, setFormat] = useState<InstagramFormat>("story");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [storyFile, setStoryFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
@@ -451,7 +474,7 @@ export default function InstagramStoryModal({
     loadImageElement(proxiedImgUrl).then((bgImg) => {
       if (!isMounted) return;
       try {
-        const { dataUrl, filePromise } = renderStoryCanvas(article, bgImg);
+        const { dataUrl, filePromise } = renderStoryCanvas(article, bgImg, format);
         setDataUrl(dataUrl);
         filePromise.then((file: File | null) => {
           if (isMounted && file) {
@@ -459,7 +482,7 @@ export default function InstagramStoryModal({
           }
         });
       } catch (err) {
-        console.error("Errore generazione Storia Instagram:", err);
+        console.error("Errore generazione grafica Instagram:", err);
       } finally {
         setLoading(false);
       }
@@ -468,11 +491,12 @@ export default function InstagramStoryModal({
     return () => {
       isMounted = false;
     };
-  }, [article]);
+  }, [article, format]);
 
   if (!article) return null;
 
   const articleUrl = getArticleUrl(article);
+  const isReel = format === "reel";
 
   const handleCopyLink = async () => {
     try {
@@ -488,7 +512,8 @@ export default function InstagramStoryModal({
     if (!dataUrl) return;
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.download = `romaflash-story-${article.id.slice(0, 8)}.png`;
+    const prefix = isReel ? "romaflash-reel" : "romaflash-story";
+    a.download = `${prefix}-${article.id.slice(0, 8)}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -528,7 +553,7 @@ export default function InstagramStoryModal({
     handleDownload();
     if (isMobile) {
       setTimeout(() => {
-        window.location.href = "instagram://camera";
+        window.location.href = isReel ? "instagram://camera" : "instagram://camera";
       }, 300);
     } else {
       window.open("https://www.instagram.com/", "_blank");
@@ -549,13 +574,13 @@ export default function InstagramStoryModal({
             </div>
             <div>
               <h3 className="text-sm font-black text-white flex items-center gap-2">
-                <span>Generatore Storia Instagram</span>
+                <span>Grafica Instagram RomaFlash</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
                   9:16 HD
                 </span>
               </h3>
               <p className="text-[11px] text-slate-400">
-                Pronta per essere pubblicata sul profilo ufficiale @romaflash
+                Seleziona il formato per Storia o Reel ed esporta in 1 click
               </p>
             </div>
           </div>
@@ -572,7 +597,37 @@ export default function InstagramStoryModal({
         <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
           {/* Anteprima Telefono (Sinistra) */}
-          <div className="md:col-span-5 flex justify-center">
+          <div className="md:col-span-5 flex flex-col items-center gap-3">
+            
+            {/* Switch Formato: Storia vs Reel */}
+            <div className="w-full max-w-[260px] flex bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+              <button
+                type="button"
+                onClick={() => setFormat("story")}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  format === "story"
+                    ? "bg-rose-900 text-amber-300 shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Storia (Link)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormat("reel")}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  format === "reel"
+                    ? "bg-gradient-to-r from-purple-800 to-pink-700 text-white shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Film className="w-3.5 h-3.5" />
+                <span>Reel (Clean)</span>
+              </button>
+            </div>
+
+            {/* Frame Telefono 9:16 */}
             <div className="relative w-full max-w-[260px] aspect-[9/16] rounded-[28px] overflow-hidden bg-black border-4 border-slate-700 shadow-2xl">
               {loading || !dataUrl ? (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2">
@@ -582,11 +637,15 @@ export default function InstagramStoryModal({
               ) : (
                 <img
                   src={dataUrl}
-                  alt="Anteprima Storia"
+                  alt="Anteprima"
                   className="w-full h-full object-cover select-none"
                 />
               )}
             </div>
+
+            <span className="text-[10px] text-slate-400 font-medium">
+              {isReel ? "🎬 Modalità Reel: 100% pulita senza sticker" : "📱 Modalità Storia: include sticker link"}
+            </span>
           </div>
 
           {/* Istruzioni e Azioni (Destra) */}
@@ -597,7 +656,7 @@ export default function InstagramStoryModal({
               <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  Link Articolo (per Sticker Instagram):
+                  Link Articolo (per Sticker Storia o Bio):
                 </span>
                 <span className="text-[10px] text-amber-400 font-mono">
                   {copiedLink ? "Copiato!" : "Da incollare"}
@@ -625,22 +684,36 @@ export default function InstagramStoryModal({
               </div>
             </div>
 
-            {/* Guida Rapida */}
+            {/* Guida Differenziata */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">
               <div className="font-bold text-white flex items-center gap-1.5">
-                <span>📱</span> Come pubblicare la Storia in 5 secondi:
+                <span>{isReel ? "🎬" : "📱"}</span> Come pubblicare {isReel ? "il Reel" : "la Storia"}:
               </div>
-              <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
-                <li>
-                  Tocca <strong className="text-white">"Condividi su Instagram"</strong> e scegli <strong>Instagram &gt; Storie</strong> (il link dell'articolo viene copiato in automatico!).
-                </li>
-                <li>
-                  <em>Oppure:</em> salva l'immagine e tocca <strong className="text-white">"Apri App Instagram"</strong> per andare dritto alla fotocamera/storie.
-                </li>
-                <li>
-                  Negli sticker seleziona <strong className="text-amber-400">Link</strong>, fai <strong>Incolla</strong> e condividi!
-                </li>
-              </ol>
+              {isReel ? (
+                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
+                  <li>
+                    Salva l'immagine e tocca <strong className="text-white">"Apri App Instagram"</strong>.
+                  </li>
+                  <li>
+                    Crea un <strong className="text-pink-400">Reel</strong> usando questa foto per 5-7 secondi e aggiungi un audio in sottofondo.
+                  </li>
+                  <li>
+                    Nella didascalia invita a commentare o a vedere la Storia per l'articolo completo!
+                  </li>
+                </ol>
+              ) : (
+                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11.5px] leading-relaxed">
+                  <li>
+                    Tocca <strong className="text-white">"Condividi su Instagram"</strong> e scegli <strong>Instagram &gt; Storie</strong> (link copiato in automatico!).
+                  </li>
+                  <li>
+                    Su Instagram tocca l'icona degli sticker e seleziona <strong className="text-amber-400">Link</strong>.
+                  </li>
+                  <li>
+                    Fai <strong className="text-white">Incolla</strong> e pubblica la tua storia!
+                  </li>
+                </ol>
+              )}
             </div>
 
             {/* Pulsanti Azione Principali */}
@@ -684,20 +757,20 @@ export default function InstagramStoryModal({
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5 text-amber-400" />
-              <span>Salva Immagine PNG (1080×1920)</span>
+              <span>Scarica PNG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
             </button>
 
             {sharedSuccess && (
               <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
                 <Check className="w-4 h-4 shrink-0" />
-                <span>Storia inviata a Instagram! Incolla il link negli sticker.</span>
+                <span>Grafica inviata a Instagram!</span>
               </div>
             )}
 
             {copiedLink && !sharedSuccess && (
               <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 shrink-0" />
-                <span>Link copiato negli appunti! Pronto per lo sticker Link.</span>
+                <span>Link copiato negli appunti! Pronto per lo sticker o la Bio.</span>
               </div>
             )}
 

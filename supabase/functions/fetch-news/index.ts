@@ -245,6 +245,22 @@ serve(async (req) => {
       }
     }
 
+    if (reqBody?.restoreArticleImages && Array.isArray(reqBody.restoreArticleImages)) {
+      let updated = 0;
+      for (const item of reqBody.restoreArticleImages) {
+        if (item.id && item.image_url) {
+          const { error } = await supabase
+            .from('articles')
+            .update({ image_url: item.image_url })
+            .eq('id', item.id);
+          if (!error) updated++;
+        }
+      }
+      return new Response(JSON.stringify({ success: true, updated }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) throw new Error("GEMINI_API_KEY non configurata")
 
@@ -270,10 +286,19 @@ serve(async (req) => {
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
       .order('published_at', { ascending: false });
       
+    const eightHoursAgoMs = Date.now() - 8 * 60 * 60 * 1000;
     const usedImageUrls = new Set<string>(
       (recentArticles || [])
+        .filter((a: any) => new Date(a.published_at).getTime() >= eightHoursAgoMs)
         .map((a: any) => a.image_url)
         .filter((u: any) => typeof u === 'string' && u.startsWith('http'))
+    );
+
+    const recentArchiveUsed = new Set<string>(
+      (recentArticles || [])
+        .slice(0, 15)
+        .map((a: any) => a.image_url)
+        .filter((u: any) => typeof u === 'string' && u.startsWith('/images/archive/'))
     );
       
     const latestPublishedAt = recentArticles && recentArticles.length > 0 
@@ -476,18 +501,27 @@ serve(async (req) => {
             !candidateImageUrl ||
             usedImageUrls.has(candidateImageUrl);
 
-          // Scarica i byte dell'immagine per farla ispezionare visivamente da Gemini Vision
+          // Scarica i byte dell'immagine (tramite proxy ridimensionato wsrv.nl o diretto fino a 10MB) per farla ispezionare visivamente da Gemini Vision
           let inlineImagePart: any = null;
           if (candidateImageUrl && !isImageRejected) {
             try {
-              const imgRes = await fetch(candidateImageUrl, {
+              const resizedUrl = `https://wsrv.nl/?url=${encodeURIComponent(candidateImageUrl)}&w=900&q=80&output=jpg`;
+              let imgRes = await fetch(resizedUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
                 signal: AbortSignal.timeout(7000)
-              });
-              if (imgRes.ok) {
+              }).catch(() => null);
+
+              if (!imgRes || !imgRes.ok) {
+                imgRes = await fetch(candidateImageUrl, {
+                  headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+                  signal: AbortSignal.timeout(8000)
+                });
+              }
+
+              if (imgRes && imgRes.ok) {
                 const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
                 const buf = await imgRes.arrayBuffer();
-                if (buf.byteLength > 5000 && buf.byteLength < 3500000 && contentType.startsWith('image/')) {
+                if (buf.byteLength > 3000 && buf.byteLength < 10000000 && contentType.startsWith('image/')) {
                   const bytes = new Uint8Array(buf);
                   let binary = '';
                   const chunkSize = 0x8000;
@@ -542,11 +576,13 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
    Scrivi in "tweet_text" un recap nativo completo, denso, approfondito e ricco di dettagli per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema). Non limitarti a una frase breve: racconta il fatto centrale, i dettagli, i numeri o il virgolettato chiave in modo che chi legge su X abbia una vera e propria notizia completa ed esaustiva.
    Scrivi in "dynamic_hashtags" 1 o 2 hashtag caldi e pertinenti alla notizia specifica (es. "#Dybala", "#RomaInter", "#Calciomercato"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
-   Se ti è stata allegata un'immagine, controllala con estrema severità.
-   Imposta "is_clean_real_photo": false SE l'immagine contiene UNO QUALSIASI di questi elementi:
-   - Loghi, stemmi, scritte o watermark della testata giornalistica o sito fonte (es. "Voce Giallorossa", "ForzaRoma", "RomaNews", "Tuttomercatoweb", "FootyHeadlines", "Sky", "DAZN", ecc.) in un angolo o sovraimpressi;
-   - Grafiche fatte a mano dalla fonte (es. risultati "FULL TIME 0-0", tabelle xG o statistiche, grafiche di formazioni, locandine di rubriche/podcast, fotomontaggi con testo, banner, screenshot di social o siti).
-   Imposta "is_clean_real_photo": true SOLO SE è una fotografia reale e pulita, totalmente priva di loghi di siti terzi, watermark o grafiche redazionali. Nel minimo dubbio, imposta "is_clean_real_photo": false!
+   Se ti è stata allegata un'immagine, verifica se è una FOTOGRAFIA REALE utilizzabile oppure se ha un watermark del sito fonte / è una grafica digitale.
+   Imposta "is_clean_real_photo": true per TUTTE le fotografie reali (di partite, calciatori, allenatori, stadi, trofei, conferenze stampa, cene o eventi), ANCHE SE all'interno della scena fotografata compaiono normali elementi del mondo reale come:
+   - Sponsor sulle maglie da gioco (es. "EUROBET.live", "Riyadh Season", "Wizz", "Adidas", stemmi dell'AS Roma o di altri club/competizioni cuciti sulla divisa);
+   - Cartelloni pubblicitari/LED a bordocampo (es. "UEFA", sponsor), fondali di sale stampa (es. "Coppa Italia Frecciarossa"), microfoni, striscioni fisici appesi al muro (es. "Roma Club...") o schermi/proiettori fisici presenti nella stanza dell'evento.
+   Imposta "is_clean_real_photo": false SOLO SE l'immagine presenta:
+   - Un watermark o logo digitale sovraimpresso sopra la foto dalla testata giornalistica (es. la scritta "ROMANEWS.EU", "VoceGiallorossa", "ForzaRoma", "TMW", "Sky Sport" applicata digitalmente sull'immagine);
+   - NON è una fotografia, ma una grafica digitale creata al computer (es. solo un logo su sfondo colorato piatto come il logo della Serie A, una locandina/card grafica di auguri "Happy Birthday" con disegni e font decorativi sovraimpressi, una tabella di statistiche/formazioni o uno screenshot di un post social/sito).
 
 Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
 {
@@ -673,14 +709,17 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             continue; // Salta il salvataggio in caso di errore di parsing
           }
 
-          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 13 immagini proprietarie RomaFlash
+          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 13 immagini proprietarie RomaFlash non usate di recente
           let imageUrl: string;
           if (!isImageRejected && inlineImagePart && isCleanRealPhoto && candidateImageUrl) {
             imageUrl = candidateImageUrl;
             usedImageUrls.add(candidateImageUrl);
           } else {
-            const randomIdx = Math.floor(Math.random() * 13) + 1;
-            imageUrl = `/images/archive/roma-${randomIdx}.jpg`;
+            const allArchive = Array.from({ length: 13 }, (_, i) => `/images/archive/roma-${i + 1}.jpg`);
+            const availableArchive = allArchive.filter(p => !recentArchiveUsed.has(p));
+            const pool = availableArchive.length > 0 ? availableArchive : allArchive;
+            imageUrl = pool[Math.floor(Math.random() * pool.length)];
+            recentArchiveUsed.add(imageUrl);
             console.log(`[IMAGE FILTER] Immagine fonte scartata (grafica/logo/mancante) -> assegnata ${imageUrl}`);
           }
 

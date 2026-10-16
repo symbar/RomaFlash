@@ -60,6 +60,7 @@ const translations: Record<Language, Record<string, string>> = {
     'countdown.days': 'G',
     'countdown.hours': 'O',
     'countdown.minutes': 'M',
+    'countdown.seconds': 'S',
     'article.prev': 'Notizia precedente',
     'article.next': 'Notizia successiva',
     'article.swipe_hint': 'Scorri col pollice per cambiare notizia',

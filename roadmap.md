@@ -31,7 +31,7 @@ Potenziamento delle sezioni dati e post-partita sfruttando fonti specializzate e
 Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
 *   **3.1 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le notizie più calde in formato pillola.
-*   **3.2 Generatore "Condividi come Storia Instagram":** Tasto per il lettore che trasforma istantaneamente la notizia in una card verticale (9:16) brandizzata RomaFlash da condividere su Instagram Stories o WhatsApp.
+*   ~~**3.2 Generatore Storie Instagram (9:16) nel Backoffice /stats:** Generatore istantaneo di card verticali 1080×1920 con logo tondo ufficiale RomaFlash, foto hero e copia link automatica per sticker per pubblicare le storie in 5 secondi dall'account ufficiale Instagram con Web Share API (mobile) e download ad alta risoluzione (desktop).~~ ✅ **(Completato)**
 
 ---
 

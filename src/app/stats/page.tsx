@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import GlobalHeader from "@/components/GlobalHeader";
 import TikTokKitModal, { TikTokIcon } from "@/components/TikTokKitModal";
+import InstagramStoryModal, { InstagramIcon } from "@/components/InstagramStoryModal";
 import {
   Eye,
   Flame,
@@ -42,6 +43,7 @@ export default function StatsBackofficePage() {
   const [sortMode, setSortMode] = useState<SortMode>("recent");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [tiktokArticle, setTiktokArticle] = useState<any | null>(null);
+  const [instagramArticle, setInstagramArticle] = useState<any | null>(null);
 
   useEffect(() => {
     try {
@@ -629,6 +631,15 @@ export default function StatsBackofficePage() {
 
                   <button
                     type="button"
+                    onClick={() => setInstagramArticle(art)}
+                    className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
+                    title="Genera Storia Instagram 9:16"
+                  >
+                    <InstagramIcon className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => handleDeleteArticle(art.id, art.title)}
                     disabled={deletingId === art.id}
                     className="p-1 rounded-lg text-gray-400 hover:text-red-600 active:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
@@ -810,6 +821,14 @@ export default function StatsBackofficePage() {
                         </button>
                         <button
                           type="button"
+                          onClick={() => setInstagramArticle(art)}
+                          className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
+                          title="Genera Storia Instagram 9:16"
+                        >
+                          <InstagramIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDeleteArticle(art.id, art.title)}
                           disabled={deletingId === art.id}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40"
@@ -838,11 +857,17 @@ export default function StatsBackofficePage() {
         </div>
       </div>
 
-      {/* Modal Generatore Kit TikTok 2 Slide (1080x1920) */}
+      {/* Modal Generatore Kit TikTok 2 Slide (1080x1350) */}
       <TikTokKitModal
         article={tiktokArticle}
         onClose={() => setTiktokArticle(null)}
         onMarkShared={handleSetTikTokShared}
+      />
+
+      {/* Modal Generatore Storia Instagram 9:16 (1080x1920) */}
+      <InstagramStoryModal
+        article={instagramArticle}
+        onClose={() => setInstagramArticle(null)}
       />
     </main>
   );

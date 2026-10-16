@@ -598,19 +598,12 @@ export default function InstagramStoryModal({
         return;
       } catch (err: any) {
         if (err.name === "AbortError") return;
-        console.warn("navigator.share fallito, uso fallback:", err);
+        console.warn("navigator.share non completato:", err);
       }
     }
 
-    // 3. Fallback: scarica la foto e apri Instagram via deep link (o web)
+    // 3. Fallback pulito: scarica direttamente il file PNG senza redirect esterni
     handleDownload();
-    if (isMobile) {
-      setTimeout(() => {
-        window.location.href = "instagram://camera";
-      }, 300);
-    } else {
-      window.open("https://www.instagram.com/", "_blank");
-    }
   };
 
   if (typeof document === "undefined") return null;
@@ -804,7 +797,7 @@ export default function InstagramStoryModal({
             {/* Pulsanti Azione Principali */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
               
-              {/* Tasto 1: Condividi con Foto su Instagram */}
+              {/* Tasto 1: Scarica / Condividi */}
               <button
                 type="button"
                 onClick={handleShare}
@@ -812,37 +805,49 @@ export default function InstagramStoryModal({
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
               >
                 <Share2 className="w-4 h-4" />
-                <span>Condividi su Instagram</span>
+                <span>{isMobile ? "Condividi Grafica (Mobile)" : "Scarica Grafica HD (9:16)"}</span>
               </button>
 
-              {/* Tasto 2: Apri direttamente Instagram App */}
-              <a
-                href={isMobile ? "instagram://camera" : "https://www.instagram.com/"}
-                target={isMobile ? "_self" : "_blank"}
-                rel="noopener noreferrer"
-                onClick={() => {
-                  try {
-                    navigator.clipboard?.writeText(articleUrl);
-                    setCopiedLink(true);
-                  } catch {}
-                }}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-800 to-indigo-900 hover:opacity-90 active:scale-95 text-white font-bold text-xs border border-purple-500/30 shadow-md transition-all text-center"
-              >
-                <InstagramIcon className="w-4 h-4 text-pink-400" />
-                <span>{isMobile ? "Apri App Instagram" : "Apri Instagram Web"}</span>
-              </a>
+              {/* Tasto 2: Copia Testo Contestuale */}
+              {isReel ? (
+                <button
+                  type="button"
+                  onClick={handleCopyCaption}
+                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-xs border shadow-sm transition-all cursor-pointer active:scale-95 ${
+                    copiedCaption
+                      ? "bg-emerald-600 text-white border-emerald-500"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                  }`}
+                >
+                  {copiedCaption ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-pink-400" />}
+                  <span>{copiedCaption ? "Didascalia Copiata!" : "Copia Didascalia + Tag"}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-xs border shadow-sm transition-all cursor-pointer active:scale-95 ${
+                    copiedLink
+                      ? "bg-emerald-600 text-white border-emerald-500"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
+                  }`}
+                >
+                  {copiedLink ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-amber-400" />}
+                  <span>{copiedLink ? "Link Copiato!" : "Copia Link Articolo"}</span>
+                </button>
+              )}
 
             </div>
 
-            {/* Pulsante Secondario: Scarica PNG */}
+            {/* Pulsante Download Diretto (sempre accessibile) */}
             <button
               type="button"
               onClick={handleDownload}
               disabled={loading || !dataUrl}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5 text-amber-400" />
-              <span>Scarica PNG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
+              <span>Scarica file PNG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
             </button>
 
             {sharedSuccess && (

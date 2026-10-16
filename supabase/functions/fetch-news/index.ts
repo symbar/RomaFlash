@@ -204,9 +204,7 @@ serve(async (req) => {
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const articleSlug = generateArticleSlug(art.title, art.id);
-      const articleUrl = `https://romaflash.app/notizie/${articleSlug}`;
-      const hashtags = `#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
       
       let baseText = cleanBase;
       if (baseText.length < 180 && aiSummary.excerpt) {
@@ -216,18 +214,16 @@ serve(async (req) => {
         }
       }
 
-      // Su X, qualsiasi URL occupa esattamente 23 caratteri (t.co shortener)
-      // Spazio disponibile per il testo: 280 - 23 (url) - hashtags.length - 6 (a capo)
-      const maxBaseLength = Math.max(120, 280 - 23 - hashtags.length - 6);
+      const maxBaseLength = 278 - footer.length;
       let truncatedBase = baseText;
       if (baseText.length > maxBaseLength) {
         const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 80 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
       }
-      const fullTweet = `${truncatedBase}\n\n${articleUrl}\n\n${hashtags}`;
+      const fullTweet = `${truncatedBase}${footer}`;
 
-      console.log(`[X MANUAL REPUBLISH] Invio tweet card per articolo ${art.id}: "${fullTweet}"`);
-      const xRes = await postToX(fullTweet, null); // null per generare la Large Summary Card interattiva di X (cliccabile sull'immagine)
+      console.log(`[X MANUAL REPUBLISH] Invio tweet nativo per articolo ${art.id}: "${fullTweet}"`);
+      const xRes = await postToX(fullTweet, art.image_url);
 
       if (xRes.id) {
         aiSummary.x_tweet_id = xRes.id;
@@ -771,9 +767,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 .replace(/#ASRoma/gi, '')
                 .replace(/#RomaFlash/gi, '')
                 .trim();
-              const articleSlug = generateArticleSlug(newTitle, insertedArticle.id);
-              const articleUrl = `https://romaflash.app/notizie/${articleSlug}`;
-              const hashtags = `#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+              const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
               
               let baseText = cleanBase;
               if (baseText.length < 180 && aiSummary.excerpt) {
@@ -783,18 +777,16 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
                 }
               }
 
-              // Su X, qualsiasi URL occupa esattamente 23 caratteri (t.co shortener)
-              // Spazio disponibile per il testo: 280 - 23 (url) - hashtags.length - 6 (a capo)
-              const maxBaseLength = Math.max(120, 280 - 23 - hashtags.length - 6);
+              const maxBaseLength = 278 - footer.length;
               let truncatedBase = baseText;
               if (baseText.length > maxBaseLength) {
                 const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-                truncatedBase = (lastSpace > 80 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+                truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
               }
-              const fullTweet = `${truncatedBase}\n\n${articleUrl}\n\n${hashtags}`;
+              const fullTweet = `${truncatedBase}${footer}`;
 
-              console.log(`[X AUTO-POST] Pubblicazione tweet card (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
-              const xRes = await postToX(fullTweet, null); // null per generare la Large Summary Card interattiva di X (cliccabile sull'immagine)
+              console.log(`[X AUTO-POST] Pubblicazione tweet nativo (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
+              const xRes = await postToX(fullTweet, imageUrl);
               if (xRes.id) {
                 console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
                 tweetsTodayCount++;

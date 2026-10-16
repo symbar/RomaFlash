@@ -307,15 +307,27 @@ serve(async (req) => {
     const todayRome = getRomeDateStr(new Date());
 
     let tweetsTodayCount = 0;
+    let lastTweetTime = 0;
     if (recentArticles) {
       for (const art of recentArticles) {
         const postedAt = art.ai_summary?.x_posted_at;
-        if (postedAt && getRomeDateStr(new Date(postedAt)) === todayRome) {
-          tweetsTodayCount++;
+        if (postedAt) {
+          const t = new Date(postedAt).getTime();
+          if (t > lastTweetTime) lastTweetTime = t;
+          if (getRomeDateStr(new Date(postedAt)) === todayRome) {
+            tweetsTodayCount++;
+          }
         }
       }
     }
-    console.log(`[X AUTO-POST] Tweet notizie già pubblicati oggi (${todayRome}): ${tweetsTodayCount}`);
+    console.log(`[X AUTO-POST] Tweet notizie già pubblicati oggi (${todayRome}): ${tweetsTodayCount}. Ultimo invio: ${lastTweetTime > 0 ? new Date(lastTweetTime).toISOString() : 'Nessuno'}`);
+
+    const eligibleNewArticlesForX: Array<{
+      id: string;
+      title: string;
+      image_url: string;
+      ai_summary: any;
+    }> = [];
 
     // Funzione deterministica anti-duplicato con stemming italiano e confronto incrociato Titolo + Riassunto
     const stopWords = new Set([
@@ -752,56 +764,19 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             });
             recentTitlesList += `\n- ${newTitle} (${aiSummary.excerpt || ''})`;
 
-            // 6b. Auto-Pubblicazione su X per TUTTI gli articoli (esclusi i post Social)
+            // Raccoglie gli articoli inseriti idonei per X (esclusi post Social)
             const isSocialPost =
               aiSummary.category === 'Social' ||
               Boolean(aiSummary.social_embed_url) ||
               source.name === 'AS Roma (Ufficiale)';
 
             if (insertedArticle?.id && !isSocialPost) {
-              const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${newTitle}\n\n${aiSummary.excerpt}`)
-                .replace(/https?:\/\/\S+/gi, '')
-                .replace(/#[a-zA-Z0-9_]+/g, '')
-                .trim();
-              const extraTags = (aiSummary.dynamic_hashtags || '')
-                .replace(/#ASRoma/gi, '')
-                .replace(/#RomaFlash/gi, '')
-                .trim();
-              const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
-              
-              let baseText = cleanBase;
-              if (baseText.length < 180 && aiSummary.excerpt) {
-                const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
-                if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
-                  baseText = `${baseText} ${cleanExcerpt}`.trim();
-                }
-              }
-
-              const maxBaseLength = 278 - footer.length;
-              let truncatedBase = baseText;
-              if (baseText.length > maxBaseLength) {
-                const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-                truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
-              }
-              const fullTweet = `${truncatedBase}${footer}`;
-
-              console.log(`[X AUTO-POST] Pubblicazione tweet nativo (#${tweetsTodayCount + 1} di oggi): ${newTitle}`);
-              const xRes = await postToX(fullTweet, imageUrl);
-              if (xRes.id) {
-                console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
-                tweetsTodayCount++;
-                aiSummary.x_tweet_id = xRes.id;
-                if (xRes.url) {
-                  aiSummary.x_tweet_url = xRes.url;
-                }
-                aiSummary.x_posted_at = new Date().toISOString();
-                await supabase
-                  .from('articles')
-                  .update({ ai_summary: aiSummary })
-                  .eq('id', insertedArticle.id);
-              } else {
-                console.error(`[X AUTO-POST] Errore pubblicazione su X:`, xRes.error);
-              }
+              eligibleNewArticlesForX.push({
+                id: insertedArticle.id,
+                title: newTitle,
+                image_url: imageUrl,
+                ai_summary: aiSummary,
+              });
             }
             
             // Invia notifica push
@@ -837,6 +812,90 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
         }
       } catch (feedError) {
         console.error(`Errore nel fetching della fonte ${source.name}:`, feedError)
+      }
+    }
+
+    // 7. Gestione intelligente della coda X: massimo 1 tweet per run, spaziato di almeno 20 minuti
+    const MIN_INTERVAL_MS = 20 * 60 * 1000; // 20 minuti
+    const now = Date.now();
+    const timeSinceLastTweet = now - lastTweetTime;
+    const canPostToX = lastTweetTime === 0 || timeSinceLastTweet >= MIN_INTERVAL_MS;
+
+    console.log(`[X QUEUE] Ultimo tweet uscito: ${lastTweetTime > 0 ? Math.round(timeSinceLastTweet / 60000) + ' min fa' : 'Nessuno recente'}. Pronto per X? ${canPostToX}`);
+
+    let articleToTweet: { id: string; title: string; image_url: string; ai_summary: any } | null = null;
+
+    if (canPostToX) {
+      if (eligibleNewArticlesForX.length > 0) {
+        articleToTweet = eligibleNewArticlesForX[0];
+        console.log(`[X QUEUE] Selezionata nuova notizia appena inserita: "${articleToTweet.title}"`);
+      } else {
+        const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+        const { data: pendingArticles } = await supabase
+          .from('articles')
+          .select('id, title, image_url, ai_summary, published_at')
+          .gte('published_at', twentyFourHoursAgo)
+          .not('original_url', 'like', 'romaflash-daily-briefing-%')
+          .is('ai_summary->x_posted_at', null)
+          .neq('ai_summary->>category', 'Social')
+          .order('published_at', { ascending: false })
+          .limit(1);
+
+        if (pendingArticles && pendingArticles.length > 0) {
+          articleToTweet = pendingArticles[0];
+          console.log(`[X QUEUE] Ripescata notizia in coda da pubblicare su X: "${articleToTweet.title}"`);
+        }
+      }
+    } else {
+      if (eligibleNewArticlesForX.length > 0) {
+        console.log(`[X QUEUE] ${eligibleNewArticlesForX.length} nuovi articoli salvati sul sito ma accodati per X (ultimo tweet solo ${Math.round(timeSinceLastTweet / 60000)} min fa, attesa minima 20 min).`);
+      }
+    }
+
+    if (articleToTweet && articleToTweet.id) {
+      const artAi = articleToTweet.ai_summary || {};
+      const cleanBase = (artAi.tweet_text || `🐺🟡🔴 ${articleToTweet.title}\n\n${artAi.excerpt}`)
+        .replace(/https?:\/\/\S+/gi, '')
+        .replace(/#[a-zA-Z0-9_]+/g, '')
+        .trim();
+      const extraTags = (artAi.dynamic_hashtags || '')
+        .replace(/#ASRoma/gi, '')
+        .replace(/#RomaFlash/gi, '')
+        .trim();
+      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      
+      let baseText = cleanBase;
+      if (baseText.length < 180 && artAi.excerpt) {
+        const cleanExcerpt = artAi.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
+        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
+          baseText = `${baseText} ${cleanExcerpt}`.trim();
+        }
+      }
+
+      const maxBaseLength = 278 - footer.length;
+      let truncatedBase = baseText;
+      if (baseText.length > maxBaseLength) {
+        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+      }
+      const fullTweet = `${truncatedBase}${footer}`;
+
+      console.log(`[X AUTO-POST] Pubblicazione tweet nativo spaziato (#${tweetsTodayCount + 1} di oggi): ${articleToTweet.title}`);
+      const xRes = await postToX(fullTweet, articleToTweet.image_url);
+      if (xRes.id) {
+        console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
+        tweetsTodayCount++;
+        artAi.x_tweet_id = xRes.id;
+        if (xRes.url) {
+          artAi.x_tweet_url = xRes.url;
+        }
+        artAi.x_posted_at = new Date().toISOString();
+        await supabase
+          .from('articles')
+          .update({ ai_summary: artAi })
+          .eq('id', articleToTweet.id);
+      } else {
+        console.error(`[X AUTO-POST] Errore pubblicazione su X:`, xRes.error);
       }
     }
 

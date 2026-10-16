@@ -273,53 +273,7 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
         throw insertError
     }
 
-    // Auto-Pubblicazione su X (12° slot riservato a Il Punto della Giornata)
-    let xTweetId: string | undefined = undefined;
-    if (savedBriefing?.id) {
-      const cleanBase = (aiSummary.tweet_text || `🌙🐺 ${briefingArticle.title}\n\n${aiSummary.excerpt}`)
-        .replace(/https?:\/\/\S+/gi, '')
-        .replace(/#[a-zA-Z0-9_]+/g, '')
-        .trim();
-      const extraTags = (aiSummary.dynamic_hashtags || '')
-        .replace(/#ASRoma/gi, '')
-        .replace(/#RomaFlash/gi, '')
-        .trim();
-      const footer = `\n\n⚡ RomaFlash  #ASRoma #PuntodellaGiornata${extraTags ? ` ${extraTags}` : ''}`;
-      
-      let baseText = cleanBase;
-      if (baseText.length < 180 && aiSummary.excerpt) {
-        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
-        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
-          baseText = `${baseText} ${cleanExcerpt}`.trim();
-        }
-      }
-
-      const maxBaseLength = 278 - footer.length;
-      let truncatedBase = baseText;
-      if (baseText.length > maxBaseLength) {
-        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
-      }
-      const fullTweet = `${truncatedBase}${footer}`;
-
-      console.log(`[X AUTO-POST] Pubblicazione Punto della Giornata nativo su X...`);
-      const xRes = await postToX(fullTweet, briefingImageUrl);
-      if (xRes.id) {
-        console.log(`[X AUTO-POST] Punto della Giornata pubblicato su X! ID: ${xRes.id}`);
-        xTweetId = xRes.id;
-        aiSummary.x_tweet_id = xRes.id;
-        if (xRes.url) {
-          aiSummary.x_tweet_url = xRes.url;
-        }
-        aiSummary.x_posted_at = new Date().toISOString();
-        await supabase
-          .from('articles')
-          .update({ ai_summary: aiSummary })
-          .eq('id', savedBriefing.id);
-      } else {
-        console.error(`[X AUTO-POST] Errore pubblicazione Punto della Giornata su X:`, xRes.error);
-      }
-    }
+    // Il Punto della Giornata rimane esclusivo per il sito web e le notifiche push (non pubblicato su X)
 
     // Invia notifica push
     const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')

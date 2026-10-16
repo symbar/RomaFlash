@@ -130,7 +130,19 @@ export async function onRequestGet(context: any) {
 
   const paragraphs = content
     .split(/\n+/)
-    .map((p: string) => `<p>${escapeHtml(p.trim())}</p>`)
+    .map((p: string) => {
+      const trimmed = p.trim();
+      if (!trimmed) return "";
+      if (trimmed.startsWith(">")) {
+        const cleanQuote = trimmed.replace(/^>\s*/, "");
+        return `<blockquote>${escapeHtml(cleanQuote)}</blockquote>`;
+      }
+      if (/^["“].+[”"]\s*[—–-]\s*.+$/.test(trimmed)) {
+        return `<blockquote>${escapeHtml(trimmed)}</blockquote>`;
+      }
+      return `<p>${escapeHtml(trimmed)}</p>`;
+    })
+    .filter(Boolean)
     .join("\n");
 
   const seoSemanticBlock = `

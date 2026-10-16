@@ -572,16 +572,23 @@ Nel dubbio, imposta SEMPRE "is_duplicate": true!
 2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
-1. Scrivi un nuovo titolo in italiano (diverso dall'originale).
+1. Scrivi un nuovo titolo in italiano (diverso dall'originale). Se l'articolo riguarda un'intervista o dichiarazioni, usa la formula: Soggetto: "Virgolettato d'impatto" (es. Ranieri: "A Roma servono uomini veri", Dybala: "Voglio vincere qui").
 2. Scrivi un breve riassunto di 2 righe (excerpt) in italiano per la homepage.
-3. Riscrivi l'intero articolo in italiano in modo discorsivo, fluido e professionale. Se l'articolo contiene interviste o dichiarazioni (di calciatori, mister o dirigenti), PRESERVA e RIPORTA SEMPRE TRA VIRGOLETTE ("...") le loro parole esatte e i virgolettati originali, evitando di parafrasarli.
+3. Riscrivi l'intero articolo in italiano in modo discorsivo, fluido e professionale.
+   FEDELTÀ DELLE INTERVISTE & VIRGOLETTATI REALI (REGOLA FONDAMENTALE):
+   Se l'articolo contiene interviste, conferenze stampa o dichiarazioni rilasciate dai protagonisti (calciatori, allenatore, dirigenti, opinionisti):
+   - PRESERVA e RIPORTA SEMPRE TRA VIRGOLETTE ("...") le loro parole esatte e i virgolettati originali, evitando assolutamente di parafrasarli, censurarli o annacquarli.
+   - Ogni dichiarazione o citazione testuale significativa DEVE essere posizionata su una propria riga isolata che inizia con il carattere '>' nel formato:
+     > "Dichiarazione testuale esatta del protagonista..." — Nome Autore
+   - Il resto dell'articolo (contesto, analisi, cronaca) deve essere scritto in normali paragrafi narrativi.
 4. ESTREMA IMPORTANZA: Se l'articolo parla di probabili formazioni, formazioni ufficiali o schieramenti in campo dell'AS Roma, devi estrarre il modulo e i giocatori, valorizzando l'oggetto "formation". Altrimenti, lascialo a null.
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
-7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma.
+7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma. Per i virgolettati, mantieni la riga isolata con '>' e le parole esatte tradotte (es. > "Exact translated quote..." — Author Name).
 8. AUTO-PUBBLICAZIONE X / TWITTER ("tweet_text" e "dynamic_hashtags"):
    Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash in modalità 100% nativa.
-   Scrivi in "tweet_text" un recap nativo completo, denso, approfondito e ricco di dettagli per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema). Non limitarti a una frase breve: racconta il fatto centrale, i dettagli, i numeri o il virgolettato chiave in modo che chi legge su X abbia una vera e propria notizia completa ed esaustiva.
+   Scrivi in "tweet_text" un recap nativo completo, denso, approfondito e ricco di dettagli per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con 1-2 emoji pertinenti, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema).
+   Se l'articolo riporta dichiarazioni o interviste, apri il tweet con il virgolettato chiave o la frase a effetto tra virgolette (es. 🎙️ Dybala: "Roma è casa mia, qui vogliamo vincere trofei". ...). Non limitarti a una frase breve: racconta il fatto centrale, i dettagli, i numeri o il virgolettato chiave in modo che chi legge su X abbia una vera e propria notizia completa ed esaustiva.
    Scrivi in "dynamic_hashtags" 1 o 2 hashtag caldi e pertinenti alla notizia specifica (es. "#Dybala", "#RomaInter", "#Calciomercato"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
    Se ti è stata allegata un'immagine, verifica se è una FOTOGRAFIA REALE utilizzabile oppure se ha un watermark del sito fonte / è una grafica digitale.

@@ -34,7 +34,7 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 *   **3.2 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le 5 notizie più calde della giornata in formato pillola.
 *   **3.3 Swipe Orizzontale fra Articoli (Stile TikTok/Reels):** Navigazione a swipe col pollice da un articolo all'altro senza dover tornare alla home page.
 *   **3.4 Generatore "Condividi come Storia Instagram":** Tasto per il lettore che trasforma istantaneamente la notizia in una card verticale (9:16) brandizzata RomaFlash da condividere su Instagram Stories o WhatsApp.
-*   **3.5 Fedeltà delle Interviste & Virgolettati Reali:** Aggiornamento del prompt di sintesi di Gemini per preservare e riportare fedelmente tra virgolette (`"..."`) le dichiarazioni testuali esatte rilasciate dai protagonisti (calciatori, mister, dirigenti), evitando che l'AI parafrasi o annacqui le parole originali durante la riscrittura.
+*   ~~**3.5 Fedeltà delle Interviste & Virgolettati Reali:** Aggiornamento del prompt di sintesi di Gemini per preservare e riportare fedelmente tra virgolette (`"..."`) le dichiarazioni testuali esatte rilasciate dai protagonisti (calciatori, mister, dirigenti), evitando che l'AI parafrasi o annacqui le parole originali durante la riscrittura; formattazione visiva con Quote Card Giallorossa in app e supporto semantico `<blockquote>` per SEO/Edge SSR.~~ ✅ **(Completato)**
 
 ---
 

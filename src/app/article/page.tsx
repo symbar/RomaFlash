@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalRightSidebar from '@/components/GlobalRightSidebar';
-import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Flame, Snowflake, MessageCircle, Quote } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import { Tweet } from 'react-tweet';
@@ -368,11 +368,52 @@ function ArticleContent() {
                 let tweetId = hasTweet ? embedUrl.split('status/')[1]?.split('?')[0] : '';
                 if (tweetId && !/^\d+$/.test(tweetId)) tweetId = '';
                 
+                const renderParagraph = (p: string, key: string | number) => {
+                  const trimmed = p.trim();
+                  const isBlockquote = trimmed.startsWith('>');
+                  const isExplicitQuote = !isBlockquote && /^["“].+[”"]\s*[—–-]\s*.+$/.test(trimmed);
+
+                  if (isBlockquote || isExplicitQuote) {
+                    const cleanText = isBlockquote ? trimmed.replace(/^>\s*/, '') : trimmed;
+                    let quoteText = cleanText;
+                    let author = '';
+
+                    const dashMatch = cleanText.match(/^(.*?)\s+[—–-]\s+([^—–-]+)$/);
+                    if (dashMatch) {
+                      quoteText = dashMatch[1].trim();
+                      author = dashMatch[2].trim();
+                    }
+
+                    // Pulisci eventuali virgolette esterne doppie/singole
+                    const unquotedText = quoteText.replace(/^["“](.*)["”]$/, '$1').trim();
+
+                    return (
+                      <blockquote
+                        key={key}
+                        className="quote-card my-8 rounded-2xl p-5 md:p-6 bg-gradient-to-br from-rose-50/70 via-amber-50/40 to-white dark:from-rose-950/20 dark:via-amber-950/10 dark:to-card border-l-4 border-[#8E1B23] shadow-xs relative overflow-hidden"
+                      >
+                        <Quote className="w-8 h-8 text-[#8E1B23]/15 absolute top-3 right-4 pointer-events-none" />
+                        <div className="font-serif italic font-medium text-lg md:text-xl text-foreground leading-snug mb-3 pr-8">
+                          &ldquo;{unquotedText}&rdquo;
+                        </div>
+                        {author && (
+                          <div className="flex items-center gap-2 pt-2 border-t border-[#8E1B23]/10 text-xs text-muted-foreground">
+                            <span className="w-2 h-2 rounded-full bg-[#8E1B23] shrink-0"></span>
+                            <span className="font-bold text-foreground">{author}</span>
+                          </div>
+                        )}
+                      </blockquote>
+                    );
+                  }
+
+                  return <p key={key} className="mb-6">{p}</p>;
+                };
+
                 if (tweetId === '') hasTweet = false;
                 if (!hasTweet || paragraphs.length < 2) {
                   return (
                     <>
-                      {paragraphs.map((p: string, i: number) => <p key={i} className="mb-6">{p}</p>)}
+                      {paragraphs.map((p: string, i: number) => renderParagraph(p, i))}
                       {hasTweet && (
                         <div className="my-8 flex justify-center w-full">
                           <Tweet id={tweetId || ''} />
@@ -389,13 +430,13 @@ function ArticleContent() {
 
                 return (
                   <>
-                    {firstHalf.map((p: string, i: number) => <p key={'f'+i} className="mb-6">{p}</p>)}
+                    {firstHalf.map((p: string, i: number) => renderParagraph(p, 'f' + i))}
                     
                     <div className="my-8 flex justify-center w-full">
                       <Tweet id={tweetId || ''} />
                     </div>
                     
-                    {secondHalf.map((p: string, i: number) => <p key={'s'+i} className="mb-6">{p}</p>)}
+                    {secondHalf.map((p: string, i: number) => renderParagraph(p, 's' + i))}
                     
                     {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
                   </>

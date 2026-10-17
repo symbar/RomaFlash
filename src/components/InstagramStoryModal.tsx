@@ -28,6 +28,7 @@ export function InstagramIcon({ className = "w-3.5 h-3.5" }: { className?: strin
 interface InstagramStoryModalProps {
   article: any | null;
   onClose: () => void;
+  onMarkShared?: (articleId: string, shared: boolean) => void;
 }
 
 export type InstagramFormat = "story" | "reel";
@@ -190,19 +191,46 @@ function extractHighlight(article: any): { quote: string; author: string } | nul
 
 /**
  * Genera la didascalia ottimizzata per i Reels di Instagram:
- * - Titolo dell'articolo
- * - Estratto riassuntivo
- * - Domanda/Call To Action per spingere i commenti
- * - Riferimento al sito
- * - 3-4 hashtag caldi mirati (#ASRoma #RomaFlash ...)
+ * NOTA: Su Instagram gli URL http/https nel testo dei Reel NON sono mai resi cliccabili da Meta.
+ * Ciò che Instagram rende cliccabile in blu nella didascalia di un Reel sono:
+ * 1) Le menzioni con chiocciola (@romaflash) che portano direttamente al profilo con il Link in Bio e le Storie
+ * 2) Gli hashtag (#ASRoma, #RomaFlash, ecc.)
+ * Inoltre inseriamo l'articolo completo ben formattato così l'utente può leggere tutta la notizia nel Reel.
  */
 export function buildReelCaption(article: any): string {
   const title = (article?.title || "").trim();
   const excerpt = (article?.ai_summary?.excerpt || "").trim();
+  const rawContent = (article?.ai_summary?.content || "").trim();
+
+  // Pulizia del markdown per ottenere il testo completo e leggibile dell'articolo
+  let fullBody = rawContent
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/^>\s*/gm, "💬 ")
+    .replace(/^[-•]\s+/gm, "• ")
+    .trim();
+
+  if (!fullBody) {
+    fullBody = excerpt;
+  } else if (
+    excerpt &&
+    fullBody.length < 200 &&
+    !fullBody.toLowerCase().includes(excerpt.slice(0, 30).toLowerCase())
+  ) {
+    fullBody = `${excerpt}\n\n${fullBody}`;
+  }
+
+  const paragraphs = fullBody
+    .split(/\n+/)
+    .map((p: string) => p.trim())
+    .filter(Boolean);
+  const bodyText = paragraphs.join("\n\n");
+
   const dynamicTags = (article?.ai_summary?.dynamic_hashtags || "")
     .split(/\s+/)
     .filter((t: string) => t.startsWith("#"))
-    .slice(0, 2)
+    .slice(0, 3)
     .join(" ");
 
   let cta = "Cosa ne pensi? Dì la tua nei commenti! 👇🐺";
@@ -210,15 +238,14 @@ export function buildReelCaption(article: any): string {
   if (cat === "Dichiarazioni") {
     cta = "Sei d'accordo con queste parole? Scrivilo nei commenti! 👇🐺";
   } else if (cat === "Probabili Formazioni") {
-    cta = "Chi faresti giocare titolare sabato? Scrivilo qui sotto! 👇🐺";
+    cta = "Chi faresti giocare titolare? Scrivilo qui sotto! 👇🐺";
   } else if (cat === "Calciomercato") {
     cta = "Operazione giusta per la Roma? Commenta con la tua opinione! 👇🐺";
   }
 
-  const tags = `#ASRoma #RomaFlash ${dynamicTags || "#SerieA"}`.trim();
-  const articleUrl = getArticleUrl(article);
+  const tags = `#ASRoma #RomaFlash #SerieA #Calcio ${dynamicTags}`.trim();
 
-  return `${title}\n\n${excerpt ? excerpt + "\n\n" : ""}${cta}\n\n🔗 Leggi l'articolo completo su: ${articleUrl}\n\n${tags}`;
+  return `🐺 ${title} 🟡🔴\n\n${bodyText ? bodyText + "\n\n" : ""}${cta}\n\n📲 Segui @romaflash e tocca il link cliccabile in Bio (o nelle nostre Storie) per tutte le notizie in tempo reale su romaflash.app!\n\n${tags}`;
 }
 
 /**
@@ -485,6 +512,7 @@ function renderStoryCanvas(
 export default function InstagramStoryModal({
   article,
   onClose,
+  onMarkShared,
 }: InstagramStoryModalProps) {
   const [format, setFormat] = useState<InstagramFormat>("story");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
@@ -494,12 +522,18 @@ export default function InstagramStoryModal({
   const [copiedCaption, setCopiedCaption] = useState(false);
   const [sharedSuccess, setSharedSuccess] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [captionText, setCaptionText] = useState<string>("");
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
       setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     }
   }, []);
+
+  useEffect(() => {
+    if (!article) return;
+    setCaptionText(buildReelCaption(article));
+  }, [article]);
 
   useEffect(() => {
     if (!article) return;
@@ -535,13 +569,15 @@ export default function InstagramStoryModal({
 
   const articleUrl = getArticleUrl(article);
   const isReel = format === "reel";
-  const reelCaption = buildReelCaption(article);
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(articleUrl);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 3000);
+      if (onMarkShared && article?.id) {
+        onMarkShared(article.id, true);
+      }
     } catch {
       // ignore
     }
@@ -549,9 +585,12 @@ export default function InstagramStoryModal({
 
   const handleCopyCaption = async () => {
     try {
-      await navigator.clipboard.writeText(reelCaption);
+      await navigator.clipboard.writeText(captionText);
       setCopiedCaption(true);
       setTimeout(() => setCopiedCaption(false), 3000);
+      if (onMarkShared && article?.id) {
+        onMarkShared(article.id, true);
+      }
     } catch {
       // ignore
     }
@@ -567,12 +606,19 @@ export default function InstagramStoryModal({
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    if (onMarkShared && article?.id) {
+      onMarkShared(article.id, true);
+    }
   };
 
   const handleShare = async () => {
+    if (onMarkShared && article?.id) {
+      onMarkShared(article.id, true);
+    }
+
     // 1. Copia preventiva istantanea negli appunti:
     // in modalità Reel copia la didascalia completa con hashtag; in modalità Storia copia il link
-    const textToCopy = isReel ? reelCaption : articleUrl;
+    const textToCopy = isReel ? captionText : articleUrl;
     try {
       navigator.clipboard?.writeText(textToCopy);
       if (isReel) {
@@ -588,9 +634,6 @@ export default function InstagramStoryModal({
 
     // 2. Chiamata a navigator.share:
     // FONDAMENTALE: passare SOLO `files: [storyFile]` senza title, text o url!
-    // Se viene passato title o text, i sistemi mobili (Android/iOS) inviano a Instagram un intent di tipo testo/link,
-    // e Instagram apre il suo browser in-app che fallisce con l'errore "This page couldn't load".
-    // Passando esclusivamente il file immagine JPEG, Instagram apre direttamente il composer delle Storie / Feed / Reel.
     if (
       storyFile &&
       typeof navigator !== "undefined" &&
@@ -703,26 +746,29 @@ export default function InstagramStoryModal({
           </div>
 
           {/* Istruzioni e Azioni (Destra) */}
-          <div className="md:col-span-7 space-y-4">
+          <div className="md:col-span-7 space-y-3.5">
             
-            {/* Box Dinamico: Didascalia per Reel OPPURE Link per Storia */}
-            {isReel ? (
+            {/* Box Dinamico: Didascalia per Reel + Box Link sempre disponibile */}
+            {isReel && (
               <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                    Didascalia &amp; Hashtag (già pronti per il Reel):
+                    Didascalia Reel (Notizia completa + @romaflash cliccabile):
                   </span>
                   <span className="text-[10px] text-pink-400 font-mono">
-                    {copiedCaption ? "Copiata!" : "Pronta da incollare"}
+                    {copiedCaption ? "Copiata!" : "Modificabile"}
                   </span>
                 </div>
                 <textarea
-                  readOnly
-                  rows={4}
-                  value={reelCaption}
-                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded-lg p-2.5 resize-none focus:outline-none font-sans leading-relaxed"
+                  rows={5}
+                  value={captionText}
+                  onChange={(e) => setCaptionText(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded-lg p-2.5 resize-y focus:outline-none font-sans leading-relaxed"
                 />
+                <p className="text-[10.5px] text-slate-400 leading-snug">
+                  💡 <strong className="text-pink-300">Nota Instagram:</strong> nei Reel Instagram rende cliccabili in blu le menzioni <strong className="text-white">@romaflash</strong> e gli hashtag (mentre disabilita gli URL <code className="text-slate-300">https://</code> nel testo dei Reel, che invece sono cliccabili nello <strong>Sticker Link delle Storie</strong> qui sotto e nella <strong>Bio</strong>).
+                </p>
                 <button
                   type="button"
                   onClick={handleCopyCaption}
@@ -733,42 +779,42 @@ export default function InstagramStoryModal({
                   }`}
                 >
                   {copiedCaption ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedCaption ? "Didascalia Copiata negli Appunti!" : "Copia Didascalia + Hashtag"}</span>
+                  <span>{copiedCaption ? "Didascalia Copiata negli Appunti!" : "Copia Didascalia Reel + Hashtag"}</span>
                 </button>
               </div>
-            ) : (
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    Link Articolo (per Sticker Storia):
-                  </span>
-                  <span className="text-[10px] text-amber-400 font-mono">
-                    {copiedLink ? "Copiato!" : "Da incollare"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={articleUrl}
-                    className="flex-1 bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCopyLink}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      copiedLink
-                        ? "bg-emerald-600 text-white"
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-                    }`}
-                  >
-                    {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedLink ? "Copiato" : "Copia"}
-                  </button>
-                </div>
-              </div>
             )}
+
+            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  Link Cliccabile Articolo (per Sticker &quot;Link&quot; nelle Storie):
+                </span>
+                <span className="text-[10px] text-amber-400 font-mono">
+                  {copiedLink ? "Copiato!" : "100% cliccabile su Storie"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={articleUrl}
+                  className="flex-1 bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    copiedLink
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+                  }`}
+                >
+                  {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedLink ? "Copiato" : "Copia Link"}
+                </button>
+              </div>
+            </div>
 
             {/* Guida Differenziata */}
             <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">

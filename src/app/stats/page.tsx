@@ -172,6 +172,25 @@ export default function StatsBackofficePage() {
     });
   };
 
+  const handleSetInstagramShared = async (articleId: string, shared: boolean) => {
+    setArticles((prev) =>
+      prev.map((a) =>
+        a.id === articleId
+          ? {
+              ...a,
+              ai_summary: { ...(a.ai_summary || {}), instagram_shared: shared },
+            }
+          : a
+      )
+    );
+    if (!unlockedPin) return;
+    await supabase.rpc("admin_set_instagram_shared", {
+      target_article_id: articleId,
+      admin_pin: unlockedPin,
+      is_shared: shared,
+    });
+  };
+
   const metrics = useMemo(() => {
     const totalViews = articles.reduce((sum, a) => sum + (a.views || 0), 0);
     const now = Date.now();
@@ -574,6 +593,19 @@ export default function StatsBackofficePage() {
                       <TikTokIcon className="w-3 h-3" />
                     </a>
                   )}
+                  {art.ai_summary?.instagram_shared && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetInstagramShared(art.id, false);
+                      }}
+                      className="inline-flex items-center justify-center w-5 h-5 rounded bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                      title="Pubblicato su Instagram (clicca per rimuovere il segno)"
+                    >
+                      <InstagramIcon className="w-3 h-3" />
+                    </button>
+                  )}
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700 truncate">
                     {category}
                   </span>
@@ -634,9 +666,10 @@ export default function StatsBackofficePage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setInstagramArticle(art);
+                      handleSetInstagramShared(art.id, true);
                     }}
                     className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
-                    title="Genera Storia Instagram 9:16"
+                    title="Genera Storia o Reel Instagram 9:16"
                   >
                     <InstagramIcon className="w-3.5 h-3.5" />
                   </button>
@@ -703,6 +736,7 @@ export default function StatsBackofficePage() {
                 const sourceName = art.sources?.name || "RomaFlash";
                 const hasX = Boolean(art.ai_summary?.x_tweet_id);
                 const hasTikTok = Boolean(art.ai_summary?.tiktok_shared);
+                const hasInstagram = Boolean(art.ai_summary?.instagram_shared);
                 const pubDate = new Date(art.published_at).toLocaleString(
                   "it-IT",
                   {
@@ -735,7 +769,7 @@ export default function StatsBackofficePage() {
                       </div>
                     </td>
                     <td className="py-3 px-3 text-center">
-                      {hasX || hasTikTok ? (
+                      {hasX || hasTikTok || hasInstagram ? (
                         <div className="inline-flex items-center justify-center gap-1">
                           {hasX && (
                             <a
@@ -758,6 +792,19 @@ export default function StatsBackofficePage() {
                             >
                               <TikTokIcon className="w-3.5 h-3.5" />
                             </a>
+                          )}
+                          {hasInstagram && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSetInstagramShared(art.id, false);
+                              }}
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-80 transition-opacity cursor-pointer shadow-2xs"
+                              title="Pubblicato su Instagram (clicca per rimuovere il segno)"
+                            >
+                              <InstagramIcon className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       ) : (
@@ -827,9 +874,10 @@ export default function StatsBackofficePage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             setInstagramArticle(art);
+                            handleSetInstagramShared(art.id, true);
                           }}
                           className="p-1.5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white hover:opacity-90 transition-all shadow-xs cursor-pointer hover:scale-105"
-                          title="Genera Storia Instagram 9:16"
+                          title="Genera Storia o Reel Instagram 9:16"
                         >
                           <InstagramIcon className="w-3.5 h-3.5" />
                         </button>
@@ -874,6 +922,7 @@ export default function StatsBackofficePage() {
       <InstagramStoryModal
         article={instagramArticle}
         onClose={() => setInstagramArticle(null)}
+        onMarkShared={handleSetInstagramShared}
       />
     </main>
   );

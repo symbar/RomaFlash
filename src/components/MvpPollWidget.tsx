@@ -67,35 +67,35 @@ const DEMO_VOTES_INITIAL: Record<string, number> = {
   balerdi: 0
 };
 
-// Calcola la chiusura del sondaggio alle ore 20:00 del giorno successivo al match (fuso orario italiano)
-function getPollCloseTime(matchDateIso: string): number {
-  const matchDate = new Date(matchDateIso);
+// Calcola la chiusura del sondaggio: fino alle ore 23:59:59 del giorno prima della partita successiva (fuso orario italiano)
+function getPollCloseTimeBeforeNextMatch(nextMatchDateIso: string): number {
+  const nextMatchDate = new Date(nextMatchDateIso);
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Rome',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
-  }).format(matchDate).split('-');
+  }).format(nextMatchDate).split('-');
 
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const day = parseInt(parts[2], 10);
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const d = parseInt(parts[2], 10);
 
-  // Giorno successivo
-  const nextDayRef = new Date(Date.UTC(year, month - 1, day + 1, 12, 0, 0));
-  const nextParts = new Intl.DateTimeFormat('en-CA', {
+  // Giorno prima della partita successiva
+  const eveRef = new Date(Date.UTC(y, m - 1, d - 1, 12, 0, 0));
+  const eveParts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Rome',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
-  }).format(nextDayRef).split('-');
+  }).format(eveRef).split('-');
 
-  const nextY = nextParts[0];
-  const nextM = nextParts[1];
-  const nextD = nextParts[2];
+  const eveY = eveParts[0];
+  const eveM = eveParts[1];
+  const eveD = eveParts[2];
 
-  // Calcola le ore 20:00:00 nel fuso orario di Roma (gestione automatica legale/solare)
-  const utcGuess = new Date(`${nextY}-${nextM}-${nextD}T20:00:00Z`);
+  // Chiude alle ore 23:59:59 del giorno prima nel fuso orario di Roma (gestione automatica solare/legale)
+  const utcGuess = new Date(`${eveY}-${eveM}-${eveD}T23:59:59Z`);
   const romeStr = utcGuess.toLocaleString('en-US', { timeZone: 'Europe/Rome' });
   const utcStr = utcGuess.toLocaleString('en-US', { timeZone: 'UTC' });
   const offsetMs = new Date(romeStr).getTime() - new Date(utcStr).getTime();
@@ -182,11 +182,23 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           
           // Regola concordata:
           // Inizio sondaggio: 105 min di partita + 30 minuti dal fischio finale = 135 minuti dal calcio d'inizio
-          // Chiusura sondaggio: alle ore 20:00 del giorno successivo
           const pollStart = matchTime + (105 + 30) * 60 * 1000;
-          const pollCloses = getPollCloseTime(match.match_date);
-          const nowTime = now.getTime();
 
+          // Chiusura sondaggio: aperto fino alle 23:59:59 del giorno prima della partita successiva
+          const { data: upcomingMatches } = await supabase
+            .from('calendar_matches')
+            .select('*')
+            .or('home_team.eq.Roma,away_team.eq.Roma')
+            .gt('match_date', match.match_date)
+            .order('match_date', { ascending: true })
+            .limit(1);
+
+          const nextMatch = upcomingMatches?.[0];
+          const pollCloses = nextMatch
+            ? getPollCloseTimeBeforeNextMatch(nextMatch.match_date)
+            : matchTime + 3 * 24 * 3600 * 1000;
+
+          const nowTime = now.getTime();
           const isInsideVotingWindow = nowTime >= pollStart && nowTime <= pollCloses;
           const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
 
@@ -386,9 +398,15 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
       if (diff <= 0) {
         setTimeLeft(t('mvp.closed'));
       } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const totalHours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        setTimeLeft(`${hours}h ${minutes}m`);
+        if (totalHours >= 24) {
+          const days = Math.floor(totalHours / 24);
+          const remHours = totalHours % 24;
+          setTimeLeft(`${days}g ${remHours}h`);
+        } else {
+          setTimeLeft(`${totalHours}h ${minutes}m`);
+        }
       }
     }
 

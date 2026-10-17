@@ -19,6 +19,7 @@ import {
   renderSlide1,
   renderSlide2Outro,
   renderStoryCanvas,
+  renderStorySlide2Outro,
   loadImageElement,
   toProxiedUrl,
   ensureFontsLoaded,
@@ -107,7 +108,7 @@ export default function InstagramStoryModal({
   onClose,
   onMarkShared,
 }: InstagramStoryModalProps) {
-  // Formato predefinito: Carosello 4:5 (Standardizzato con TikTok)
+  // Formato: Carosello 4:5 o Storia 9:16
   const [format, setFormat] = useState<InstagramFormat>("carousel");
   const [activeSlide, setActiveSlide] = useState<1 | 2>(1);
 
@@ -117,9 +118,11 @@ export default function InstagramStoryModal({
   const [slide2Url, setSlide2Url] = useState<string>("");
   const [slide2File, setSlide2File] = useState<File | null>(null);
 
-  // Risorse Storia 9:16
-  const [storyUrl, setStoryUrl] = useState<string>("");
-  const [storyFile, setStoryFile] = useState<File | null>(null);
+  // Risorse Storia 9:16 (Standardizzate con la nuova impostazione grafica)
+  const [story1Url, setStory1Url] = useState<string>("");
+  const [story1File, setStory1File] = useState<File | null>(null);
+  const [story2Url, setStory2Url] = useState<string>("");
+  const [story2File, setStory2File] = useState<File | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [packDownloading, setPackDownloading] = useState<boolean>(false);
@@ -155,28 +158,34 @@ export default function InstagramStoryModal({
         bgImg = await loadImageElement("/images/archive/roma-1.jpg");
       }
 
-      // 1. Slide 1 Carosello (4:5)
+      // 1. Carosello 4:5 (Standardizzato TikTok & Instagram)
       const s1 = renderSlide1(article, bgImg);
-      // 2. Slide 2 Outro Carosello (4:5)
       const s2 = renderSlide2Outro();
-      // 3. Storia Verticale 9:16
-      const st = renderStoryCanvas(article, bgImg);
+
+      // 2. Storie 9:16 (Con la nuova impostazione grafica coordinata)
+      const st1 = renderStoryCanvas(article, bgImg);
+      const st2 = renderStorySlide2Outro();
 
       if (isMounted) {
         setSlide1Url(s1.dataUrl);
         setSlide2Url(s2.dataUrl);
-        setStoryUrl(st.dataUrl);
+        setStory1Url(st1.dataUrl);
+        setStory2Url(st2.dataUrl);
 
-        Promise.all([s1.filePromise, s2.filePromise, st.filePromise]).then(
-          ([f1, f2, fStory]) => {
-            if (isMounted) {
-              setSlide1File(f1);
-              setSlide2File(f2);
-              setStoryFile(fStory);
-              setLoading(false);
-            }
+        Promise.all([
+          s1.filePromise,
+          s2.filePromise,
+          st1.filePromise,
+          st2.filePromise,
+        ]).then(([f1, f2, fSt1, fSt2]) => {
+          if (isMounted) {
+            setSlide1File(f1);
+            setSlide2File(f2);
+            setStory1File(fSt1);
+            setStory2File(fSt2);
+            setLoading(false);
           }
-        );
+        });
       }
     }
 
@@ -241,8 +250,10 @@ export default function InstagramStoryModal({
         triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
       }
     } else {
-      if (storyUrl) {
-        triggerDownload(storyUrl, `romaflash-storia-${shortId}.jpg`);
+      if (activeSlide === 1 && story1Url) {
+        triggerDownload(story1Url, `romaflash-storia-1-${shortId}.jpg`);
+      } else if (activeSlide === 2 && story2Url) {
+        triggerDownload(story2Url, `romaflash-storia-2-outro.jpg`);
       }
     }
 
@@ -252,16 +263,26 @@ export default function InstagramStoryModal({
   };
 
   const handleDownloadPack = () => {
-    if (!slide1Url || !slide2Url) return;
-    setPackDownloading(true);
     const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
+    setPackDownloading(true);
 
-    triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
+    if (isCarousel) {
+      if (!slide1Url || !slide2Url) return;
+      triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
 
-    setTimeout(() => {
-      triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
-      setPackDownloading(false);
-    }, 450);
+      setTimeout(() => {
+        triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
+        setPackDownloading(false);
+      }, 450);
+    } else {
+      if (!story1Url || !story2Url) return;
+      triggerDownload(story1Url, `romaflash-storia-1-${shortId}.jpg`);
+
+      setTimeout(() => {
+        triggerDownload(story2Url, `romaflash-storia-2-outro.jpg`);
+        setPackDownloading(false);
+      }, 450);
+    }
 
     if (onMarkShared && article?.id) {
       onMarkShared(article.id, true);
@@ -274,7 +295,7 @@ export default function InstagramStoryModal({
     }
 
     // Copia preventiva automatica negli appunti:
-    // in modalità Carosello copia la didascalia; in modalità Storia copia il link
+    // in modalità Carosello copia la didascalia; in modalità Storia copia il link per lo sticker
     const textToCopy = isCarousel ? captionText : articleUrl;
     try {
       await navigator.clipboard?.writeText(textToCopy);
@@ -290,8 +311,10 @@ export default function InstagramStoryModal({
     }
 
     const filesToShare = isCarousel
-      ? [slide1File, slide2File].filter(Boolean) as File[]
-      : [storyFile].filter(Boolean) as File[];
+      ? ([slide1File, slide2File].filter(Boolean) as File[])
+      : activeSlide === 1
+      ? ([story1File].filter(Boolean) as File[])
+      : ([story2File].filter(Boolean) as File[]);
 
     if (
       filesToShare.length > 0 &&
@@ -325,7 +348,9 @@ export default function InstagramStoryModal({
     ? activeSlide === 1
       ? slide1Url
       : slide2Url
-    : storyUrl;
+    : activeSlide === 1
+    ? story1Url
+    : story2Url;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
@@ -342,11 +367,13 @@ export default function InstagramStoryModal({
                   Kit Instagram RomaFlash
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  {isCarousel ? "Carosello 4:5 (Standard)" : "Storia 9:16"}
+                  {isCarousel ? "Carosello 4:5" : "Storia 9:16"}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Formato standardizzato con TikTok: Slide 1 (Notizia) + Slide 2 (Outro romaflash.app)
+                {isCarousel
+                  ? "Standardizzato con TikTok: Slide 1 (Notizia) + Slide 2 (Outro romaflash.app)"
+                  : "Storie 9:16 con la nuova impostazione grafica coordinata e Sticker Link"}
               </p>
             </div>
           </div>
@@ -391,33 +418,31 @@ export default function InstagramStoryModal({
               </button>
             </div>
 
-            {/* Sub-selector Slide (se Carosello) */}
-            {isCarousel && (
-              <div className="w-full max-w-[270px] grid grid-cols-2 p-1 bg-slate-950/80 rounded-lg border border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={() => setActiveSlide(1)}
-                  className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
-                    activeSlide === 1
-                      ? "bg-slate-800 text-amber-300 shadow-xs"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  1. Notizia
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveSlide(2)}
-                  className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
-                    activeSlide === 2
-                      ? "bg-slate-800 text-amber-300 shadow-xs"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  2. Outro Sito
-                </button>
-              </div>
-            )}
+            {/* Sub-selector Slide: 1. Notizia vs 2. Outro Sito */}
+            <div className="w-full max-w-[270px] grid grid-cols-2 p-1 bg-slate-950/80 rounded-lg border border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setActiveSlide(1)}
+                className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  activeSlide === 1
+                    ? "bg-slate-800 text-amber-300 shadow-xs"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                1. Notizia
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSlide(2)}
+                className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
+                  activeSlide === 2
+                    ? "bg-slate-800 text-amber-300 shadow-xs"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                2. Outro Sito
+              </button>
+            </div>
 
             {/* Frame Grafica */}
             <div
@@ -442,11 +467,16 @@ export default function InstagramStoryModal({
             </div>
 
             <span className="text-[10px] text-slate-400 text-center font-medium">
-              {isCarousel
-                ? activeSlide === 1
-                  ? "Slide 1: Foto reale + Titolo bicolore + Super Sunto"
-                  : "Slide 2: Mockup laptop/smartphone + Banner www.romaflash.app"
-                : "Formato 9:16 con indicatore sticker link"}
+              {activeSlide === 1 ? (
+                <span>
+                  📍 <strong>Slide 1:</strong> Foto + Titolo bicolore + Super Sunto
+                  {!isCarousel ? " + Sticker Link" : ""}
+                </span>
+              ) : (
+                <span>
+                  🎯 <strong>Slide 2:</strong> Crest + Mockup dispositivi + Banner www.romaflash.app
+                </span>
+              )}
             </span>
           </div>
 
@@ -552,68 +582,42 @@ export default function InstagramStoryModal({
 
             {/* Pulsanti Azione Principali */}
             <div className="space-y-2 pt-1">
-              {isCarousel ? (
-                <>
-                  {/* SCARICA PACK 2 SLIDE (PRIMARIO) */}
-                  <button
-                    type="button"
-                    onClick={handleDownloadPack}
-                    disabled={loading || !slide1Url || !slide2Url || packDownloading}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <Layers className="w-4 h-4 text-white" />
-                    <span>
-                      {packDownloading
-                        ? "Download Pack in corso..."
-                        : "Scarica Pack 2 Slide Carosello (4:5)"}
-                    </span>
-                  </button>
+              {/* SCARICA PACK 2 SLIDE (PRIMARIO) */}
+              <button
+                type="button"
+                onClick={handleDownloadPack}
+                disabled={loading || packDownloading}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Layers className="w-4 h-4 text-white" />
+                <span>
+                  {packDownloading
+                    ? "Download Pack in corso..."
+                    : `Scarica Pack 2 Slide (${isCarousel ? "Carosello 4:5" : "Storie 9:16"})`}
+                </span>
+              </button>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={handleDownloadSingle}
-                      disabled={loading || !previewImgUrl}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 font-bold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      <Download className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Scarica Slide {activeSlide}</span>
-                    </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadSingle}
+                  disabled={loading || !previewImgUrl}
+                  className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 font-bold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Scarica Slide {activeSlide}</span>
+                </button>
 
-                    <button
-                      type="button"
-                      onClick={handleShare}
-                      disabled={loading || !slide1File || !slide2File}
-                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      <Share2 className="w-3.5 h-3.5" />
-                      <span>Condividi Pack</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    disabled={loading || !storyUrl}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>Condividi Storia 9:16</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleDownloadSingle}
-                    disabled={loading || !storyUrl}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
-                  >
-                    <Download className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Scarica Storia JPG (1080×1920)</span>
-                  </button>
-                </>
-              )}
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Condividi {isCarousel ? "Pack" : `Slide ${activeSlide}`}</span>
+                </button>
+              </div>
             </div>
 
             {sharedSuccess && (

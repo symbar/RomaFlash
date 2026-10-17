@@ -694,6 +694,7 @@ export function renderSlide2Outro(): {
 /**
  * =========================================================================
  * SLIDE STORIA 9:16 (1080x1920) - Per Storie Instagram con Sticker Link
+ * Standardizzata graficamente al 100% con Slide 1 (Notizia + Super Sunto)
  * =========================================================================
  */
 export function renderStoryCanvas(
@@ -705,141 +706,162 @@ export function renderStoryCanvas(
   canvas.height = STORY_H;
   const ctx = canvas.getContext("2d")!;
 
-  ctx.fillStyle = "#0c0204";
+  // 1. Base Scura Profonda
+  ctx.fillStyle = "#140407";
   ctx.fillRect(0, 0, STORY_W, STORY_H);
 
+  // 2. Foto Reale in alto (copre fino a circa 1200px con zoom ideale)
   if (bgImg && bgImg.width > 0 && bgImg.height > 0) {
-    const targetH = 1140;
+    const targetH = 1220;
     const scale = Math.max(STORY_W / bgImg.width, targetH / bgImg.height);
     const drawW = bgImg.width * scale;
     const drawH = bgImg.height * scale;
     const offsetX = (STORY_W - drawW) * 0.5;
-    const offsetY = Math.min(0, (targetH - drawH) * 0.15);
+    const offsetY = Math.min(0, (targetH - drawH) * 0.18);
     ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
   }
 
+  // 3. Gradiente editoriale sfumato dal nero della foto al buio della base
   const grad = ctx.createLinearGradient(0, 0, 0, STORY_H);
-  grad.addColorStop(0, "rgba(0, 0, 0, 0.5)");
-  grad.addColorStop(0.18, "rgba(0, 0, 0, 0.12)");
-  grad.addColorStop(0.42, "rgba(12, 2, 4, 0.42)");
-  grad.addColorStop(0.56, "rgba(14, 2, 5, 0.85)");
-  grad.addColorStop(0.68, "rgba(15, 2, 4, 0.96)");
-  grad.addColorStop(1, "#0a0103");
+  grad.addColorStop(0, "rgba(0, 0, 0, 0.3)");
+  grad.addColorStop(0.16, "rgba(0, 0, 0, 0.0)");
+  grad.addColorStop(0.38, "rgba(12, 2, 4, 0.28)");
+  grad.addColorStop(0.52, "rgba(16, 3, 6, 0.82)");
+  grad.addColorStop(0.66, "rgba(18, 3, 6, 0.96)");
+  grad.addColorStop(1, "#120204");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, STORY_W, STORY_H);
 
+  // Bagliore radiale carminio inferiore
   const radial = ctx.createRadialGradient(
     STORY_W / 2,
-    STORY_H - 120,
-    10,
+    STORY_H - 150,
+    20,
     STORY_W / 2,
-    STORY_H - 120,
-    600
+    STORY_H - 150,
+    650
   );
-  radial.addColorStop(0, "rgba(142, 27, 35, 0.55)");
+  radial.addColorStop(0, "rgba(142, 27, 35, 0.45)");
   radial.addColorStop(1, "rgba(142, 27, 35, 0)");
   ctx.fillStyle = radial;
-  ctx.fillRect(0, STORY_H - 600, STORY_W, 600);
+  ctx.fillRect(0, STORY_H - 650, STORY_W, 650);
 
-  // Logo tondo ufficiale a sinistra
-  const padX = 84;
-  const logoR = 76;
-  const logoCx = padX + logoR;
-  const logoCy = 175;
-  drawCircularLogo(ctx, logoCx, logoCy, logoR);
+  // 4. Logo Tondo Ufficiale RomaFlash in Alto a Sinistra (posizionato a safe area storie: cx=104, cy=140, r=72)
+  drawCircularLogo(ctx, 104, 140, 72);
 
-  const maxW = STORY_W - padX * 2;
-  const titleRaw = (article?.title || "Ultime Notizie AS Roma")
+  // 5. Testi: Titolo Bicolore + Barra Oro + Super Sunto Completo
+  const padX = 76;
+  const maxW = STORY_W - padX * 2; // 928px
+  const titleText = (article?.title || "Ultime Notizie AS Roma")
     .replace(/['’‘]/g, "'")
-    .toUpperCase();
-  const fontFam = getCondensedFontFamily();
+    .toUpperCase()
+    .trim();
+  const suntoText = buildCompleteSuperSunto(article);
+  const condensedFont = getCondensedFontFamily();
 
-  let titleFontSize = 66;
-  ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-  let titleLines = wrapText(ctx, titleRaw, maxW);
+  // Calcolo dinamico dimensione per fit perfetto sopra lo sticker
+  let titleSize = 68;
+  let suntoSize = 38;
+  let titleLines: string[] = [];
+  let suntoLines: string[] = [];
+  let titleLineH = 74;
+  let suntoLineH = 50;
 
-  if (titleLines.length > 4) {
-    titleFontSize = 54;
-    ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-    titleLines = wrapText(ctx, titleRaw, maxW);
+  for (let step = 0; step < 8; step++) {
+    ctx.font = `700 ${titleSize}px ${condensedFont}`;
+    titleLines = wrapText(ctx, titleText, maxW);
+    titleLineH = Math.round(titleSize * 1.08);
+
+    ctx.font = `600 ${suntoSize}px system-ui, -apple-system, sans-serif`;
+    suntoLines = wrapText(ctx, suntoText, maxW);
+    suntoLineH = Math.round(suntoSize * 1.34);
+
+    const totalBlockH =
+      titleLines.length * titleLineH +
+      38 +
+      suntoLines.length * suntoLineH;
+
+    if (totalBlockH <= 660 || (titleSize <= 46 && suntoSize <= 28)) {
+      break;
+    }
+    titleSize -= 3;
+    suntoSize -= 2;
   }
 
-  const sunto = buildCompleteSuperSunto(article);
-  ctx.font = "italic 32px Georgia, serif";
-  const quoteLines = wrapText(ctx, `"${sunto}"`, maxW - 48);
-  const quoteBoxH = quoteLines.length * 44 + 28;
+  const totalBlockH =
+    titleLines.length * titleLineH +
+    38 +
+    suntoLines.length * suntoLineH;
 
-  const stickerH = 80;
-  const stickerY = 1680;
-  const lineHeight = Math.round(titleFontSize * 1.22);
-  const titleHeight = titleLines.length * lineHeight;
+  // Posizionamento verticale: sopra lo sticker link (che sta a y=1660)
+  const stickerY = 1660;
+  const bottomLimit = stickerY - 45; // 1615
+  const minTop = 880;
+  let y = Math.max(minTop, bottomLimit - totalBlockH);
 
-  let currentY = stickerY - 40 - quoteBoxH - 32 - titleHeight;
-  if (currentY < 1040) currentY = 1040;
-
-  // Titolo
   ctx.save();
-  ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 18;
+  ctx.textBaseline = "top";
+  ctx.textAlign = "left";
+
+  // Titolo bicolore Bianco + Oro
+  ctx.font = `700 ${titleSize}px ${condensedFont}`;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetX = 3;
   ctx.shadowOffsetY = 4;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  for (const line of titleLines) {
-    ctx.fillText(line, padX, currentY);
-    currentY += lineHeight;
+
+  const splitTitleIdx = Math.ceil(titleLines.length / 2);
+  for (let i = 0; i < titleLines.length; i++) {
+    ctx.fillStyle = i < splitTitleIdx ? "#ffffff" : "#f5b800";
+    ctx.fillText(titleLines[i], padX, y);
+    y += titleLineH;
+  }
+
+  // Barra di separazione Oro
+  y += 14;
+  ctx.shadowColor = "transparent";
+  ctx.fillStyle = "#f5b800";
+  ctx.beginPath();
+  ctx.roundRect(padX, y, 140, 6, 3);
+  ctx.fill();
+  y += 24;
+
+  // Super Sunto nitido (uguale a Slide 1 TikTok & Instagram 4:5!)
+  ctx.font = `600 ${suntoSize}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  for (const line of suntoLines) {
+    ctx.fillText(line, padX, y);
+    y += suntoLineH;
   }
   ctx.restore();
 
-  // Box Sunto
-  currentY += 24;
-  const boxX = padX;
-  const boxY = currentY;
-  const boxW = maxW;
-
-  ctx.save();
-  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-  ctx.beginPath();
-  ctx.roundRect(boxX, boxY, boxW, quoteBoxH, 16);
-  ctx.fill();
-
-  ctx.fillStyle = "#f0b516";
-  ctx.beginPath();
-  ctx.roundRect(boxX, boxY, 8, quoteBoxH, [16, 0, 0, 16]);
-  ctx.fill();
-
-  ctx.font = "italic 30px Georgia, serif";
-  ctx.fillStyle = "#f8fafc";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-
-  let qY = boxY + 18;
-  for (const qLine of quoteLines) {
-    ctx.fillText(qLine, boxX + 28, qY);
-    qY += 40;
-  }
-  ctx.restore();
-
-  // Sticker Mockup
-  ctx.save();
-  const stW = 620;
+  // 6. Sticker Mockup Instagram Link
+  const stickerH = 84;
+  const stW = 660;
   const stX = (STORY_W - stW) / 2;
   const stY = stickerY;
 
-  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
   ctx.shadowBlur = 24;
   ctx.shadowOffsetY = 8;
 
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(stX, stY, stW, stickerH, 40);
+  ctx.roundRect(stX, stY, stW, stickerH, 42);
   ctx.fill();
 
   ctx.shadowColor = "transparent";
+
+  // Badge icona link
   ctx.fillStyle = "#8e1b23";
   ctx.beginPath();
-  ctx.arc(stX + 46, stY + stickerH / 2, 18, 0, Math.PI * 2);
+  ctx.arc(stX + 46, stY + stickerH / 2, 20, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = "#ffffff";
@@ -856,17 +878,17 @@ export function renderStoryCanvas(
 
   ctx.font = "600 20px system-ui, -apple-system, sans-serif";
   ctx.fillStyle = "#64748b";
-  ctx.fillText("•  romaflash.app", stX + 400, stY + stickerH / 2 - 2);
+  ctx.fillText("• romaflash.app", stX + 420, stY + stickerH / 2 - 2);
   ctx.restore();
 
-  // Footer
+  // 7. Footer elegante
   ctx.save();
   ctx.font = "bold 22px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.letterSpacing = "2px";
-  ctx.fillText("@ROMAFLASH 🐺", STORY_W / 2, 1810);
+  ctx.fillText("@ROMAFLASH 🐺", STORY_W / 2, 1790);
   ctx.restore();
 
   const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
@@ -876,6 +898,345 @@ export function renderStoryCanvas(
         if (!blob) return resolve(null);
         const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
         const file = new File([blob], `romaflash-storia-9-16-${shortId}.jpg`, {
+          type: "image/jpeg",
+        });
+        resolve(file);
+      },
+      "image/jpeg",
+      0.95
+    );
+  });
+
+  return { dataUrl, filePromise };
+}
+
+/**
+ * =========================================================================
+ * SLIDE 2 STORIA 9:16 (1080x1920) - Outro / Invito a romaflash.app
+ * Coordinata al 100% con Slide 2 Carosello ma adattata per lo schermo verticale 9:16
+ * =========================================================================
+ */
+export function renderStorySlide2Outro(): {
+  dataUrl: string;
+  filePromise: Promise<File | null>;
+} {
+  const canvas = document.createElement("canvas");
+  canvas.width = STORY_W;
+  canvas.height = STORY_H;
+  const ctx = canvas.getContext("2d")!;
+
+  const W = STORY_W;
+  const H = STORY_H;
+
+  // 1. Sfondo Giallorosso Profondo con gradiente radiale
+  const bgGrad = ctx.createRadialGradient(W / 2, H * 0.44, 100, W / 2, H * 0.44, 1100);
+  bgGrad.addColorStop(0, "#991b24");
+  bgGrad.addColorStop(0.5, "#5c0e18");
+  bgGrad.addColorStop(0.85, "#2a040b");
+  bgGrad.addColorStop(1, "#140205");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Raggi diagonali dinamici
+  ctx.save();
+  ctx.strokeStyle = "rgba(240, 181, 22, 0.04)";
+  ctx.lineWidth = 16;
+  for (let i = -W; i < W * 2; i += 75) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i + H * 0.6, H);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Lupetto watermark gigante al centro
+  ctx.save();
+  ctx.translate(W / 2 - 270, H * 0.32);
+  ctx.scale(540 / 512, 540 / 512);
+  ctx.fillStyle = "rgba(240, 181, 22, 0.035)";
+  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
+  ctx.restore();
+
+  // 2. Logo Tondo Ufficiale RomaFlash in Alto
+  drawCircularLogo(ctx, W / 2, 240, 125);
+
+  ctx.save();
+  ctx.font = "bold 17px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "#f0b516";
+  ctx.textAlign = "center";
+  ctx.letterSpacing = "4px";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+  ctx.shadowBlur = 10;
+  ctx.fillText("L'ESSENZA DELLE NOTIZIE GIALLOROSSE", W / 2, 395);
+  ctx.restore();
+
+  // 3. Mockup Dispositivi: Laptop + Smartphone (ridimensionati per proporzioni verticali 9:16)
+  const laptopX = 120;
+  const laptopY = 490;
+  const laptopW = 580;
+  const laptopH = 350;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+  ctx.shadowBlur = 42;
+  ctx.shadowOffsetY = 24;
+
+  ctx.fillStyle = "#1e2124";
+  ctx.beginPath();
+  ctx.roundRect(laptopX, laptopY, laptopW, laptopH, 18);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.shadowColor = "transparent";
+
+  // Schermo Laptop
+  const screenX = laptopX + 16;
+  const screenY = laptopY + 16;
+  const screenW = laptopW - 32;
+  const screenH = laptopH - 32;
+
+  ctx.fillStyle = "#0c0204";
+  ctx.beginPath();
+  ctx.roundRect(screenX, screenY, screenW, screenH, 8);
+  ctx.fill();
+
+  // Header desktop
+  ctx.fillStyle = "#1a0307";
+  ctx.fillRect(screenX, screenY, screenW, 38);
+  ctx.font = "900 13px system-ui, sans-serif";
+  ctx.fillStyle = "#f0b516";
+  ctx.textAlign = "left";
+  ctx.fillText("🐺 ROMAFLASH", screenX + 16, screenY + 24);
+
+  ctx.font = "bold 9px system-ui, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.fillText("NEWS", screenX + 165, screenY + 24);
+  ctx.fillText("FORMAZIONI", screenX + 225, screenY + 24);
+  ctx.fillText("CALENDARIO", screenX + 310, screenY + 24);
+  ctx.fillText("CLASSIFICA", screenX + 400, screenY + 24);
+
+  ctx.fillStyle = "#f0b516";
+  ctx.fillRect(screenX, screenY + 38, screenW, 2);
+
+  // Card Notizia Desktop
+  ctx.fillStyle = "#1e050a";
+  ctx.beginPath();
+  ctx.roundRect(screenX + 16, screenY + 54, screenW * 0.58, screenH - 70, 8);
+  ctx.fill();
+
+  ctx.fillStyle = "#e02d47";
+  ctx.beginPath();
+  ctx.roundRect(screenX + 28, screenY + 68, 74, 18, 4);
+  ctx.fill();
+  ctx.font = "900 8.5px system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("ULTIM'ORA", screenX + 35, screenY + 80);
+
+  ctx.font = "800 14px system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("DYBALA GUIDA L'ATTACCO:", screenX + 28, screenY + 108);
+  ctx.fillText("I DETTAGLI DI FORMAZIONE", screenX + 28, screenY + 126);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+  ctx.fillRect(screenX + 28, screenY + 146, screenW * 0.46, 5);
+  ctx.fillRect(screenX + 28, screenY + 158, screenW * 0.42, 5);
+  ctx.fillRect(screenX + 28, screenY + 170, screenW * 0.35, 5);
+
+  // Colonna destra desktop
+  for (let r = 0; r < 3; r++) {
+    const ry = screenY + 54 + r * 72;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.beginPath();
+    ctx.roundRect(screenX + screenW * 0.62, ry, screenW * 0.36, 62, 6);
+    ctx.fill();
+
+    ctx.fillStyle = "#f0b516";
+    ctx.fillRect(screenX + screenW * 0.64, ry + 12, 54, 4);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+    ctx.fillRect(screenX + screenW * 0.64, ry + 26, screenW * 0.28, 6);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.fillRect(screenX + screenW * 0.64, ry + 38, screenW * 0.22, 5);
+  }
+
+  // Base Tastiera Laptop
+  ctx.fillStyle = "#2a2d32";
+  ctx.beginPath();
+  ctx.roundRect(laptopX - 44, laptopY + laptopH - 4, laptopW + 88, 24, [4, 4, 12, 12]);
+  ctx.fill();
+
+  ctx.restore();
+
+  // Smartphone Mockup (iPhone Pro) - In primo piano a destra
+  const phoneX = 640;
+  const phoneY = 430;
+  const phoneW = 290;
+  const phoneH = 590;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 50;
+  ctx.shadowOffsetX = -12;
+  ctx.shadowOffsetY = 30;
+
+  ctx.fillStyle = "#1e2024";
+  ctx.beginPath();
+  ctx.roundRect(phoneX, phoneY, phoneW, phoneH, 46);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  ctx.shadowColor = "transparent";
+
+  const pScrX = phoneX + 11;
+  const pScrY = phoneY + 11;
+  const pScrW = phoneW - 22;
+  const pScrH = phoneH - 22;
+
+  ctx.fillStyle = "#0a0103";
+  ctx.beginPath();
+  ctx.roundRect(pScrX, pScrY, pScrW, pScrH, 38);
+  ctx.fill();
+
+  // Dynamic Island
+  ctx.fillStyle = "#000000";
+  ctx.beginPath();
+  ctx.roundRect(phoneX + phoneW / 2 - 40, pScrY + 12, 80, 22, 11);
+  ctx.fill();
+
+  // Header mobile
+  ctx.fillStyle = "#180307";
+  ctx.fillRect(pScrX, pScrY + 44, pScrW, 48);
+
+  ctx.font = "900 14px system-ui, sans-serif";
+  ctx.fillStyle = "#f0b516";
+  ctx.textAlign = "center";
+  ctx.fillText("🐺 ROMAFLASH", pScrX + pScrW / 2, pScrY + 72);
+
+  // Card Notizia Top Mobile
+  ctx.fillStyle = "#1f0409";
+  ctx.beginPath();
+  ctx.roundRect(pScrX + 14, pScrY + 108, pScrW - 28, 210, 16);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(240, 181, 22, 0.3)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = "#2d0810";
+  ctx.beginPath();
+  ctx.roundRect(pScrX + 20, pScrY + 114, pScrW - 40, 105, 10);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(pScrX + pScrW / 2 - 28, pScrY + 135);
+  ctx.scale(56 / 512, 56 / 512);
+  ctx.fillStyle = "rgba(240, 181, 22, 0.25)";
+  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
+  ctx.restore();
+
+  ctx.font = "800 13px system-ui, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
+  ctx.fillText("CALCIOMERCATO & CAMPO", pScrX + 26, pScrY + 242);
+  ctx.font = "bold 11px system-ui, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+  ctx.fillText("Tutte le formazioni e i voti live", pScrX + 26, pScrY + 264);
+
+  ctx.fillStyle = "rgba(240, 181, 22, 0.15)";
+  ctx.beginPath();
+  ctx.roundRect(pScrX + 26, pScrY + 282, pScrW - 52, 24, 6);
+  ctx.fill();
+  ctx.font = "bold 10px system-ui, sans-serif";
+  ctx.fillStyle = "#f0b516";
+  ctx.fillText("📊 SONDAGGIO: CHI VINCE SABATO?", pScrX + 34, pScrY + 298);
+
+  ctx.restore();
+
+  // 4. Testo Call to Action
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "900 58px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 4;
+  ctx.fillText("Trovi tutti i dettagli su", W / 2, 1260);
+  ctx.restore();
+
+  // 5. Bannerone ORO Giallorosso Pieno
+  const bannerY = 1340;
+  const bannerH = 140;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 12;
+
+  ctx.fillStyle = "#f0b516";
+  ctx.fillRect(0, bannerY, W, bannerH);
+
+  ctx.fillStyle = "#8e1b23";
+  ctx.fillRect(0, bannerY, W, 6);
+  ctx.fillRect(0, bannerY + bannerH - 6, W, 6);
+
+  ctx.shadowColor = "transparent";
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "900 76px system-ui, -apple-system, Impact, sans-serif";
+  ctx.fillStyle = "#180307";
+  ctx.letterSpacing = "2px";
+  ctx.fillText("www.romaflash.app", W / 2, bannerY + bannerH / 2 + 3);
+
+  ctx.restore();
+
+  // 6. Freccia Gigante Dorata in Basso ➔
+  const arrowY = 1600;
+  const arrowStartX = W / 2 - 210;
+  const arrowEndX = W / 2 + 210;
+  const shaftH = 38;
+  const headSize = 78;
+
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 26;
+  ctx.shadowOffsetY = 6;
+
+  ctx.fillStyle = "#f0b516";
+  ctx.beginPath();
+  ctx.moveTo(arrowStartX, arrowY - shaftH / 2);
+  ctx.lineTo(arrowEndX - headSize, arrowY - shaftH / 2);
+  ctx.lineTo(arrowEndX - headSize, arrowY - headSize);
+  ctx.lineTo(arrowEndX, arrowY);
+  ctx.lineTo(arrowEndX - headSize, arrowY + headSize);
+  ctx.lineTo(arrowEndX - headSize, arrowY + shaftH / 2);
+  ctx.lineTo(arrowStartX, arrowY + shaftH / 2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+
+  // Footer 9:16
+  ctx.save();
+  ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.letterSpacing = "2px";
+  ctx.fillText("@ROMAFLASH 🐺", W / 2, 1780);
+  ctx.restore();
+
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+  const filePromise = new Promise<File | null>((resolve) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return resolve(null);
+        const file = new File([blob], `romaflash-storia-outro-9-16.jpg`, {
           type: "image/jpeg",
         });
         resolve(file);

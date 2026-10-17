@@ -2,9 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Download, Copy, Check, Share2, Sparkles, Film, Image as ImageIcon } from "lucide-react";
+import {
+  X,
+  Download,
+  Copy,
+  Check,
+  Share2,
+  Sparkles,
+  Layers,
+  Film,
+  Image as ImageIcon,
+} from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
 import { getArticleUrl } from "@/lib/slug";
+import {
+  renderSlide1,
+  renderSlide2Outro,
+  renderStoryCanvas,
+  loadImageElement,
+  toProxiedUrl,
+  ensureFontsLoaded,
+} from "@/lib/socialSlideGenerator";
 
 export function InstagramIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   return (
@@ -31,173 +49,9 @@ interface InstagramStoryModalProps {
   onMarkShared?: (articleId: string, shared: boolean) => void;
 }
 
-export type InstagramFormat = "story" | "reel";
+export type InstagramFormat = "carousel" | "story";
 
-const STORY_W = 1080;
-const STORY_H = 1920; // 9:16 portrait format for Instagram Stories and Reels
-
-const WOLF_LOGO_SVG_PATH =
-  "M179.3 38.94C154.7 77.7 142.7 139.7 168.4 185.9l-16.3 9.2c-6.7-11.9-11.2-24.4-13.9-37.2c-34.5-6.3-69.42-7.5-104.98-2.1c34.07 10.1 52.77 23.7 76.68 46.7c-26.82 9.7-60.25 30.2-92.93 70.2c35.47-8.8 64.83-11.5 89.43-6.3c-36.94 22.5-64.06 56.1-88.34 114.1c35.9-17.2 64.89-18.8 102.94-18.8c-23.07 32.7-35.27 77.2-36.31 112.8c24.51-26 57.61-60.2 87.21-79c3 29.9 15 58.3 35.9 85.3c-.2-43.9 10.3-88.3 31.6-133.4c-18.8 9-32.4 18.1-49.9 29.3c6.2-27.9 12.4-55.8 18.7-83.7c-23.3 2.4-39 10-60.5 18.5c16.3-33.1 32.7-66.1 49.1-99.2l16.8 8.3l-28.4 57.4c18.4-4.4 28.7-4.1 45.7-1.3c-4.5 20.4-9 40.7-13.6 61c65.3-36.2 148.3-45.9 226.7-50c7.6-12.9 13.8-24.2 18.8-34.8l-6.3-24.4l-24.4 30.8l-7.8-27.5l-22.5 29.2l-7.5-26.1l-23.9 31.5l-7.7-28.2l-23.8 31.4l1.2-41.1l22.6-42.7l7.6 28.3l23.9-31.5l7.6 28.2l23.5-30l6.5 26.9l24.5-30.8l7.8 27.5l24.6-32c2.3-10.8 4.6-22.4 7.4-35.7c-55.5-3.7-106.3 4.8-154 9.8c-38-20.8-80.8-26.8-121.9-18.5c-13.6-29.69-27.2-59.38-40.9-89.06M325.5 158.3c-4.5 14.2-13 18.3-24.7 20.6c-16.1-4.4-28.3-15.5-34.4-30.2c20.4-3.8 42.4 3.4 59.1 9.6";
-
-function getCondensedFontFamily(): string {
-  if (typeof document !== "undefined") {
-    const computed = getComputedStyle(document.documentElement);
-    const oswald = computed.getPropertyValue("--font-oswald").trim();
-    const bebas = computed.getPropertyValue("--font-bebas").trim();
-    if (oswald) return `${oswald}, Impact, "Arial Narrow", sans-serif`;
-    if (bebas) return `${bebas}, Impact, "Arial Narrow", sans-serif`;
-  }
-  return `"Oswald", "Bebas Neue", Impact, "Arial Narrow", sans-serif`;
-}
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number
-): string[] {
-  const words = (text || "").trim().split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-  let currentLine = "";
-
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxWidth && currentLine) {
-      lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = testLine;
-    }
-  }
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-  return lines;
-}
-
-function loadImageElement(src: string): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
-}
-
-function toProxiedUrl(url: string | null | undefined): string {
-  if (!url) return "/images/archive/roma-1.jpg";
-  if (url.startsWith("/")) return url;
-  return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=jpg`;
-}
-
-/**
- * Disegna il logo tondo ufficiale di RomaFlash (posizionato a sinistra).
- */
-function drawCircularLogo(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  r: number
-) {
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 8;
-
-  // Cerchio di base scuro
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fillStyle = "#26050a";
-  ctx.fill();
-
-  ctx.shadowColor = "transparent";
-
-  // Anello esterno oro
-  ctx.lineWidth = 6;
-  ctx.strokeStyle = "#f0b516";
-  ctx.stroke();
-
-  // Anello interno carminio
-  ctx.beginPath();
-  ctx.arc(cx, cy, r - 7, 0, Math.PI * 2);
-  ctx.lineWidth = 2.5;
-  ctx.strokeStyle = "rgba(224, 45, 71, 0.9)";
-  ctx.stroke();
-
-  // Lupetto in oro
-  const wolfSize = r * 1.15;
-  ctx.save();
-  ctx.translate(cx - wolfSize / 2, cy - r * 0.65);
-  const scale = wolfSize / 512;
-  ctx.scale(scale, scale);
-  const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
-  ctx.fillStyle = "#f0b516";
-  ctx.fill(wolfPath);
-  ctx.restore();
-
-  // Testo ROMAFLASH
-  ctx.font = `900 ${Math.round(r * 0.22)}px system-ui, -apple-system, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("ROMAFLASH", cx, cy + r * 0.52);
-
-  ctx.restore();
-}
-
-/**
- * Estrae un virgolettato o un highlight significativo dal contenuto dell'articolo.
- */
-function extractHighlight(article: any): { quote: string; author: string } | null {
-  const content = article?.ai_summary?.content || "";
-  const lines = content.split("\n").map((l: string) => l.trim()).filter(Boolean);
-
-  for (const line of lines) {
-    if (line.startsWith(">")) {
-      const clean = line.replace(/^>\s*/, "");
-      const match = clean.match(/^(.*?)\s+[—–-]\s+([^—–-]+)$/);
-      if (match) {
-        return {
-          quote: match[1].replace(/^["“](.*)["”]$/, "$1").trim(),
-          author: match[2].trim(),
-        };
-      }
-      return {
-        quote: clean.replace(/^["“](.*)["”]$/, "$1").trim(),
-        author: "",
-      };
-    }
-    if (/^["“].+[”"]\s*[—–-]\s*.+$/.test(line)) {
-      const match = line.match(/^(.*?)\s+[—–-]\s+([^—–-]+)$/);
-      if (match) {
-        return {
-          quote: match[1].replace(/^["“](.*)["”]$/, "$1").trim(),
-          author: match[2].trim(),
-        };
-      }
-    }
-  }
-
-  // Se non c'è un virgolettato esplicito, usa l'excerpt breve se presente
-  const excerpt = (article?.ai_summary?.excerpt || "").trim();
-  if (excerpt && excerpt.length >= 25 && excerpt.length <= 160) {
-    return { quote: excerpt, author: "" };
-  }
-
-  return null;
-}
-
-/**
- * Genera la didascalia ottimizzata per i Reels di Instagram:
- * NOTA: Su Instagram gli URL http/https nel testo dei Reel NON sono mai resi cliccabili da Meta.
- * Ciò che Instagram rende cliccabile in blu nella didascalia di un Reel sono:
- * 1) Le menzioni con chiocciola (@romaflash) che portano direttamente al profilo con il Link in Bio e le Storie
- * 2) Gli hashtag (#ASRoma, #RomaFlash, ecc.)
- * Inoltre inseriamo l'articolo completo ben formattato così l'utente può leggere tutta la notizia nel Reel.
- */
-export function buildReelCaption(article: any): string {
+export function buildInstagramCaption(article: any): string {
   const title = (article?.title || "").trim();
   const excerpt = (article?.ai_summary?.excerpt || "").trim();
   const rawContent = (article?.ai_summary?.content || "").trim();
@@ -230,7 +84,7 @@ export function buildReelCaption(article: any): string {
   const dynamicTags = (article?.ai_summary?.dynamic_hashtags || "")
     .split(/\s+/)
     .filter((t: string) => t.startsWith("#"))
-    .slice(0, 3)
+    .slice(0, 4)
     .join(" ");
 
   let cta = "Cosa ne pensi? Dì la tua nei commenti! 👇🐺";
@@ -245,268 +99,7 @@ export function buildReelCaption(article: any): string {
 
   const tags = `#ASRoma #RomaFlash #SerieA #Calcio ${dynamicTags}`.trim();
 
-  return `🐺 ${title} 🟡🔴\n\n${bodyText ? bodyText + "\n\n" : ""}${cta}\n\n📲 Segui @romaflash e tocca il link cliccabile in Bio (o nelle nostre Storie) per tutte le notizie in tempo reale su romaflash.app!\n\n${tags}`;
-}
-
-/**
- * Disegna la grafica 9:16 (1080x1920) per Storia o Reel.
- * - In "story": include lo sticker adesivo "Tocca per l'articolo".
- * - In "reel": layout 100% pulito ed editoriale senza sticker, solo logo a sinistra e titolo/citazione.
- */
-function renderStoryCanvas(
-  article: any,
-  bgImg: HTMLImageElement | null,
-  format: InstagramFormat
-): { dataUrl: string; filePromise: Promise<File | null> } {
-  const canvas = document.createElement("canvas");
-  canvas.width = STORY_W;
-  canvas.height = STORY_H;
-  const ctx = canvas.getContext("2d")!;
-
-  // 1. Sfondo base scuro
-  ctx.fillStyle = "#0c0204";
-  ctx.fillRect(0, 0, STORY_W, STORY_H);
-
-  // 2. Foto Hero (nella metà superiore 56%)
-  if (bgImg && bgImg.width > 0 && bgImg.height > 0) {
-    const targetH = 1140; // Copre i primi 1140px prima di sfumare nel buio
-    const scale = Math.max(STORY_W / bgImg.width, targetH / bgImg.height);
-    const drawW = bgImg.width * scale;
-    const drawH = bgImg.height * scale;
-    const offsetX = (STORY_W - drawW) * 0.5;
-    const offsetY = Math.min(0, (targetH - drawH) * 0.15);
-    ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
-  }
-
-  // 3. Gradiente cinematografico a più livelli per leggibilità perfetta
-  const grad = ctx.createLinearGradient(0, 0, 0, STORY_H);
-  grad.addColorStop(0, "rgba(0, 0, 0, 0.5)");
-  grad.addColorStop(0.18, "rgba(0, 0, 0, 0.12)");
-  grad.addColorStop(0.42, "rgba(12, 2, 4, 0.42)");
-  grad.addColorStop(0.56, "rgba(14, 2, 5, 0.85)");
-  grad.addColorStop(0.68, "rgba(15, 2, 4, 0.96)");
-  grad.addColorStop(1, "#0a0103");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, STORY_W, STORY_H);
-
-  // Bagliore radiale Giallorosso in fondo
-  const radial = ctx.createRadialGradient(
-    STORY_W / 2,
-    STORY_H - 120,
-    10,
-    STORY_W / 2,
-    STORY_H - 120,
-    600
-  );
-  radial.addColorStop(0, "rgba(142, 27, 35, 0.55)");
-  radial.addColorStop(1, "rgba(142, 27, 35, 0)");
-  ctx.fillStyle = radial;
-  ctx.fillRect(0, STORY_H - 600, STORY_W, 600);
-
-  // 4. Logo Tondo Ufficiale sulla SINISTRA (richiesta utente)
-  const padX = 84;
-  const logoR = 76;
-  const logoCx = padX + logoR;
-  const logoCy = 175;
-  drawCircularLogo(ctx, logoCx, logoCy, logoR);
-
-  // 5. Sezione Inferiore: Titolo + Box Citazione
-  const maxW = STORY_W - padX * 2; // 912px
-
-  const titleRaw = (article?.title || "Ultime Notizie AS Roma")
-    .replace(/['’‘]/g, "'")
-    .toUpperCase();
-
-  const fontFam = getCondensedFontFamily();
-
-  // Calcolo dinamico dimensione font titolo
-  let titleFontSize = 66;
-  ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-  let titleLines = wrapText(ctx, titleRaw, maxW);
-
-  if (titleLines.length > 4) {
-    titleFontSize = 54;
-    ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-    titleLines = wrapText(ctx, titleRaw, maxW);
-  }
-
-  const highlight = extractHighlight(article);
-
-  const lineHeight = Math.round(titleFontSize * 1.22);
-  const titleHeight = titleLines.length * lineHeight;
-
-  // Box citazione eventuale
-  let quoteLines: string[] = [];
-  let quoteBoxH = 0;
-  if (highlight?.quote) {
-    ctx.font = "italic 32px Georgia, serif";
-    const quoteMaxW = maxW - 48;
-    quoteLines = wrapText(ctx, `"${highlight.quote}"`, quoteMaxW);
-    quoteBoxH = quoteLines.length * 44 + (highlight.author ? 44 : 28);
-  }
-
-  // Posizionamento differenziato tra Storia (con sticker) e Reel (100% pulito)
-  const isReel = format === "reel";
-  const stickerH = 80;
-  const stickerY = 1680;
-  const footerY = isReel ? 1760 : 1810;
-
-  let currentY: number;
-
-  if (isReel) {
-    // Layout Reel: nessun sticker, centratura armonica nella parte inferiore
-    currentY = highlight?.quote
-      ? footerY - 90 - quoteBoxH - 36 - titleHeight
-      : footerY - 130 - titleHeight;
-  } else {
-    // Layout Storia: posizionato sopra lo sticker link
-    currentY = highlight?.quote
-      ? stickerY - 40 - quoteBoxH - 32 - titleHeight
-      : stickerY - 60 - titleHeight;
-  }
-
-  // Limite superiore di sicurezza
-  if (currentY < 1040) {
-    currentY = 1040;
-  }
-
-  // Disegna Titolo
-  ctx.save();
-  ctx.font = `900 ${titleFontSize}px ${fontFam}`;
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 4;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-
-  for (const line of titleLines) {
-    ctx.fillText(line, padX, currentY);
-    currentY += lineHeight;
-  }
-  ctx.restore();
-
-  // Disegna eventuale Box Citazione / Highlight (pulito, senza badge)
-  if (highlight?.quote && quoteLines.length > 0) {
-    currentY += 24;
-    const boxX = padX;
-    const boxY = currentY;
-    const boxW = maxW;
-
-    ctx.save();
-    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxW, quoteBoxH, 16);
-    ctx.fill();
-
-    // Bordo dorato a sinistra
-    ctx.fillStyle = "#f0b516";
-    ctx.beginPath();
-    ctx.roundRect(boxX, boxY, 8, quoteBoxH, [16, 0, 0, 16]);
-    ctx.fill();
-
-    // Testo citazione
-    ctx.font = "italic 30px Georgia, serif";
-    ctx.fillStyle = "#f8fafc";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-
-    let qY = boxY + 18;
-    for (const qLine of quoteLines) {
-      ctx.fillText(qLine, boxX + 28, qY);
-      qY += 40;
-    }
-
-    // Autore
-    if (highlight.author) {
-      ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
-      ctx.fillStyle = "#f0b516";
-      ctx.textAlign = "right";
-      ctx.fillText(`— ${highlight.author.toUpperCase()}`, boxX + boxW - 24, qY + 4);
-    }
-
-    ctx.restore();
-  }
-
-  // 6. Sticker Link Visual Mock: SOLO PER IL FORMATO STORIA (in Reel NON si disegna)
-  if (!isReel) {
-    ctx.save();
-    const stW = 620;
-    const stX = (STORY_W - stW) / 2;
-    const stY = stickerY;
-
-    ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 8;
-
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.roundRect(stX, stY, stW, stickerH, 40);
-    ctx.fill();
-
-    ctx.shadowColor = "transparent";
-
-    // Icona catena link rossa
-    ctx.fillStyle = "#8e1b23";
-    ctx.beginPath();
-    ctx.arc(stX + 46, stY + stickerH / 2, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 20px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🔗", stX + 46, stY + stickerH / 2);
-
-    // Testo Sticker
-    ctx.font = "900 24px system-ui, -apple-system, sans-serif";
-    ctx.fillStyle = "#0f172a";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillText("TOCCA PER L'ARTICOLO", stX + 80, stY + stickerH / 2 - 2);
-
-    ctx.font = "600 20px system-ui, -apple-system, sans-serif";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("•  romaflash.app", stX + 400, stY + stickerH / 2 - 2);
-
-    ctx.restore();
-  }
-
-  // 7. Footer @romaflash 🐺
-  ctx.save();
-  ctx.font = isReel
-    ? "bold 24px system-ui, -apple-system, sans-serif"
-    : "bold 22px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = isReel ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.45)";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.letterSpacing = "2px";
-  ctx.fillText(isReel ? "ROMAFLASH • @ROMAFLASH 🐺" : "@ROMAFLASH 🐺", STORY_W / 2, footerY);
-  ctx.restore();
-
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-  const filePromise = new Promise<File | null>((resolve) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          resolve(null);
-          return;
-        }
-        const prefix = isReel ? "romaflash-reel" : "romaflash-story";
-        const file = new File(
-          [blob],
-          `${prefix}-${article?.id ? String(article.id).slice(0, 8) : "news"}.jpg`,
-          { type: "image/jpeg" }
-        );
-        resolve(file);
-      },
-      "image/jpeg",
-      0.95
-    );
-  });
-
-  return { dataUrl, filePromise };
+  return `🐺 ${title} 🟡🔴\n\n${bodyText ? bodyText + "\n\n" : ""}${cta}\n\n📲 Segui @romaflash e tocca il link in Bio o nelle Storie per leggere l'approfondimento completo su www.romaflash.app!\n\n${tags}`;
 }
 
 export default function InstagramStoryModal({
@@ -514,14 +107,26 @@ export default function InstagramStoryModal({
   onClose,
   onMarkShared,
 }: InstagramStoryModalProps) {
-  const [format, setFormat] = useState<InstagramFormat>("story");
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  // Formato predefinito: Carosello 4:5 (Standardizzato con TikTok)
+  const [format, setFormat] = useState<InstagramFormat>("carousel");
+  const [activeSlide, setActiveSlide] = useState<1 | 2>(1);
+
+  // Risorse Carosello 4:5
+  const [slide1Url, setSlide1Url] = useState<string>("");
+  const [slide1File, setSlide1File] = useState<File | null>(null);
+  const [slide2Url, setSlide2Url] = useState<string>("");
+  const [slide2File, setSlide2File] = useState<File | null>(null);
+
+  // Risorse Storia 9:16
+  const [storyUrl, setStoryUrl] = useState<string>("");
   const [storyFile, setStoryFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [copiedCaption, setCopiedCaption] = useState(false);
-  const [sharedSuccess, setSharedSuccess] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [packDownloading, setPackDownloading] = useState<boolean>(false);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [copiedCaption, setCopiedCaption] = useState<boolean>(false);
+  const [sharedSuccess, setSharedSuccess] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [captionText, setCaptionText] = useState<string>("");
 
   useEffect(() => {
@@ -532,43 +137,73 @@ export default function InstagramStoryModal({
 
   useEffect(() => {
     if (!article) return;
-    setCaptionText(buildReelCaption(article));
+    setCaptionText(buildInstagramCaption(article));
   }, [article]);
 
   useEffect(() => {
     if (!article) return;
+    let isMounted = true;
     setLoading(true);
 
-    let isMounted = true;
-    const rawImgUrl = getArticleImageUrl(article);
-    const proxiedImgUrl = toProxiedUrl(rawImgUrl);
+    async function generateAll() {
+      await ensureFontsLoaded();
 
-    loadImageElement(proxiedImgUrl).then((bgImg) => {
-      if (!isMounted) return;
-      try {
-        const { dataUrl, filePromise } = renderStoryCanvas(article, bgImg, format);
-        setDataUrl(dataUrl);
-        filePromise.then((file: File | null) => {
-          if (isMounted && file) {
-            setStoryFile(file);
-          }
-        });
-      } catch (err) {
-        console.error("Errore generazione grafica Instagram:", err);
-      } finally {
-        setLoading(false);
+      const rawImgUrl = getArticleImageUrl(article) || "/images/archive/roma-1.jpg";
+      const proxiedImgUrl = toProxiedUrl(rawImgUrl);
+      let bgImg = await loadImageElement(proxiedImgUrl);
+      if (!bgImg) {
+        bgImg = await loadImageElement("/images/archive/roma-1.jpg");
       }
-    });
+
+      // 1. Slide 1 Carosello (4:5)
+      const s1 = renderSlide1(article, bgImg);
+      // 2. Slide 2 Outro Carosello (4:5)
+      const s2 = renderSlide2Outro();
+      // 3. Storia Verticale 9:16
+      const st = renderStoryCanvas(article, bgImg);
+
+      if (isMounted) {
+        setSlide1Url(s1.dataUrl);
+        setSlide2Url(s2.dataUrl);
+        setStoryUrl(st.dataUrl);
+
+        Promise.all([s1.filePromise, s2.filePromise, st.filePromise]).then(
+          ([f1, f2, fStory]) => {
+            if (isMounted) {
+              setSlide1File(f1);
+              setSlide2File(f2);
+              setStoryFile(fStory);
+              setLoading(false);
+            }
+          }
+        );
+      }
+    }
+
+    generateAll();
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     return () => {
       isMounted = false;
+      document.body.style.overflow = prevOverflow;
     };
-  }, [article, format]);
+  }, [article]);
 
-  if (!article) return null;
+  if (!article || typeof document === "undefined") return null;
 
   const articleUrl = getArticleUrl(article);
-  const isReel = format === "reel";
+  const isCarousel = format === "carousel";
+
+  const triggerDownload = (dataUrl: string, filename: string) => {
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const handleCopyLink = async () => {
     try {
@@ -596,16 +231,38 @@ export default function InstagramStoryModal({
     }
   };
 
-  const handleDownload = () => {
-    if (!dataUrl) return;
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    const prefix = isReel ? "romaflash-reel" : "romaflash-story";
+  const handleDownloadSingle = () => {
     const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
-    a.download = `${prefix}-${shortId}.jpg`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+    if (isCarousel) {
+      if (activeSlide === 1 && slide1Url) {
+        triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
+      } else if (activeSlide === 2 && slide2Url) {
+        triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
+      }
+    } else {
+      if (storyUrl) {
+        triggerDownload(storyUrl, `romaflash-storia-${shortId}.jpg`);
+      }
+    }
+
+    if (onMarkShared && article?.id) {
+      onMarkShared(article.id, true);
+    }
+  };
+
+  const handleDownloadPack = () => {
+    if (!slide1Url || !slide2Url) return;
+    setPackDownloading(true);
+    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
+
+    triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
+
+    setTimeout(() => {
+      triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
+      setPackDownloading(false);
+    }, 450);
+
     if (onMarkShared && article?.id) {
       onMarkShared(article.id, true);
     }
@@ -616,33 +273,35 @@ export default function InstagramStoryModal({
       onMarkShared(article.id, true);
     }
 
-    // 1. Copia preventiva istantanea negli appunti:
-    // in modalità Reel copia la didascalia completa con hashtag; in modalità Storia copia il link
-    const textToCopy = isReel ? captionText : articleUrl;
+    // Copia preventiva automatica negli appunti:
+    // in modalità Carosello copia la didascalia; in modalità Storia copia il link
+    const textToCopy = isCarousel ? captionText : articleUrl;
     try {
-      navigator.clipboard?.writeText(textToCopy);
-      if (isReel) {
+      await navigator.clipboard?.writeText(textToCopy);
+      if (isCarousel) {
         setCopiedCaption(true);
-        setTimeout(() => setCopiedCaption(false), 4000);
+        setTimeout(() => setCopiedCaption(false), 3500);
       } else {
         setCopiedLink(true);
-        setTimeout(() => setCopiedLink(false), 4000);
+        setTimeout(() => setCopiedLink(false), 3500);
       }
     } catch {
       // ignore
     }
 
-    // 2. Chiamata a navigator.share:
-    // FONDAMENTALE: passare SOLO `files: [storyFile]` senza title, text o url!
+    const filesToShare = isCarousel
+      ? [slide1File, slide2File].filter(Boolean) as File[]
+      : [storyFile].filter(Boolean) as File[];
+
     if (
-      storyFile &&
+      filesToShare.length > 0 &&
       typeof navigator !== "undefined" &&
       typeof navigator.canShare === "function" &&
-      navigator.canShare({ files: [storyFile] })
+      navigator.canShare({ files: filesToShare })
     ) {
       try {
         await navigator.share({
-          files: [storyFile],
+          files: filesToShare,
         });
         setSharedSuccess(true);
         setTimeout(() => setSharedSuccess(false), 4000);
@@ -653,16 +312,24 @@ export default function InstagramStoryModal({
       }
     }
 
-    // 3. Fallback per browser o dispositivi che non supportano la condivisione file via intent:
-    handleDownload();
+    // Fallback: download
+    if (isCarousel) {
+      handleDownloadPack();
+    } else {
+      handleDownloadSingle();
+    }
   };
 
-  if (typeof document === "undefined") return null;
+  // Preview attualmente attiva
+  const previewImgUrl = isCarousel
+    ? activeSlide === 1
+      ? slide1Url
+      : slide2Url
+    : storyUrl;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        
         {/* Header Modal */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/60">
           <div className="flex items-center gap-2.5">
@@ -670,14 +337,16 @@ export default function InstagramStoryModal({
               <InstagramIcon className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-white flex items-center gap-2">
-                <span>Grafica Instagram RomaFlash</span>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-white">
+                  Kit Instagram RomaFlash
+                </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  9:16 HD
+                  {isCarousel ? "Carosello 4:5 (Standard)" : "Storia 9:16"}
                 </span>
-              </h3>
+              </div>
               <p className="text-[11px] text-slate-400">
-                Seleziona il formato per Storia o Reel ed esporta in 1 click
+                Formato standardizzato con TikTok: Slide 1 (Notizia) + Slide 2 (Outro romaflash.app)
               </p>
             </div>
           </div>
@@ -691,107 +360,140 @@ export default function InstagramStoryModal({
         </div>
 
         {/* Corpo Modal */}
-        <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
-          {/* Anteprima Telefono (Sinistra) */}
-          <div className="md:col-span-5 flex flex-col items-center gap-3">
-            
-            {/* Switch Formato: Storia vs Reel */}
-            <div className="w-full max-w-[260px] flex bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+          {/* Anteprima (Sinistra) */}
+          <div className="md:col-span-5 flex flex-col items-center gap-2.5">
+            {/* Switch Macro-Formato: Carosello 4:5 vs Storia 9:16 */}
+            <div className="w-full max-w-[270px] flex bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+              <button
+                type="button"
+                onClick={() => setFormat("carousel")}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  isCarousel
+                    ? "bg-gradient-to-r from-amber-600 to-rose-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Carosello 4:5</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setFormat("story")}
                 className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  format === "story"
-                    ? "bg-rose-900 text-amber-300 shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>Storia (Link)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormat("reel")}
-                className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  format === "reel"
+                  !isCarousel
                     ? "bg-gradient-to-r from-purple-800 to-pink-700 text-white shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
                 <Film className="w-3.5 h-3.5" />
-                <span>Reel (Clean)</span>
+                <span>Storia 9:16</span>
               </button>
             </div>
 
-            {/* Frame Telefono 9:16 */}
-            <div className="relative w-full max-w-[260px] aspect-[9/16] rounded-[28px] overflow-hidden bg-black border-4 border-slate-700 shadow-2xl">
-              {loading || !dataUrl ? (
+            {/* Sub-selector Slide (se Carosello) */}
+            {isCarousel && (
+              <div className="w-full max-w-[270px] grid grid-cols-2 p-1 bg-slate-950/80 rounded-lg border border-slate-800/80">
+                <button
+                  type="button"
+                  onClick={() => setActiveSlide(1)}
+                  className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
+                    activeSlide === 1
+                      ? "bg-slate-800 text-amber-300 shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  1. Notizia
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSlide(2)}
+                  className={`py-1 px-2 rounded text-[11px] font-bold transition-all text-center cursor-pointer ${
+                    activeSlide === 2
+                      ? "bg-slate-800 text-amber-300 shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  2. Outro Sito
+                </button>
+              </div>
+            )}
+
+            {/* Frame Grafica */}
+            <div
+              className={`relative w-full rounded-2xl overflow-hidden bg-black border-2 border-slate-700 shadow-2xl transition-all ${
+                isCarousel
+                  ? "max-w-[260px] aspect-[4/5]"
+                  : "max-w-[230px] aspect-[9/16]"
+              }`}
+            >
+              {loading || !previewImgUrl ? (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2">
                   <div className="w-6 h-6 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
                   <span className="text-xs font-semibold">Generazione HD...</span>
                 </div>
               ) : (
                 <img
-                  src={dataUrl}
-                  alt="Anteprima"
+                  src={previewImgUrl}
+                  alt="Anteprima Instagram"
                   className="w-full h-full object-cover select-none"
                 />
               )}
             </div>
 
-            <span className="text-[10px] text-slate-400 font-medium">
-              {isReel ? "🎬 Modalità Reel: 100% pulita senza sticker" : "📱 Modalità Storia: include sticker link"}
+            <span className="text-[10px] text-slate-400 text-center font-medium">
+              {isCarousel
+                ? activeSlide === 1
+                  ? "Slide 1: Foto reale + Titolo bicolore + Super Sunto"
+                  : "Slide 2: Mockup laptop/smartphone + Banner www.romaflash.app"
+                : "Formato 9:16 con indicatore sticker link"}
             </span>
           </div>
 
           {/* Istruzioni e Azioni (Destra) */}
-          <div className="md:col-span-7 space-y-3.5">
-            
-            {/* Box Dinamico: Didascalia per Reel + Box Link sempre disponibile */}
-            {isReel && (
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                    Didascalia Reel (Notizia completa + @romaflash cliccabile):
-                  </span>
-                  <span className="text-[10px] text-pink-400 font-mono">
-                    {copiedCaption ? "Copiata!" : "Modificabile"}
-                  </span>
-                </div>
-                <textarea
-                  rows={5}
-                  value={captionText}
-                  onChange={(e) => setCaptionText(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded-lg p-2.5 resize-y focus:outline-none font-sans leading-relaxed"
-                />
-                <p className="text-[10.5px] text-slate-400 leading-snug">
-                  💡 <strong className="text-pink-300">Nota Instagram:</strong> nei Reel Instagram rende cliccabili in blu le menzioni <strong className="text-white">@romaflash</strong> e gli hashtag (mentre disabilita gli URL <code className="text-slate-300">https://</code> nel testo dei Reel, che invece sono cliccabili nello <strong>Sticker Link delle Storie</strong> qui sotto e nella <strong>Bio</strong>).
-                </p>
+          <div className="md:col-span-7 space-y-3">
+            {/* Box Didascalia Instagram (con @romaflash cliccabile) */}
+            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-pink-400" />
+                  Didascalia Feed & Carosello (con @romaflash cliccabile):
+                </span>
+                <span className="text-[10px] text-pink-400 font-mono">
+                  {copiedCaption ? "Copiata!" : "Modificabile"}
+                </span>
+              </div>
+              <textarea
+                rows={5}
+                value={captionText}
+                onChange={(e) => setCaptionText(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-[11px] rounded-lg p-2.5 resize-y focus:outline-none font-sans leading-relaxed"
+              />
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleCopyCaption}
-                  className={`w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     copiedCaption
                       ? "bg-emerald-600 text-white"
                       : "bg-gradient-to-r from-purple-900 to-pink-900 hover:opacity-95 text-pink-200 border border-purple-500/40"
                   }`}
                 >
                   {copiedCaption ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedCaption ? "Didascalia Copiata negli Appunti!" : "Copia Didascalia Reel + Hashtag"}</span>
+                  <span>{copiedCaption ? "Didascalia Copiata!" : "Copia Didascalia + Hashtag"}</span>
                 </button>
               </div>
-            )}
+            </div>
 
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
+            {/* Box Link Diretto Articolo (per Sticker Storie o Bio) */}
+            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-[11px]">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  Link Cliccabile Articolo (per Sticker &quot;Link&quot; nelle Storie):
+                  Link Articolo (per Sticker Link nelle Storie o in Bio):
                 </span>
                 <span className="text-[10px] text-amber-400 font-mono">
-                  {copiedLink ? "Copiato!" : "100% cliccabile su Storie"}
+                  {copiedLink ? "Copiato!" : "100% cliccabile"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -816,119 +518,112 @@ export default function InstagramStoryModal({
               </div>
             </div>
 
-            {/* Guida Differenziata */}
-            <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs text-slate-300">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <span>{isReel ? "🎬" : "📱"}</span> Come pubblicare {isReel ? "il Reel" : "la Storia"}:
+            {/* Guida Rapida */}
+            <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3 text-xs text-slate-300">
+              <div className="font-bold text-white flex items-center gap-1.5 mb-1">
+                <span>{isCarousel ? "📸" : "📱"}</span> Come pubblicare su Instagram:
               </div>
-              {isReel ? (
-                <ol className="list-decimal list-inside space-y-1.5 text-slate-400 text-[11.5px] leading-relaxed">
+              {isCarousel ? (
+                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
                   <li>
-                    Tocca <strong className="text-white">&quot;Condividi Grafica&quot;</strong> (oppure <strong className="text-white">&quot;Scarica Immagine&quot;</strong>). La didascalia con gli hashtag viene copiata negli appunti!
+                    Scarica il <strong className="text-amber-300">Pack 2 Slide</strong> oppure tocca <strong className="text-white">&quot;Condividi&quot;</strong> (la didascalia viene copiata in automatico).
                   </li>
                   <li>
-                    Apri Instagram, tocca <strong className="text-pink-400">+ &gt; Reel</strong>, scegli questa grafica dalla galleria e seleziona un audio di tendenza.
+                    Apri Instagram, tocca <strong className="text-white">+ &gt; Post</strong>, attiva la modalità <strong className="text-amber-300">Selezione multipla</strong> e scegli <strong className="text-white">Slide 1</strong> e <strong className="text-white">Slide 2</strong>.
                   </li>
                   <li>
-                    Nel campo didascalia fai <strong className="text-white">Incolla</strong> per avere testo, invito ai commenti e hashtag pronti!
+                    Incolla la didascalia con la menzione <strong className="text-rose-300">@romaflash</strong> per renderla cliccabile per tutti i follower.
                   </li>
                 </ol>
               ) : (
-                <ol className="list-decimal list-inside space-y-1.5 text-slate-400 text-[11.5px] leading-relaxed">
+                <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
                   <li>
-                    Tocca <strong className="text-white">&quot;Condividi Grafica&quot;</strong> (oppure <strong className="text-white">&quot;Scarica Immagine&quot;</strong>). Il link dell&apos;articolo viene copiato in automatico negli appunti!
+                    Tocca <strong className="text-white">&quot;Condividi&quot;</strong> o scarica la Storia (il link viene copiato in automatico negli appunti).
                   </li>
                   <li>
-                    Apri Instagram, tocca <strong className="text-amber-400">+ &gt; Storia</strong> e seleziona questa grafica dalla galleria.
+                    Apri Instagram, tocca <strong className="text-rose-400">+ &gt; Storia</strong> e seleziona l&apos;immagine dalla galleria.
                   </li>
                   <li>
-                    Tocca l&apos;icona degli sticker, scegli <strong className="text-amber-400">Link</strong>, fai <strong className="text-white">Incolla</strong> e posizionalo sopra lo sticker grafico!
+                    Tocca l&apos;icona sticker, seleziona <strong className="text-amber-400">Link</strong>, fai <strong className="text-white">Incolla</strong> e posizionalo sull&apos;adesivo grafico.
                   </li>
                 </ol>
               )}
             </div>
 
             {/* Pulsanti Azione Principali */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-              
-              {/* Tasto 1: Scarica / Condividi */}
-              <button
-                type="button"
-                onClick={handleShare}
-                disabled={loading || !dataUrl}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>{isMobile ? "Condividi Grafica (Mobile)" : "Scarica Grafica HD (9:16)"}</span>
-              </button>
+            <div className="space-y-2 pt-1">
+              {isCarousel ? (
+                <>
+                  {/* SCARICA PACK 2 SLIDE (PRIMARIO) */}
+                  <button
+                    type="button"
+                    onClick={handleDownloadPack}
+                    disabled={loading || !slide1Url || !slide2Url || packDownloading}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Layers className="w-4 h-4 text-white" />
+                    <span>
+                      {packDownloading
+                        ? "Download Pack in corso..."
+                        : "Scarica Pack 2 Slide Carosello (4:5)"}
+                    </span>
+                  </button>
 
-              {/* Tasto 2: Copia Testo Contestuale */}
-              {isReel ? (
-                <button
-                  type="button"
-                  onClick={handleCopyCaption}
-                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-xs border shadow-sm transition-all cursor-pointer active:scale-95 ${
-                    copiedCaption
-                      ? "bg-emerald-600 text-white border-emerald-500"
-                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
-                  }`}
-                >
-                  {copiedCaption ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-pink-400" />}
-                  <span>{copiedCaption ? "Didascalia Copiata!" : "Copia Didascalia + Tag"}</span>
-                </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDownloadSingle}
+                      disabled={loading || !previewImgUrl}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 font-bold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Scarica Slide {activeSlide}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      disabled={loading || !slide1File || !slide2File}
+                      className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>Condividi Pack</span>
+                    </button>
+                  </div>
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className={`w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-xs border shadow-sm transition-all cursor-pointer active:scale-95 ${
-                    copiedLink
-                      ? "bg-emerald-600 text-white border-emerald-500"
-                      : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700"
-                  }`}
-                >
-                  {copiedLink ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-amber-400" />}
-                  <span>{copiedLink ? "Link Copiato!" : "Copia Link Articolo"}</span>
-                </button>
-              )}
+                <>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    disabled={loading || !storyUrl}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    <span>Condividi Storia 9:16</span>
+                  </button>
 
+                  <button
+                    type="button"
+                    onClick={handleDownloadSingle}
+                    disabled={loading || !storyUrl}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 font-semibold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Scarica Storia JPG (1080×1920)</span>
+                  </button>
+                </>
+              )}
             </div>
 
-            {/* Pulsante Download Diretto (sempre accessibile) */}
-            <button
-              type="button"
-              onClick={handleDownload}
-              disabled={loading || !dataUrl}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-slate-300 font-semibold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <Download className="w-3.5 h-3.5 text-amber-400" />
-              <span>Scarica Immagine JPG 1080×1920 ({isReel ? "Reel Clean" : "Storia con Link"})</span>
-            </button>
-
             {sharedSuccess && (
-              <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
                 <Check className="w-4 h-4 shrink-0" />
-                <span>Grafica inviata a Instagram!</span>
+                <span>Pronto per Instagram!</span>
               </div>
             )}
-
-            {copiedCaption && !sharedSuccess && (
-              <div className="p-2.5 rounded-lg bg-pink-500/10 border border-pink-500/30 text-pink-300 text-xs font-semibold flex items-center gap-2">
-                <Sparkles className="w-4 h-4 shrink-0" />
-                <span>Didascalia e hashtag copiati! Fai &quot;Incolla&quot; nel campo testo del Reel.</span>
-              </div>
-            )}
-
-            {copiedLink && !sharedSuccess && (
-              <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-2">
-                <Sparkles className="w-4 h-4 shrink-0" />
-                <span>Link copiato negli appunti! Pronto per lo sticker della Storia.</span>
-              </div>
-            )}
-
           </div>
-
         </div>
-
       </div>
     </div>,
     document.body

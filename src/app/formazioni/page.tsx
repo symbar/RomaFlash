@@ -85,11 +85,11 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
       {(!details.Squalificati || details.Squalificati.length === 0) ? (
         <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
-        <div className="mb-6 md:mb-8">
+        <div className="mb-6 md:mb-8 text-center space-y-2.5">
           {details.Squalificati.map((item: any, idx: number) => (
-            <div key={idx} className="mb-2">
+            <div key={idx} className="px-1">
               <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
-              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight max-w-xs mx-auto">{item.desc}</div>}
             </div>
           ))}
         </div>
@@ -102,11 +102,11 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
       {(!details.Diffidati || details.Diffidati.length === 0) ? (
         <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
-        <div className="mb-6 md:mb-8">
+        <div className="mb-6 md:mb-8 text-center space-y-2.5">
           {details.Diffidati.map((item: any, idx: number) => (
-            <div key={idx} className="mb-2">
+            <div key={idx} className="px-1">
               <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
-              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight max-w-xs mx-auto">{item.desc}</div>}
             </div>
           ))}
         </div>
@@ -119,28 +119,28 @@ function DynamicDetails({ details, color }: { details: any, color: string }) {
       {(!details.Infortunati || details.Infortunati.length === 0) ? (
         <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
-        <div className="mb-6 md:mb-8">
+        <div className="mb-6 md:mb-8 text-center space-y-2.5">
           {details.Infortunati.map((item: any, idx: number) => (
-            <div key={idx} className="mb-2.5">
+            <div key={idx} className="px-1">
               <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
-              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight">{item.desc}</div>}
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight max-w-xs mx-auto">{item.desc}</div>}
             </div>
           ))}
         </div>
       )}
 
       {/* IN DUBBIO */}
-      <div className="flex justify-center mb-4">
-        <span className="bg-cyan-400 text-[#ffffff] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">{lang === 'en' ? 'Doubtful' : 'In dubbio'}</span>
+      <div className="flex justify-center mb-3 md:mb-4">
+        <span className="bg-cyan-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 md:px-3 md:py-1 rounded-full shadow-xs">{lang === 'en' ? 'Doubtful' : 'In dubbio'}</span>
       </div>
       {(!details['In dubbio'] || details['In dubbio'].length === 0) ? (
-        <div className="text-center text-xs text-gray-500 mb-8">{t('lineups.none')}</div>
+        <div className="text-center text-[11px] md:text-xs text-gray-400 mb-6 md:mb-8">{t('lineups.none')}</div>
       ) : (
-        <div className="mb-4">
+        <div className="mb-6 md:mb-8 text-center space-y-2.5">
           {details['In dubbio'].map((item: any, idx: number) => (
-            <div key={idx} className="mb-2">
-              <div className="text-sm font-bold text-gray-900 mb-1">{item.name}</div>
-              {item.desc && <div className="text-xs text-gray-600">{item.desc}</div>}
+            <div key={idx} className="px-1">
+              <div className="text-xs md:text-sm font-bold text-gray-900 mb-0.5">{item.name}</div>
+              {item.desc && <div className="text-[10px] md:text-xs text-gray-600 leading-tight max-w-xs mx-auto">{item.desc}</div>}
             </div>
           ))}
         </div>

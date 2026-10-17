@@ -351,7 +351,7 @@ export default function TikTokKitModal({
               {activeSlide === 1 ? (
                 <span>📍 <strong>Slide 1:</strong> Foto reale + Titolo + Super Sunto completo</span>
               ) : (
-                <span>🎯 <strong>Slide 2:</strong> Crest + Mockup dispositivi + Banner romaflash.app</span>
+                <span>🎯 <strong>Slide 2:</strong> Maxi Stemma + Streetwear Poster + Box romaflash.app</span>
               )}
             </p>
           </div>

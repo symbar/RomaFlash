@@ -474,7 +474,7 @@ export default function InstagramStoryModal({
                 </span>
               ) : (
                 <span>
-                  🎯 <strong>Slide 2:</strong> Crest + Mockup dispositivi + Banner www.romaflash.app
+                  🎯 <strong>Slide 2:</strong> Maxi Stemma + Streetwear Poster + Box romaflash.app
                 </span>
               )}
             </span>

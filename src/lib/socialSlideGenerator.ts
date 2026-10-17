@@ -327,8 +327,9 @@ export function renderSlide1(
 /**
  * =========================================================================
  * SLIDE 2: LOCANDINA OUTRO / CTA (1080x1350 4:5)
- * Ispirata al format di riferimento ("simile ma diversa"), 100% coordinata RomaFlash
- * con Logo Tondo al centro, Mockup Laptop & iPhone, Banner Dorato e Freccia
+ * OPZIONE 4: Streetwear Poster & Big Typography
+ * Tipografia gigante outline, stemma RomaFlash centrale (280px),
+ * claim "Non seguire il rumore. Leggi il Flash.", 3 tag pill e CTA box.
  * =========================================================================
  */
 export function renderSlide2Outro(): {
@@ -342,334 +343,109 @@ export function renderSlide2Outro(): {
 
   const W = SLIDE_W;
   const H = SLIDE_H;
+  const condensedFont = getCondensedFontFamily();
 
-  // 1. Sfondo Giallorosso Profondo con gradiente radiale
-  const bgGrad = ctx.createRadialGradient(W / 2, H * 0.44, 80, W / 2, H * 0.44, 850);
-  bgGrad.addColorStop(0, "#991b24"); // Rosso Roma imperiale
-  bgGrad.addColorStop(0.5, "#5c0e18");
-  bgGrad.addColorStop(0.85, "#2a040b");
-  bgGrad.addColorStop(1, "#140205"); // Bordo elegante scurissimo
-  ctx.fillStyle = bgGrad;
+  // 1. Sfondo scuro carminio profondo
+  ctx.fillStyle = "#140205";
   ctx.fillRect(0, 0, W, H);
 
-  // Faint background diagonal dynamic rays
+  // 2. Tipografia GIGANTE in background outline
   ctx.save();
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.04)";
-  ctx.lineWidth = 14;
-  for (let i = -W; i < W * 2; i += 70) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i + H * 0.6, H);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // Lupetto watermark gigante al centro
-  ctx.save();
-  ctx.translate(W / 2 - 240, H * 0.28);
-  ctx.scale(480 / 512, 480 / 512);
-  ctx.fillStyle = "rgba(240, 181, 22, 0.035)";
-  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
-  ctx.restore();
-
-  // 2. Logo Tondo Ufficiale RomaFlash in Alto (Centrato, diametro 230px)
-  drawCircularLogo(ctx, W / 2, 175, 115);
-
-  // Sottotitolo elegante sotto il logo
-  ctx.save();
-  ctx.font = "bold 15px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#f0b516";
+  ctx.font = `900 240px ${condensedFont}`;
   ctx.textAlign = "center";
-  ctx.letterSpacing = "4px";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-  ctx.shadowBlur = 10;
-  ctx.fillText("L'ESSENZA DELLE NOTIZIE GIALLOROSSE", W / 2, 310);
+  ctx.textBaseline = "middle";
+  ctx.strokeStyle = "rgba(240, 181, 22, 0.06)";
+  ctx.lineWidth = 3;
+  ctx.strokeText("ROMA", W / 2, 280);
+  ctx.strokeText("FLASH", W / 2, 540);
   ctx.restore();
 
-  // 3. Mockup Dispositivi: Laptop (MacBook) + Smartphone (iPhone Pro)
-  const laptopX = 130;
-  const laptopY = 360;
-  const laptopW = 540;
-  const laptopH = 330;
+  // 3. Bagliore radiale dorato al centro
+  const rad = ctx.createRadialGradient(W / 2, 410, 30, W / 2, 410, 500);
+  rad.addColorStop(0, "rgba(240, 181, 22, 0.2)");
+  rad.addColorStop(1, "transparent");
+  ctx.fillStyle = rad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 280px)
+  drawCircularLogo(ctx, W / 2, 410, 140);
+
+  // 5. Titoli Punchy Streetwear
+  ctx.save();
+  ctx.font = `900 52px ${condensedFont}`;
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 20;
+  ctx.fillText("NON SEGUIRE IL RUMORE.", W / 2, 630);
+
+  ctx.font = `900 52px ${condensedFont}`;
+  ctx.fillStyle = "#f5b800";
+  ctx.fillText("LEGGI IL FLASH.", W / 2, 695);
+  ctx.restore();
+
+  // 6. 3 Pillole Stile "Stamp" / Streetwear Tag
+  const tags = [
+    "🐺 100% CUORE GIALLOROSSO",
+    "⚡ 30 SECONDI PER SAPERE TUTTO",
+    "🚫 ZERO PUBBLICITÀ INVASIVE",
+  ];
+
+  for (let i = 0; i < tags.length; i++) {
+    const ty = 765 + i * 65;
+    ctx.save();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.strokeStyle = "#f5b800";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 270, ty, 540, 50, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = "900 16px system-ui, -apple-system, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.letterSpacing = "1px";
+    ctx.fillText(tags[i], W / 2, ty + 25);
+    ctx.restore();
+  }
+
+  // 7. Industrial / Bold CTA Block in basso
+  const ctaY = 1010;
+  const ctaH = 155;
+  const ctaW = W - 140;
+  const ctaX = 70;
 
   ctx.save();
-  // Ombra Laptop
-  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 24;
-
-  // Scocca Schermo Laptop
-  ctx.fillStyle = "#1e2124";
-  ctx.beginPath();
-  ctx.roundRect(laptopX, laptopY, laptopW, laptopH, 18);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.shadowColor = "transparent";
-
-  // Display Screen Laptop
-  const screenX = laptopX + 16;
-  const screenY = laptopY + 16;
-  const screenW = laptopW - 32;
-  const screenH = laptopH - 32;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 15;
 
   ctx.fillStyle = "#0c0204";
+  ctx.strokeStyle = "#f5b800";
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(screenX, screenY, screenW, screenH, 8);
+  ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 18);
   ctx.fill();
-
-  // Header sito desktop
-  ctx.fillStyle = "#1a0307";
-  ctx.fillRect(screenX, screenY, screenW, 36);
-
-  ctx.font = "900 13px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.textAlign = "left";
-  ctx.fillText("🐺 ROMAFLASH", screenX + 16, screenY + 23);
-
-  ctx.font = "bold 9px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.fillText("NEWS", screenX + 160, screenY + 23);
-  ctx.fillText("FORMAZIONI", screenX + 215, screenY + 23);
-  ctx.fillText("CALENDARIO", screenX + 295, screenY + 23);
-  ctx.fillText("CLASSIFICA", screenX + 380, screenY + 23);
-
-  ctx.fillStyle = "#f0b516";
-  ctx.fillRect(screenX, screenY + 36, screenW, 2);
-
-  // Hero Card sinistra desktop
-  ctx.fillStyle = "#1e050a";
-  ctx.beginPath();
-  ctx.roundRect(screenX + 14, screenY + 50, screenW * 0.58, screenH - 64, 8);
-  ctx.fill();
-
-  ctx.fillStyle = "#e02d47";
-  ctx.beginPath();
-  ctx.roundRect(screenX + 26, screenY + 62, 70, 16, 4);
-  ctx.fill();
-  ctx.font = "900 8px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("ULTIM'ORA", screenX + 33, screenY + 73);
-
-  ctx.font = "800 13px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("DYBALA GUIDA L'ATTACCO:", screenX + 26, screenY + 98);
-  ctx.fillText("I DETTAGLI DI FORMAZIONE", screenX + 26, screenY + 115);
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-  ctx.fillRect(screenX + 26, screenY + 132, screenW * 0.46, 5);
-  ctx.fillRect(screenX + 26, screenY + 144, screenW * 0.42, 5);
-  ctx.fillRect(screenX + 26, screenY + 156, screenW * 0.35, 5);
-
-  // Colonna destra desktop
-  for (let r = 0; r < 3; r++) {
-    const ry = screenY + 50 + r * 68;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-    ctx.beginPath();
-    ctx.roundRect(screenX + screenW * 0.62, ry, screenW * 0.36, 58, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#f0b516";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 12, 50, 4);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 24, screenW * 0.28, 6);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 36, screenW * 0.22, 5);
-  }
-
-  // Base Tastiera Laptop
-  ctx.fillStyle = "#2a2d32";
-  ctx.beginPath();
-  ctx.roundRect(laptopX - 44, laptopY + laptopH - 4, laptopW + 88, 22, [4, 4, 12, 12]);
-  ctx.fill();
-
-  ctx.fillStyle = "#181a1d";
-  ctx.beginPath();
-  ctx.roundRect(laptopX + laptopW / 2 - 40, laptopY + laptopH - 4, 80, 8, [0, 0, 4, 4]);
-  ctx.fill();
-
-  ctx.restore();
-
-  // Smartphone Mockup (iPhone Pro) - In primo piano a destra
-  const phoneX = 640;
-  const phoneY = 320;
-  const phoneW = 270;
-  const phoneH = 550;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 48;
-  ctx.shadowOffsetX = -10;
-  ctx.shadowOffsetY = 28;
-
-  ctx.fillStyle = "#1e2024";
-  ctx.beginPath();
-  ctx.roundRect(phoneX, phoneY, phoneW, phoneH, 44);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-  ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  ctx.shadowColor = "transparent";
-
-  const pScrX = phoneX + 11;
-  const pScrY = phoneY + 11;
-  const pScrW = phoneW - 22;
-  const pScrH = phoneH - 22;
-
-  ctx.fillStyle = "#0a0103";
-  ctx.beginPath();
-  ctx.roundRect(pScrX, pScrY, pScrW, pScrH, 36);
-  ctx.fill();
-
-  // Dynamic Island
-  ctx.fillStyle = "#000000";
-  ctx.beginPath();
-  ctx.roundRect(phoneX + phoneW / 2 - 38, pScrY + 12, 76, 22, 11);
-  ctx.fill();
-
-  // Header mobile
-  ctx.fillStyle = "#180307";
-  ctx.fillRect(pScrX, pScrY + 44, pScrW, 46);
-
-  ctx.font = "900 13px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.textAlign = "center";
-  ctx.fillText("🐺 ROMAFLASH", pScrX + pScrW / 2, pScrY + 70);
-
-  // Card Notizia Top Mobile
-  ctx.fillStyle = "#1f0409";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 12, pScrY + 104, pScrW - 24, 200, 16);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.3)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  ctx.fillStyle = "#2d0810";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 18, pScrY + 110, pScrW - 36, 100, 10);
-  ctx.fill();
-
-  ctx.save();
-  ctx.translate(pScrX + pScrW / 2 - 25, pScrY + 130);
-  ctx.scale(50 / 512, 50 / 512);
-  ctx.fillStyle = "rgba(240, 181, 22, 0.25)";
-  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
-  ctx.restore();
-
-  ctx.font = "800 12px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "left";
-  ctx.fillText("CALCIOMERCATO & CAMPO", pScrX + 24, pScrY + 232);
-  ctx.font = "bold 10px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-  ctx.fillText("Tutte le formazioni e i voti live", pScrX + 24, pScrY + 252);
-
-  ctx.fillStyle = "rgba(240, 181, 22, 0.15)";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 24, pScrY + 270, pScrW - 48, 22, 6);
-  ctx.fill();
-  ctx.font = "bold 9px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.fillText("📊 SONDAGGIO: CHI VINCE SABATO?", pScrX + 32, pScrY + 284);
-
-  // Seconda Card Mobile
-  ctx.fillStyle = "#180408";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 12, pScrY + 316, pScrW - 24, 130, 16);
-  ctx.fill();
-  ctx.font = "800 11px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("PAGELLE & STATISTICHE", pScrX + 24, pScrY + 342);
-
-  // Barra di navigazione inferiore
-  ctx.fillStyle = "rgba(0,0,0,0.85)";
-  ctx.fillRect(pScrX, pScrY + pScrH - 48, pScrW, 48);
-
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.roundRect(phoneX + phoneW / 2 - 45, phoneY + phoneH - 20, 90, 4, 2);
-  ctx.fill();
-
-  // Riflesso vetro
-  const glass = ctx.createLinearGradient(pScrX, pScrY, pScrX + pScrW, pScrY + pScrH);
-  glass.addColorStop(0, "rgba(255, 255, 255, 0.12)");
-  glass.addColorStop(0.35, "rgba(255, 255, 255, 0.0)");
-  glass.addColorStop(1, "rgba(255, 255, 255, 0.0)");
-  ctx.fillStyle = glass;
-  ctx.beginPath();
-  ctx.roundRect(pScrX, pScrY, pScrW, pScrH, 36);
-  ctx.fill();
-
-  ctx.restore();
-
-  // 4. Testo Call to Action
-  ctx.save();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "900 52px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 4;
-  ctx.fillText("Trovi tutti i dettagli su", W / 2, 940);
-  ctx.restore();
-
-  // 5. Bannerone ORO Giallorosso Pieno
-  const bannerY = 1000;
-  const bannerH = 126;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-  ctx.shadowBlur = 28;
-  ctx.shadowOffsetY = 10;
-
-  ctx.fillStyle = "#f0b516";
-  ctx.fillRect(0, bannerY, W, bannerH);
-
-  ctx.fillStyle = "#8e1b23";
-  ctx.fillRect(0, bannerY, W, 5);
-  ctx.fillRect(0, bannerY + bannerH - 5, W, 5);
+  // Strisce d'allerta gialle/oro decorative sui lati
+  ctx.fillStyle = "#f5b800";
+  ctx.fillRect(ctaX, ctaY, 14, ctaH);
+  ctx.fillRect(ctaX + ctaW - 14, ctaY, 14, ctaH);
 
   ctx.shadowColor = "transparent";
-
+  ctx.font = "bold 16px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "#f5b800";
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "900 70px system-ui, -apple-system, Impact, sans-serif";
-  ctx.fillStyle = "#180307";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("IL TUO QUOTIDIANO ONLINE GRATUITO", W / 2, ctaY + 48);
+
+  ctx.font = `900 54px ${condensedFont}`;
+  ctx.fillStyle = "#ffffff";
   ctx.letterSpacing = "2px";
-  ctx.fillText("www.romaflash.app", W / 2, bannerY + bannerH / 2 + 3);
-
-  ctx.restore();
-
-  // 6. Freccia Gigante Dorata in Basso ➔
-  const arrowY = 1220;
-  const arrowStartX = W / 2 - 190;
-  const arrowEndX = W / 2 + 190;
-  const shaftH = 34;
-  const headSize = 70;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 6;
-
-  ctx.fillStyle = "#f0b516";
-  ctx.beginPath();
-  ctx.moveTo(arrowStartX, arrowY - shaftH / 2);
-  ctx.lineTo(arrowEndX - headSize, arrowY - shaftH / 2);
-  ctx.lineTo(arrowEndX - headSize, arrowY - headSize);
-  ctx.lineTo(arrowEndX, arrowY);
-  ctx.lineTo(arrowEndX - headSize, arrowY + headSize);
-  ctx.lineTo(arrowEndX - headSize, arrowY + shaftH / 2);
-  ctx.lineTo(arrowStartX, arrowY + shaftH / 2);
-  ctx.closePath();
-  ctx.fill();
+  ctx.fillText("WWW.ROMAFLASH.APP ➔", W / 2, ctaY + 110);
 
   ctx.restore();
 
@@ -913,7 +689,7 @@ export function renderStoryCanvas(
 /**
  * =========================================================================
  * SLIDE 2 STORIA 9:16 (1080x1920) - Outro / Invito a romaflash.app
- * Coordinata al 100% con Slide 2 Carosello ma adattata per lo schermo verticale 9:16
+ * OPZIONE 4: Streetwear Poster & Big Typography (Adattata per lo schermo verticale 9:16)
  * =========================================================================
  */
 export function renderStorySlide2Outro(): {
@@ -927,308 +703,110 @@ export function renderStorySlide2Outro(): {
 
   const W = STORY_W;
   const H = STORY_H;
+  const condensedFont = getCondensedFontFamily();
 
-  // 1. Sfondo Giallorosso Profondo con gradiente radiale
-  const bgGrad = ctx.createRadialGradient(W / 2, H * 0.44, 100, W / 2, H * 0.44, 1100);
-  bgGrad.addColorStop(0, "#991b24");
-  bgGrad.addColorStop(0.5, "#5c0e18");
-  bgGrad.addColorStop(0.85, "#2a040b");
-  bgGrad.addColorStop(1, "#140205");
-  ctx.fillStyle = bgGrad;
+  // 1. Sfondo scuro carminio profondo
+  ctx.fillStyle = "#140205";
   ctx.fillRect(0, 0, W, H);
 
-  // Raggi diagonali dinamici
+  // 2. Tipografia GIGANTE in background outline
   ctx.save();
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.04)";
-  ctx.lineWidth = 16;
-  for (let i = -W; i < W * 2; i += 75) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i + H * 0.6, H);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // Lupetto watermark gigante al centro
-  ctx.save();
-  ctx.translate(W / 2 - 270, H * 0.32);
-  ctx.scale(540 / 512, 540 / 512);
-  ctx.fillStyle = "rgba(240, 181, 22, 0.035)";
-  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
-  ctx.restore();
-
-  // 2. Logo Tondo Ufficiale RomaFlash in Alto
-  drawCircularLogo(ctx, W / 2, 240, 125);
-
-  ctx.save();
-  ctx.font = "bold 17px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#f0b516";
+  ctx.font = `900 280px ${condensedFont}`;
   ctx.textAlign = "center";
-  ctx.letterSpacing = "4px";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-  ctx.shadowBlur = 10;
-  ctx.fillText("L'ESSENZA DELLE NOTIZIE GIALLOROSSE", W / 2, 395);
+  ctx.textBaseline = "middle";
+  ctx.strokeStyle = "rgba(240, 181, 22, 0.06)";
+  ctx.lineWidth = 3.5;
+  ctx.strokeText("ROMA", W / 2, 360);
+  ctx.strokeText("FLASH", W / 2, 700);
   ctx.restore();
 
-  // 3. Mockup Dispositivi: Laptop + Smartphone (ridimensionati per proporzioni verticali 9:16)
-  const laptopX = 120;
-  const laptopY = 490;
-  const laptopW = 580;
-  const laptopH = 350;
+  // 3. Bagliore radiale dorato al centro
+  const rad = ctx.createRadialGradient(W / 2, 530, 40, W / 2, 530, 600);
+  rad.addColorStop(0, "rgba(240, 181, 22, 0.22)");
+  rad.addColorStop(1, "transparent");
+  ctx.fillStyle = rad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 320px)
+  drawCircularLogo(ctx, W / 2, 530, 160);
+
+  // 5. Titoli Punchy Streetwear
+  ctx.save();
+  ctx.font = `900 60px ${condensedFont}`;
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "center";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+  ctx.shadowBlur = 22;
+  ctx.fillText("NON SEGUIRE IL RUMORE.", W / 2, 820);
+
+  ctx.font = `900 60px ${condensedFont}`;
+  ctx.fillStyle = "#f5b800";
+  ctx.fillText("LEGGI IL FLASH.", W / 2, 895);
+  ctx.restore();
+
+  // 6. 3 Pillole Stile "Stamp" / Streetwear Tag
+  const tags = [
+    "🐺 100% CUORE GIALLOROSSO",
+    "⚡ 30 SECONDI PER SAPERE TUTTO",
+    "🚫 ZERO PUBBLICITÀ INVASIVE",
+  ];
+
+  for (let i = 0; i < tags.length; i++) {
+    const ty = 990 + i * 80;
+    ctx.save();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.strokeStyle = "#f5b800";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(W / 2 - 310, ty, 620, 58, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = "900 18px system-ui, -apple-system, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.letterSpacing = "1px";
+    ctx.fillText(tags[i], W / 2, ty + 29);
+    ctx.restore();
+  }
+
+  // 7. Industrial / Bold CTA Block in basso
+  const ctaY = 1380;
+  const ctaH = 190;
+  const ctaW = W - 140;
+  const ctaX = 70;
 
   ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-  ctx.shadowBlur = 42;
-  ctx.shadowOffsetY = 24;
-
-  ctx.fillStyle = "#1e2124";
-  ctx.beginPath();
-  ctx.roundRect(laptopX, laptopY, laptopW, laptopH, 18);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.shadowColor = "transparent";
-
-  // Schermo Laptop
-  const screenX = laptopX + 16;
-  const screenY = laptopY + 16;
-  const screenW = laptopW - 32;
-  const screenH = laptopH - 32;
+  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetY = 16;
 
   ctx.fillStyle = "#0c0204";
+  ctx.strokeStyle = "#f5b800";
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
-  ctx.roundRect(screenX, screenY, screenW, screenH, 8);
+  ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 22);
   ctx.fill();
-
-  // Header desktop
-  ctx.fillStyle = "#1a0307";
-  ctx.fillRect(screenX, screenY, screenW, 38);
-  ctx.font = "900 13px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.textAlign = "left";
-  ctx.fillText("🐺 ROMAFLASH", screenX + 16, screenY + 24);
-
-  ctx.font = "bold 9px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-  ctx.fillText("NEWS", screenX + 165, screenY + 24);
-  ctx.fillText("FORMAZIONI", screenX + 225, screenY + 24);
-  ctx.fillText("CALENDARIO", screenX + 310, screenY + 24);
-  ctx.fillText("CLASSIFICA", screenX + 400, screenY + 24);
-
-  ctx.fillStyle = "#f0b516";
-  ctx.fillRect(screenX, screenY + 38, screenW, 2);
-
-  // Card Notizia Desktop
-  ctx.fillStyle = "#1e050a";
-  ctx.beginPath();
-  ctx.roundRect(screenX + 16, screenY + 54, screenW * 0.58, screenH - 70, 8);
-  ctx.fill();
-
-  ctx.fillStyle = "#e02d47";
-  ctx.beginPath();
-  ctx.roundRect(screenX + 28, screenY + 68, 74, 18, 4);
-  ctx.fill();
-  ctx.font = "900 8.5px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("ULTIM'ORA", screenX + 35, screenY + 80);
-
-  ctx.font = "800 14px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("DYBALA GUIDA L'ATTACCO:", screenX + 28, screenY + 108);
-  ctx.fillText("I DETTAGLI DI FORMAZIONE", screenX + 28, screenY + 126);
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-  ctx.fillRect(screenX + 28, screenY + 146, screenW * 0.46, 5);
-  ctx.fillRect(screenX + 28, screenY + 158, screenW * 0.42, 5);
-  ctx.fillRect(screenX + 28, screenY + 170, screenW * 0.35, 5);
-
-  // Colonna destra desktop
-  for (let r = 0; r < 3; r++) {
-    const ry = screenY + 54 + r * 72;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-    ctx.beginPath();
-    ctx.roundRect(screenX + screenW * 0.62, ry, screenW * 0.36, 62, 6);
-    ctx.fill();
-
-    ctx.fillStyle = "#f0b516";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 12, 54, 4);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 26, screenW * 0.28, 6);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.fillRect(screenX + screenW * 0.64, ry + 38, screenW * 0.22, 5);
-  }
-
-  // Base Tastiera Laptop
-  ctx.fillStyle = "#2a2d32";
-  ctx.beginPath();
-  ctx.roundRect(laptopX - 44, laptopY + laptopH - 4, laptopW + 88, 24, [4, 4, 12, 12]);
-  ctx.fill();
-
-  ctx.restore();
-
-  // Smartphone Mockup (iPhone Pro) - In primo piano a destra
-  const phoneX = 640;
-  const phoneY = 430;
-  const phoneW = 290;
-  const phoneH = 590;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 50;
-  ctx.shadowOffsetX = -12;
-  ctx.shadowOffsetY = 30;
-
-  ctx.fillStyle = "#1e2024";
-  ctx.beginPath();
-  ctx.roundRect(phoneX, phoneY, phoneW, phoneH, 46);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-  ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  ctx.shadowColor = "transparent";
-
-  const pScrX = phoneX + 11;
-  const pScrY = phoneY + 11;
-  const pScrW = phoneW - 22;
-  const pScrH = phoneH - 22;
-
-  ctx.fillStyle = "#0a0103";
-  ctx.beginPath();
-  ctx.roundRect(pScrX, pScrY, pScrW, pScrH, 38);
-  ctx.fill();
-
-  // Dynamic Island
-  ctx.fillStyle = "#000000";
-  ctx.beginPath();
-  ctx.roundRect(phoneX + phoneW / 2 - 40, pScrY + 12, 80, 22, 11);
-  ctx.fill();
-
-  // Header mobile
-  ctx.fillStyle = "#180307";
-  ctx.fillRect(pScrX, pScrY + 44, pScrW, 48);
-
-  ctx.font = "900 14px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.textAlign = "center";
-  ctx.fillText("🐺 ROMAFLASH", pScrX + pScrW / 2, pScrY + 72);
-
-  // Card Notizia Top Mobile
-  ctx.fillStyle = "#1f0409";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 14, pScrY + 108, pScrW - 28, 210, 16);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.3)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  ctx.fillStyle = "#2d0810";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 20, pScrY + 114, pScrW - 40, 105, 10);
-  ctx.fill();
-
-  ctx.save();
-  ctx.translate(pScrX + pScrW / 2 - 28, pScrY + 135);
-  ctx.scale(56 / 512, 56 / 512);
-  ctx.fillStyle = "rgba(240, 181, 22, 0.25)";
-  ctx.fill(new Path2D(WOLF_LOGO_SVG_PATH));
-  ctx.restore();
-
-  ctx.font = "800 13px system-ui, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "left";
-  ctx.fillText("CALCIOMERCATO & CAMPO", pScrX + 26, pScrY + 242);
-  ctx.font = "bold 11px system-ui, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
-  ctx.fillText("Tutte le formazioni e i voti live", pScrX + 26, pScrY + 264);
-
-  ctx.fillStyle = "rgba(240, 181, 22, 0.15)";
-  ctx.beginPath();
-  ctx.roundRect(pScrX + 26, pScrY + 282, pScrW - 52, 24, 6);
-  ctx.fill();
-  ctx.font = "bold 10px system-ui, sans-serif";
-  ctx.fillStyle = "#f0b516";
-  ctx.fillText("📊 SONDAGGIO: CHI VINCE SABATO?", pScrX + 34, pScrY + 298);
-
-  ctx.restore();
-
-  // 4. Testo Call to Action
-  ctx.save();
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "900 58px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 20;
-  ctx.shadowOffsetY = 4;
-  ctx.fillText("Trovi tutti i dettagli su", W / 2, 1260);
-  ctx.restore();
-
-  // 5. Bannerone ORO Giallorosso Pieno
-  const bannerY = 1340;
-  const bannerH = 140;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-  ctx.shadowBlur = 30;
-  ctx.shadowOffsetY = 12;
-
-  ctx.fillStyle = "#f0b516";
-  ctx.fillRect(0, bannerY, W, bannerH);
-
-  ctx.fillStyle = "#8e1b23";
-  ctx.fillRect(0, bannerY, W, 6);
-  ctx.fillRect(0, bannerY + bannerH - 6, W, 6);
+  // Strisce d'allerta gialle/oro decorative sui lati
+  ctx.fillStyle = "#f5b800";
+  ctx.fillRect(ctaX, ctaY, 16, ctaH);
+  ctx.fillRect(ctaX + ctaW - 16, ctaY, 16, ctaH);
 
   ctx.shadowColor = "transparent";
-
+  ctx.font = "bold 18px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = "#f5b800";
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = "900 76px system-ui, -apple-system, Impact, sans-serif";
-  ctx.fillStyle = "#180307";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("IL TUO QUOTIDIANO ONLINE GRATUITO", W / 2, ctaY + 60);
+
+  ctx.font = `900 62px ${condensedFont}`;
+  ctx.fillStyle = "#ffffff";
   ctx.letterSpacing = "2px";
-  ctx.fillText("www.romaflash.app", W / 2, bannerY + bannerH / 2 + 3);
+  ctx.fillText("WWW.ROMAFLASH.APP ➔", W / 2, ctaY + 135);
 
-  ctx.restore();
-
-  // 6. Freccia Gigante Dorata in Basso ➔
-  const arrowY = 1600;
-  const arrowStartX = W / 2 - 210;
-  const arrowEndX = W / 2 + 210;
-  const shaftH = 38;
-  const headSize = 78;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
-  ctx.shadowBlur = 26;
-  ctx.shadowOffsetY = 6;
-
-  ctx.fillStyle = "#f0b516";
-  ctx.beginPath();
-  ctx.moveTo(arrowStartX, arrowY - shaftH / 2);
-  ctx.lineTo(arrowEndX - headSize, arrowY - shaftH / 2);
-  ctx.lineTo(arrowEndX - headSize, arrowY - headSize);
-  ctx.lineTo(arrowEndX, arrowY);
-  ctx.lineTo(arrowEndX - headSize, arrowY + headSize);
-  ctx.lineTo(arrowEndX - headSize, arrowY + shaftH / 2);
-  ctx.lineTo(arrowStartX, arrowY + shaftH / 2);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.restore();
-
-  // Footer 9:16
-  ctx.save();
-  ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.letterSpacing = "2px";
-  ctx.fillText("@ROMAFLASH 🐺", W / 2, 1780);
   ctx.restore();
 
   const dataUrl = canvas.toDataURL("image/jpeg", 0.95);

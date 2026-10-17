@@ -794,13 +794,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             continue; // Salta il salvataggio in caso di errore di parsing
           }
 
-          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 13 immagini proprietarie RomaFlash non usate di recente
+          // Scelta finale dell'immagine: se la foto della fonte ha loghi/grafiche o non è valida, usa una delle 19 immagini proprietarie RomaFlash (incluse le 3 storiche del briefing: Stadio Olimpico, pallone in campo e sala stampa) non usate di recente
           let imageUrl: string;
           if (!isImageRejected && inlineImagePart && isCleanRealPhoto && candidateImageUrl) {
             imageUrl = candidateImageUrl;
             usedImageUrls.add(candidateImageUrl);
           } else {
-            const allArchive = Array.from({ length: 13 }, (_, i) => `/images/archive/roma-${i + 1}.jpg`);
+            const allArchive = Array.from({ length: 19 }, (_, i) => `/images/archive/roma-${i + 1}.jpg`);
             const availableArchive = allArchive.filter(p => !recentArchiveUsed.has(p));
             const pool = availableArchive.length > 0 ? availableArchive : allArchive;
             imageUrl = pool[Math.floor(Math.random() * pool.length)];

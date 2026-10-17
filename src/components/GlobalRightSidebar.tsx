@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import NextMatchWidget from '@/components/NextMatchWidget';
 import ClassificaWidget from '@/components/ClassificaWidget';
+import MvpPollWidget from '@/components/MvpPollWidget';
 
 export default function GlobalRightSidebar() {
   const [nextMatch, setNextMatch] = useState<any>(null);
@@ -36,7 +37,7 @@ export default function GlobalRightSidebar() {
   }, []);
 
   return (
-    <aside className={`${nextMatch ? 'flex' : 'hidden lg:flex'} w-full lg:w-[35%] xl:w-[30%] flex-col gap-6 order-1 lg:order-2 mb-2 lg:mb-0`}>
+    <aside className="flex w-full lg:w-[35%] xl:w-[30%] flex-col gap-4 lg:gap-6 order-1 lg:order-2 mb-2 lg:mb-0">
       {nextMatch && (
         <NextMatchWidget 
           homeTeam={nextMatch.home_team} 
@@ -46,6 +47,16 @@ export default function GlobalRightSidebar() {
           tvChannels={nextMatch.tv_channels}
         />
       )}
+
+      {/* Mini-Barra Compatta su Mobile (< 1024px) */}
+      <div className="block lg:hidden">
+        <MvpPollWidget variant="mobile" />
+      </div>
+
+      {/* Widget dedicato Sidebar su Desktop (≥ 1024px) */}
+      <div className="hidden lg:block">
+        <MvpPollWidget variant="desktop" />
+      </div>
       
       <div className="hidden lg:block">
         <ClassificaWidget />

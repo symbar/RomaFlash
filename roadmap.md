@@ -42,9 +42,8 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso di appartenenza giallorossa.
 
 *   **4.1 Tempo di Lettura Dinamico:** Micro-badge *"⏱️ 1 min di lettura"* calcolato sul testo per incentivare il click rapido.
-*   **4.2 "Il Migliore in Campo" (Instant Fan Vote):** Subito al 90° minuto, sondaggio lampo con 4 giocatori chiave in ballottaggio e grafico live delle preferenze dei tifosi.
-*   **4.3 "Indovina il Risultato & Marcatore":** Pronostico rapido pre-partita gratuito con classifica punti stagionale tra tutti i lettori di RomaFlash.
-*   **4.4 "Trivia del Romanismo" (Quiz Quotidiano):** 3 domande a risposta multipla al giorno sulla storia della Roma (campioni del passato, derby indimenticabili, record).
+*   **4.2 "Indovina il Risultato & Marcatore":** Pronostico rapido pre-partita gratuito con classifica punti stagionale tra tutti i lettori di RomaFlash.
+*   **4.3 "Trivia del Romanismo" (Quiz Quotidiano):** 3 domande a risposta multipla al giorno sulla storia della Roma (campioni del passato, derby indimenticabili, record).
 
 ---
 

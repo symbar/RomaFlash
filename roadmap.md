@@ -32,6 +32,7 @@ Evoluzione dei contenuti verso formati moderni e consumabili in mobilità.
 
 *   **3.1 Carosello Storie (Fast-News):** Bolle circolari stile Instagram in cima alla Home per scorrere rapidamente le notizie più calde in formato pillola.
 *   ~~**3.2 Generatore Storie Instagram (9:16) nel Backoffice /stats:** Generatore istantaneo di card verticali 1080×1920 con logo tondo ufficiale RomaFlash, foto hero e copia link automatica per sticker per pubblicare le storie in 5 secondi dall'account ufficiale Instagram con Web Share API (mobile) e download ad alta risoluzione (desktop).~~ ✅ **(Completato)**
+*   **3.3 Standardizzazione Formato Slide Instagram (Uniformità con TikTok):** Portare il formato visivo e la struttura delle slide/locandine di Instagram allo stesso standard 1080×1350 (4:5) adottato per TikTok, con locandina editoriale ad alto impatto e super-sunto completo per massima coerenza cross-platform.
 
 ---
 
@@ -45,9 +46,11 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 
 ### 5. Distribuzione, Fonti & Social
 
-*   **5.1 Feed Diretto X/Twitter `@OfficialASRoma`:** Connessione diretta con token di sessione nei secrets di Supabase per importare i tweet ufficiali del club in tempo reale senza dipendere da intermediari RSS a pagamento.
-*   **5.2 Filtro "Le Più Lette" (Trending):** Sezione o tab per scoprire le notizie che hanno generato più letture e interesse nelle ultime 24h e 7 giorni.
-*   **5.3 Biglietteria Contestuale:** Tasto discreto *"🎟️ Biglietti Ufficiali"* che rimanda al ticketing AS Roma quando l'articolo riguarda un match imminente all'Olimpico.
-*   **5.4 Gestione Intelligente delle Fonti (Prompting AI):** Raffinamento dei prompt per citare la testata giornalistica originale solo in caso di interviste esclusive o scoop di mercato.
-*   **5.5 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
-*   **5.6 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
+*   **5.1 Header Social Links (Icona Profilo Instagram):** Aggiornare l'header dell'app per ospitare l'icona ufficiale di Instagram (accanto a X e TikTok) con link diretto al profilo RomaFlash.
+*   **5.2 Ottimizzazione & Revisione BIO TikTok:** Rivedere e testare la biografia del profilo ufficiale TikTok per massimizzare il click-through verso il link in bio `romaflash.app` e la conversione dei follower.
+*   **5.3 Feed Diretto X/Twitter `@OfficialASRoma`:** Connessione diretta con token di sessione nei secrets di Supabase per importare i tweet ufficiali del club in tempo reale senza dipendere da intermediari RSS a pagamento.
+*   **5.4 Filtro "Le Più Lette" (Trending):** Sezione o tab per scoprire le notizie che hanno generato più letture e interesse nelle ultime 24h e 7 giorni.
+*   **5.5 Biglietteria Contestuale:** Tasto discreto *"🎟️ Biglietti Ufficiali"* che rimanda al ticketing AS Roma quando l'articolo riguarda un match imminente all'Olimpico.
+*   **5.6 Gestione Intelligente delle Fonti (Prompting AI):** Raffinamento dei prompt per citare la testata giornalistica originale solo in caso di interviste esclusive o scoop di mercato.
+*   **5.7 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
+*   **5.8 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.

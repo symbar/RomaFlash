@@ -24,6 +24,7 @@ export interface MvpPollData {
 }
 
 // Fallback demo per anteprima via URL (?mvp_preview=1)
+// Fallback demo per anteprima via URL (?mvp_preview=1)
 const DEMO_PREVIEW_POLL: MvpPollData = {
   id: 'demo-roma-genoa',
   match_title: 'Roma - Genoa',
@@ -31,7 +32,7 @@ const DEMO_PREVIEW_POLL: MvpPollData = {
   status: 'active',
   started_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
   closes_at: new Date(Date.now() + 19 * 3600 * 1000).toISOString(),
-  total_votes: 2960,
+  total_votes: 0,
   candidates: [
     {
       slug: 'castro',
@@ -43,32 +44,32 @@ const DEMO_PREVIEW_POLL: MvpPollData = {
     {
       slug: 'lulli',
       name: 'Emanuele Lulli',
-      role: 'Attaccante',
+      role: 'Esterno',
       image: '/images/players/lulli.png',
       stat: 'Gol storico del 2-0: 2° marcatore più giovane di sempre in Serie A'
     },
     {
-      slug: 'malen',
-      name: 'Donyell Malen',
-      role: 'Attaccante',
-      image: '/images/players/malen.png',
-      stat: 'Regia offensiva costante, assist e percussioni continue'
+      slug: 'mora',
+      name: 'Giacomo Mora',
+      role: 'Centrocampista',
+      image: '/images/players/mora.png',
+      stat: 'Titolare a sorpresa, qualità e personalità tra le linee'
     },
     {
-      slug: 'svilar',
-      name: 'Mile Svilar',
-      role: 'Portiere',
-      image: '/images/players/svilar.png',
-      stat: 'Clean sheet impeccabile, sicurezza assoluta nelle uscite'
+      slug: 'deroon',
+      name: 'Marten De Roon',
+      role: 'Centrocampista',
+      image: '/images/players/deroon.png',
+      stat: 'Guida a centrocampo, contrasti vinti e ritmo'
     }
   ]
 };
 
 const DEMO_VOTES_INITIAL: Record<string, number> = {
-  castro: 1420,
-  lulli: 890,
-  malen: 410,
-  svilar: 240
+  castro: 0,
+  lulli: 0,
+  mora: 0,
+  deroon: 0
 };
 
 // Calcola la chiusura del sondaggio alle ore 20:00 del giorno successivo al match (fuso orario italiano)
@@ -231,10 +232,9 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
 
             // Configura i candidati
             let candidates: MvpCandidate[] = [];
-            let baselineVotes: Record<string, number> = {};
 
             if (isGenoaMatch) {
-              // I 4 veri protagonisti acclamati di Roma - Genoa 2-0
+              // I 4 veri protagonisti che hanno giocato per davvero in Roma - Genoa 2-0
               candidates = [
                 {
                   slug: 'castro',
@@ -246,74 +246,65 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                 {
                   slug: 'lulli',
                   name: 'Emanuele Lulli',
-                  role: 'Attaccante',
+                  role: 'Esterno',
                   image: '/images/players/lulli.png',
                   stat: 'Gol storico del 2-0: 2° marcatore più giovane di sempre in Serie A'
                 },
                 {
-                  slug: 'malen',
-                  name: 'Donyell Malen',
-                  role: 'Attaccante',
-                  image: '/images/players/malen.png',
-                  stat: 'Regia offensiva costante, assist e percussioni continue'
+                  slug: 'mora',
+                  name: 'Giacomo Mora',
+                  role: 'Centrocampista',
+                  image: '/images/players/mora.png',
+                  stat: 'Titolare a sorpresa, qualità e personalità tra le linee'
                 },
                 {
-                  slug: 'svilar',
-                  name: 'Mile Svilar',
-                  role: 'Portiere',
-                  image: '/images/players/svilar.png',
-                  stat: 'Clean sheet impeccabile, sicurezza assoluta nelle uscite'
+                  slug: 'deroon',
+                  name: 'Marten De Roon',
+                  role: 'Centrocampista',
+                  image: '/images/players/deroon.png',
+                  stat: 'Guida a centrocampo, contrasti vinti e ritmo'
                 }
               ];
-              baselineVotes = {
-                castro: 1420,
-                lulli: 890,
-                malen: 410,
-                svilar: 240
-              };
             } else {
-              // Fallback dinamico per future partite
+              // Fallback per future gare (solo giocatori attivi)
               candidates = [
-                {
-                  slug: 'dybala',
-                  name: 'Paulo Dybala',
-                  role: 'Attaccante',
-                  image: '/images/players/dybala.png',
-                  stat: 'Leadership tecnica e rifinitura'
-                },
                 {
                   slug: 'castro',
                   name: 'Santiago Castro',
                   role: 'Attaccante',
                   image: '/images/players/castro.png',
-                  stat: 'Intensità offensiva e strappi'
+                  stat: 'Intensità offensiva e lavoro per la squadra'
                 },
                 {
-                  slug: 'kone',
-                  name: 'Manu Koné',
+                  slug: 'lulli',
+                  name: 'Emanuele Lulli',
+                  role: 'Esterno',
+                  image: '/images/players/lulli.png',
+                  stat: 'Spinta e intraprendenza sulla fascia'
+                },
+                {
+                  slug: 'mora',
+                  name: 'Giacomo Mora',
                   role: 'Centrocampista',
-                  image: '/images/players/kone.png',
-                  stat: 'Dominio a centrocampo e recuperi'
+                  image: '/images/players/mora.png',
+                  stat: 'Qualità tecnica e inserimenti tra le linee'
                 },
                 {
-                  slug: 'svilar',
-                  name: 'Mile Svilar',
-                  role: 'Portiere',
-                  image: '/images/players/svilar.png',
-                  stat: 'Interventi decisivi e clean sheet'
+                  slug: 'deroon',
+                  name: 'Marten De Roon',
+                  role: 'Centrocampista',
+                  image: '/images/players/deroon.png',
+                  stat: 'Recuperi difensivi e personalità'
                 }
               ];
-              baselineVotes = {
-                dybala: 1250,
-                castro: 780,
-                kone: 520,
-                svilar: 310
-              };
             }
 
-            // Conta i voti reali presenti in poll_votes per l'articolo della partita
-            let liveVotesBySlug: Record<string, number> = { ...baselineVotes };
-            let extraVotes = 0;
+            // Inizializza TUTTI i voti a ZERO: nessun voto fittizio, solo voti 100% reali
+            const liveVotesBySlug: Record<string, number> = {};
+            candidates.forEach(c => {
+              liveVotesBySlug[c.slug] = 0;
+            });
+            let realVotesCount = 0;
 
             if (analystArt?.id) {
               try {
@@ -323,7 +314,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                   .eq('article_id', analystArt.id);
 
                 if (dbVotes && dbVotes.length > 0) {
-                  extraVotes = dbVotes.length;
+                  realVotesCount = dbVotes.length;
                   dbVotes.forEach(v => {
                     const c = candidates[v.option_index];
                     if (c) {
@@ -336,8 +327,6 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               }
             }
 
-            const initialSum = Object.values(baselineVotes).reduce((a, b) => a + b, 0) + extraVotes;
-
             const activePoll: MvpPollData = {
               id: pollId,
               match_title: matchTitle,
@@ -346,13 +335,13 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               started_at: new Date(pollStart).toISOString(),
               closes_at: new Date(pollCloses).toISOString(),
               candidates,
-              total_votes: initialSum
+              total_votes: realVotesCount
             };
 
             if (isMounted) {
               setPoll(activePoll);
               setVotesByPlayer(liveVotesBySlug);
-              setTotalVotes(initialSum);
+              setTotalVotes(realVotesCount);
 
               const localVote = localStorage.getItem(`romaflash_mvp_voted_${pollId}`);
               if (localVote) {
@@ -426,7 +415,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
     if (!poll?.candidates) return { percentages: {}, topSlug: null };
 
     const percentages: Record<string, number> = {};
-    let maxVotes = -1;
+    let maxVotes = 0;
     let topSlug: string | null = null;
 
     poll.candidates.forEach((c) => {
@@ -438,7 +427,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
       percentages[c.slug] = totalVotes > 0 ? Math.round((v / totalVotes) * 100) : 0;
     });
 
-    return { percentages, topSlug };
+    return { percentages, topSlug: maxVotes > 0 ? topSlug : null };
   }, [poll, votesByPlayer, totalVotes]);
 
   const handleVote = async (candidateSlug: string) => {

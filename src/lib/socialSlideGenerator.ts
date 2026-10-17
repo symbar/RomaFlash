@@ -568,10 +568,9 @@ export function renderStoryCanvas(
     38 +
     suntoLines.length * suntoLineH;
 
-  // Posizionamento verticale: sopra lo sticker link (che sta a y=1660)
-  const stickerY = 1660;
-  const bottomLimit = stickerY - 45; // 1615
-  const minTop = 880;
+  // Posizionamento verticale nel terzo inferiore per le Storie (senza elementi invasivi)
+  const bottomLimit = 1760;
+  const minTop = 860;
   let y = Math.max(minTop, bottomLimit - totalBlockH);
 
   ctx.save();
@@ -601,7 +600,7 @@ export function renderStoryCanvas(
   ctx.fill();
   y += 24;
 
-  // Super Sunto nitido (uguale a Slide 1 TikTok & Instagram 4:5!)
+  // Super Sunto nitido
   ctx.font = `600 ${suntoSize}px system-ui, -apple-system, sans-serif`;
   ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
   ctx.shadowColor = "rgba(0, 0, 0, 0.85)";
@@ -613,57 +612,6 @@ export function renderStoryCanvas(
     ctx.fillText(line, padX, y);
     y += suntoLineH;
   }
-  ctx.restore();
-
-  // 6. Sticker Mockup Instagram Link
-  const stickerH = 84;
-  const stW = 660;
-  const stX = (STORY_W - stW) / 2;
-  const stY = stickerY;
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 8;
-
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.roundRect(stX, stY, stW, stickerH, 42);
-  ctx.fill();
-
-  ctx.shadowColor = "transparent";
-
-  // Badge icona link
-  ctx.fillStyle = "#8e1b23";
-  ctx.beginPath();
-  ctx.arc(stX + 46, stY + stickerH / 2, 20, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 20px system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("🔗", stX + 46, stY + stickerH / 2);
-
-  ctx.font = "900 24px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#0f172a";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-  ctx.fillText("TOCCA PER L'ARTICOLO", stX + 80, stY + stickerH / 2 - 2);
-
-  ctx.font = "600 20px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "#64748b";
-  ctx.fillText("• romaflash.app", stX + 420, stY + stickerH / 2 - 2);
-  ctx.restore();
-
-  // 7. Footer elegante
-  ctx.save();
-  ctx.font = "bold 22px system-ui, -apple-system, sans-serif";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.letterSpacing = "2px";
-  ctx.fillText("@ROMAFLASH 🐺", STORY_W / 2, 1790);
   ctx.restore();
 
   const dataUrl = canvas.toDataURL("image/jpeg", 0.95);

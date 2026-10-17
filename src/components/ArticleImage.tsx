@@ -114,8 +114,7 @@ export function getArticleImageUrl(article: any): string | null {
   }
 
   if (isDailyBriefing) {
-    const idx = (hash % 3) + 1;
-    return `/images/daily-briefing/briefing-${idx}.jpg`;
+    return '/images/daily-briefing/roma-real-curva-sud.jpg';
   }
 
   if (article.image_url) {
@@ -327,6 +326,11 @@ export default function ArticleImage({
   const isAnalyst = article
     ? (article.ai_summary?.category === "L'Analista" || article.title?.startsWith("L'Analista"))
     : (imgSrc.includes('/analista/'));
+  const isDailyBriefing = article
+    ? (article.original_url?.startsWith('romaflash-daily-briefing') ||
+       article.ai_summary?.category === 'Il Punto della Giornata' ||
+       article.title?.startsWith('Il Punto della Giornata'))
+    : (imgSrc.includes('/daily-briefing/'));
   const matchInfo = isAnalyst ? resolveMatchInfo(article) : null;
 
   if (variant === 'card') {
@@ -340,7 +344,7 @@ export default function ArticleImage({
           loading="lazy"
           {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
           onError={handleError}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className={`w-full h-full object-cover ${isDailyBriefing ? 'object-[center_40%]' : ''} group-hover:scale-105 transition-transform duration-700`}
         />
         {/* RomaFlash Wolf Logo Badge (Top-Left) - Nascosto solo per L'Analista nelle card piccole */}
         {!isAnalyst && (
@@ -364,7 +368,7 @@ export default function ArticleImage({
           loading="eager"
           {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
           onError={handleError}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className={`w-full h-full object-cover ${isDailyBriefing ? 'object-[center_40%]' : ''} group-hover:scale-105 transition-transform duration-700`}
         />
         {/* Gradient shadow for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
@@ -390,7 +394,7 @@ export default function ArticleImage({
         loading="eager"
         {...(isExternal ? { referrerPolicy: 'no-referrer' as const } : {})}
         onError={handleError}
-        className="w-full h-full object-cover"
+        className={`w-full h-full object-cover ${isDailyBriefing ? 'object-[center_40%]' : ''}`}
       />
       {/* RomaFlash Wolf Logo Badge (Top-Left) */}
       <div className="absolute top-3.5 left-3.5 z-10 w-9 h-9 rounded-xl bg-[#2a070c]/85 backdrop-blur-md flex items-center justify-center p-1.5 shadow-md border border-[#f0b516]/50 pointer-events-none">

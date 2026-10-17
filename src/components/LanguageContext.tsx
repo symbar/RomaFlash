@@ -179,28 +179,40 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return translations[lang][key] || translations['it'][key] || key;
   };
 
+  function sanitizeSourceText(text: string): string {
+    if (!text) return '';
+    return text
+      .replace(/\bVoceGiallorossa\.it\b/gi, 'RomaFlash')
+      .replace(/\bVoceGiallorossa\b/gi, 'RomaFlash')
+      .replace(/\bVoce Giallorossa\b/gi, 'RomaFlash')
+      .replace(/\bPodcast VG\b/gi, 'Approfondimento')
+      .replace(/\bVG Podcast\b/gi, 'Approfondimento')
+      .replace(/\bredazione di VG\b/gi, 'redazione di RomaFlash')
+      .replace(/\bredazione di VoceGiallorossa\b/gi, 'redazione di RomaFlash');
+  }
+
   const getArticleTitle = (article: any): string => {
     if (!article) return '';
     if (lang === 'en' && article.ai_summary?.en?.title) {
-      return article.ai_summary.en.title;
+      return sanitizeSourceText(article.ai_summary.en.title);
     }
-    return article.title || '';
+    return sanitizeSourceText(article.title || '');
   };
 
   const getArticleExcerpt = (article: any): string => {
     if (!article) return '';
     if (lang === 'en' && article.ai_summary?.en?.excerpt) {
-      return article.ai_summary.en.excerpt;
+      return sanitizeSourceText(article.ai_summary.en.excerpt);
     }
-    return article.ai_summary?.excerpt || '';
+    return sanitizeSourceText(article.ai_summary?.excerpt || '');
   };
 
   const getArticleContent = (article: any): string => {
     if (!article) return '';
     if (lang === 'en' && article.ai_summary?.en?.content) {
-      return article.ai_summary.en.content;
+      return sanitizeSourceText(article.ai_summary.en.content);
     }
-    return article.ai_summary?.content || '';
+    return sanitizeSourceText(article.ai_summary?.content || '');
   };
 
   const getArticlePoll = (article: any) => {

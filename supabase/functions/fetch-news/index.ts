@@ -419,6 +419,56 @@ serve(async (req) => {
       return null;
     };
 
+    // Blacklist deterministica per bloccare contenuti autoreferenziali delle fonti:
+    // Podcast VG, rubriche interne di VoceGiallorossa, rassegne interne, live Twitch, ecc.
+    const isBlacklistedSourcePromo = (
+      title: string,
+      link: string,
+      snippet?: string
+    ): boolean => {
+      const combined = `${title || ''} ${link || ''} ${snippet || ''}`.toLowerCase();
+      
+      // 1. Riferimenti diretti a VG o Vocegiallorossa (podcast, rubriche, TG, talk, interviste interne)
+      if (
+        /\bvg\b/i.test(combined) ||
+        /\bpodcast\s*vg\b/i.test(combined) ||
+        /\bvg\s*podcast\b/i.test(combined) ||
+        /\bvocegiallorossa\b/i.test(combined) ||
+        /\bvoce\s+giallorossa\b/i.test(combined) ||
+        /\btg\s+vg\b/i.test(combined) ||
+        /\bvg\s+talk\b/i.test(combined) ||
+        /\blive\s+vg\b/i.test(combined) ||
+        /\brassegna\s+stampa\s+vg\b/i.test(combined) ||
+        /\bla\s+voce\s+della\s+sera\b/i.test(combined)
+      ) {
+        return true;
+      }
+
+      // 2. URL della fonte categorizzati come podcast o rubriche di redazione interna
+      const lowerLink = (link || '').toLowerCase();
+      if (
+        lowerLink.includes('/podcast/') ||
+        lowerLink.includes('/la-voce-della-sera/') ||
+        lowerLink.includes('/tg-vg/') ||
+        lowerLink.includes('/vg-talk/')
+      ) {
+        return true;
+      }
+
+      // 3. Podcast e rubriche autoreferenziali di testata generici
+      if (
+        /\bnostro\s+podcast\b/i.test(combined) ||
+        /\bi\s+nostri\s+podcast\b/i.test(combined) ||
+        /\bpodcast\s+della\s+redazione\b/i.test(combined) ||
+        /\bcanale\s+twitch\b/i.test(combined) ||
+        /\bscarica\s+l['']app\s+di\b/i.test(combined)
+      ) {
+        return true;
+      }
+
+      return false;
+    };
+
     const existingItemsArray: ExistingArticleItem[] = (recentArticles || []).map((a: any) => ({
       title: a.title,
       fullText: `${a.title} ${a.ai_summary?.excerpt || ''}`,
@@ -451,6 +501,12 @@ serve(async (req) => {
 
         for (const item of items) {
           if (!item.link || !item.title) continue;
+
+          // Controllo blacklist deterministico anti-autopromozione / VG / podcast di testata
+          if (isBlacklistedSourcePromo(item.title, item.link, item.contentSnippet || item.content)) {
+            console.log(`[BLACK-LIST] Scartato articolo autoreferenziale/VG: "${item.title}" (${item.link})`);
+            continue;
+          }
 
           // Controlla se la notizia esiste già nel DB (duplicato esatto dell'URL)
           const { data: existing } = await supabase
@@ -569,7 +625,9 @@ REGOLE TASSATIVE SUI DUPLICATI (imposta "is_duplicate": true in tutti questi cas
 - Se due testate diverse riportano la stessa notizia, episodio, tributo, murale, evento, ospitata TV, libro, infortunio o designazione arbitrale usando sinonimi o angolazioni diverse (es. "Mourinho" vs "Special One", "murale" vs "murales") -> È DUPLICATO (is_duplicate: true).
 Nel dubbio, imposta SEMPRE "is_duplicate": true!
 
-2) SPAM / NOTIZIE NON PERTINENTI: verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
+2) SPAM / NOTIZIE NON PERTINENTI / PROMO DI ALTRE REDAZIONI (TASSATIVO):
+- Verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
+- Scarta TASSATIVAMENTE (imposta "is_spam": true) qualsiasi articolo, podcast, rubrica, rassegna o contenuto che faccia riferimento a "VG", "VoceGiallorossa", "Voce Giallorossa", podcast di testata (es. "Podcast VG", "VG Podcast", "La Voce della Sera"), dirette Twitch o canali delle fonti esterne. RomaFlash è un quotidiano indipendente: non deve MAI pubblicare né citare sigle di altre fonti esterne come VG o Vocegiallorossa.
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo in italiano (diverso dall'originale). Se l'articolo riguarda un'intervista o dichiarazioni, usa la formula: Soggetto: "Virgolettato d'impatto" (es. Ranieri: "A Roma servono uomini veri", Dybala: "Voglio vincere qui").
@@ -694,6 +752,18 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             );
             if (matchedGeneratedDup) {
               console.log(`DUPLICATO RILEVATO DAL FILTRO DETERMINISTICO (Generato): "${newTitle}" ~ "${matchedGeneratedDup}"`);
+              continue;
+            }
+
+            // Controllo guard finale: scarta tassativamente se il titolo, excerpt o content contengono riferimenti a VG/VoceGiallorossa
+            const genCheck = `${newTitle} ${parsed.excerpt || ''} ${parsed.content || ''}`.toLowerCase();
+            if (
+              /\bvg\b/i.test(genCheck) ||
+              /\bvocegiallorossa\b/i.test(genCheck) ||
+              /\bvoce\s+giallorossa\b/i.test(genCheck) ||
+              /\bpodcast\s*vg\b/i.test(genCheck)
+            ) {
+              console.log(`[GUARD] Scartato articolo generato con riferimento a VG/VoceGiallorossa: "${newTitle}"`);
               continue;
             }
             if (parsed.excerpt && parsed.content) {

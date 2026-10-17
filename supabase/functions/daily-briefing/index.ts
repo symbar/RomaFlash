@@ -244,8 +244,8 @@ Non usare Markdown attorno al JSON (\`\`\`json), restituisci il testo puro.
     const todayStr = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long' }).format(new Date())
     const todayDate = new Date().toISOString().split('T')[0]
 
-    const randomBriefingIdx = Math.floor(Math.random() * 3) + 1
-    const briefingImageUrl = `/images/daily-briefing/briefing-${randomBriefingIdx}.jpg`
+    // Immagine fissa iconica: Coreografia Curva Sud Roma-Real Madrid (A.S. ROMA - SINE METU)
+    const briefingImageUrl = `/images/daily-briefing/roma-real-curva-sud.jpg`
 
     const briefingArticle = {
       title: `Il Punto della Giornata: ${todayStr}`,

@@ -50,6 +50,15 @@ export default function Home() {
   const INITIAL_PAGE_SIZE = 17;
   const LOAD_MORE_SIZE = 15;
 
+  const isExcludedArticle = (a: any) => {
+    const t = (a.title || '').toLowerCase();
+    const u = (a.original_url || '').toLowerCase();
+    if (t.includes('podcast vg') || t.includes('vg podcast') || u.includes('vocegiallorossa.it/podcast/')) {
+      return true;
+    }
+    return false;
+  };
+
   const fetchArticles = async () => {
     const { data } = await supabase
       .from('articles')
@@ -58,7 +67,8 @@ export default function Home() {
       .range(0, INITIAL_PAGE_SIZE - 1);
     
     if (data) {
-      setArticles(data);
+      const cleanData = data.filter((a) => !isExcludedArticle(a));
+      setArticles(cleanData);
       setHasMore(data.length === INITIAL_PAGE_SIZE);
     }
     setLoading(false);
@@ -90,7 +100,8 @@ export default function Home() {
       .range(currentLength, currentLength + LOAD_MORE_SIZE - 1);
     
     if (data && data.length > 0) {
-      setArticles(prev => [...prev, ...data]);
+      const cleanData = data.filter((a) => !isExcludedArticle(a));
+      setArticles(prev => [...prev, ...cleanData]);
       setHasMore(data.length === LOAD_MORE_SIZE);
     } else {
       setHasMore(false);

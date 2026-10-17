@@ -376,18 +376,18 @@ export function renderSlide2Outro(): {
   // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 280px)
   drawCircularLogo(ctx, W / 2, 410, 140);
 
-  // 5. Titoli Punchy Streetwear
+  // 5. Claim Brand Ufficiale
   ctx.save();
   ctx.font = `900 52px ${condensedFont}`;
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
   ctx.shadowBlur = 20;
-  ctx.fillText("NON SEGUIRE IL RUMORE.", W / 2, 630);
+  ctx.fillText("L'ESSENZA DELLE", W / 2, 630);
 
   ctx.font = `900 52px ${condensedFont}`;
   ctx.fillStyle = "#f5b800";
-  ctx.fillText("LEGGI IL FLASH.", W / 2, 695);
+  ctx.fillText("NOTIZIE GIALLOROSSE", W / 2, 695);
   ctx.restore();
 
   // 6. 3 Pillole Stile "Stamp" / Streetwear Tag
@@ -742,18 +742,18 @@ export function renderStorySlide2Outro(): {
   // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 320px)
   drawCircularLogo(ctx, W / 2, 530, 160);
 
-  // 5. Titoli Punchy Streetwear
+  // 5. Claim Brand Ufficiale
   ctx.save();
   ctx.font = `900 60px ${condensedFont}`;
   ctx.fillStyle = "#ffffff";
   ctx.textAlign = "center";
   ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
   ctx.shadowBlur = 22;
-  ctx.fillText("NON SEGUIRE IL RUMORE.", W / 2, 820);
+  ctx.fillText("L'ESSENZA DELLE", W / 2, 820);
 
   ctx.font = `900 60px ${condensedFont}`;
   ctx.fillStyle = "#f5b800";
-  ctx.fillText("LEGGI IL FLASH.", W / 2, 895);
+  ctx.fillText("NOTIZIE GIALLOROSSE", W / 2, 895);
   ctx.restore();
 
   // 6. 3 Pillole Stile "Stamp" / Streetwear Tag

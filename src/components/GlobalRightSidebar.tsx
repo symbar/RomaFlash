@@ -43,6 +43,7 @@ export default function GlobalRightSidebar() {
           awayTeam={nextMatch.away_team} 
           competition={nextMatch.competition} 
           matchDate={nextMatch.match_date} 
+          tvChannels={nextMatch.tv_channels}
         />
       )}
       

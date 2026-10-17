@@ -24,7 +24,6 @@ export interface MvpPollData {
 }
 
 // Fallback demo per anteprima via URL (?mvp_preview=1)
-// Fallback demo per anteprima via URL (?mvp_preview=1)
 const DEMO_PREVIEW_POLL: MvpPollData = {
   id: 'demo-roma-genoa',
   match_title: 'Roma - Genoa',
@@ -38,29 +37,25 @@ const DEMO_PREVIEW_POLL: MvpPollData = {
       slug: 'castro',
       name: 'Santiago Castro',
       role: 'Attaccante',
-      image: '/images/players/castro.png',
-      stat: "Gol capolavoro all'incrocio, grinta da leader"
+      image: '/images/players/castro.png'
     },
     {
       slug: 'lulli',
       name: 'Emanuele Lulli',
       role: 'Esterno',
-      image: '/images/players/lulli.png',
-      stat: 'Gol storico del 2-0: 2° marcatore più giovane di sempre in Serie A'
+      image: '/images/players/lulli.png'
     },
     {
-      slug: 'mora',
-      name: 'Giacomo Mora',
-      role: 'Centrocampista',
-      image: '/images/players/mora.png',
-      stat: 'Titolare a sorpresa, qualità e personalità tra le linee'
+      slug: 'soule',
+      name: 'Matías Soulé',
+      role: 'Attaccante',
+      image: '/images/players/soule.png'
     },
     {
-      slug: 'deroon',
-      name: 'Marten De Roon',
-      role: 'Centrocampista',
-      image: '/images/players/deroon.png',
-      stat: 'Guida a centrocampo, contrasti vinti e ritmo'
+      slug: 'balerdi',
+      name: 'Leonardo Balerdi',
+      role: 'Difensore',
+      image: '/images/players/balerdi.png'
     }
   ]
 };
@@ -68,8 +63,8 @@ const DEMO_PREVIEW_POLL: MvpPollData = {
 const DEMO_VOTES_INITIAL: Record<string, number> = {
   castro: 0,
   lulli: 0,
-  mora: 0,
-  deroon: 0
+  soule: 0,
+  balerdi: 0
 };
 
 // Calcola la chiusura del sondaggio alle ore 20:00 del giorno successivo al match (fuso orario italiano)
@@ -230,39 +225,35 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
 
             const matchTitle = `${match.home_team} - ${match.away_team}`;
 
-            // Configura i candidati
+            // Configura i candidati ufficiali
             let candidates: MvpCandidate[] = [];
 
             if (isGenoaMatch) {
-              // I 4 veri protagonisti che hanno giocato per davvero in Roma - Genoa 2-0
+              // I 4 protagonisti reali: Castro, Lulli, Soulé, Balerdi
               candidates = [
                 {
                   slug: 'castro',
                   name: 'Santiago Castro',
                   role: 'Attaccante',
-                  image: '/images/players/castro.png',
-                  stat: "Gol capolavoro all'incrocio, grinta da leader"
+                  image: '/images/players/castro.png'
                 },
                 {
                   slug: 'lulli',
                   name: 'Emanuele Lulli',
                   role: 'Esterno',
-                  image: '/images/players/lulli.png',
-                  stat: 'Gol storico del 2-0: 2° marcatore più giovane di sempre in Serie A'
+                  image: '/images/players/lulli.png'
                 },
                 {
-                  slug: 'mora',
-                  name: 'Giacomo Mora',
-                  role: 'Centrocampista',
-                  image: '/images/players/mora.png',
-                  stat: 'Titolare a sorpresa, qualità e personalità tra le linee'
+                  slug: 'soule',
+                  name: 'Matías Soulé',
+                  role: 'Attaccante',
+                  image: '/images/players/soule.png'
                 },
                 {
-                  slug: 'deroon',
-                  name: 'Marten De Roon',
-                  role: 'Centrocampista',
-                  image: '/images/players/deroon.png',
-                  stat: 'Guida a centrocampo, contrasti vinti e ritmo'
+                  slug: 'balerdi',
+                  name: 'Leonardo Balerdi',
+                  role: 'Difensore',
+                  image: '/images/players/balerdi.png'
                 }
               ];
             } else {
@@ -272,29 +263,25 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                   slug: 'castro',
                   name: 'Santiago Castro',
                   role: 'Attaccante',
-                  image: '/images/players/castro.png',
-                  stat: 'Intensità offensiva e lavoro per la squadra'
+                  image: '/images/players/castro.png'
                 },
                 {
                   slug: 'lulli',
                   name: 'Emanuele Lulli',
                   role: 'Esterno',
-                  image: '/images/players/lulli.png',
-                  stat: 'Spinta e intraprendenza sulla fascia'
+                  image: '/images/players/lulli.png'
                 },
                 {
-                  slug: 'mora',
-                  name: 'Giacomo Mora',
-                  role: 'Centrocampista',
-                  image: '/images/players/mora.png',
-                  stat: 'Qualità tecnica e inserimenti tra le linee'
+                  slug: 'soule',
+                  name: 'Matías Soulé',
+                  role: 'Attaccante',
+                  image: '/images/players/soule.png'
                 },
                 {
-                  slug: 'deroon',
-                  name: 'Marten De Roon',
-                  role: 'Centrocampista',
-                  image: '/images/players/deroon.png',
-                  stat: 'Recuperi difensivi e personalità'
+                  slug: 'balerdi',
+                  name: 'Leonardo Balerdi',
+                  role: 'Difensore',
+                  image: '/images/players/balerdi.png'
                 }
               ];
             }
@@ -554,8 +541,8 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                     )}
                   </div>
 
-                  <div className="text-[10px] text-gray-500 font-medium truncate">
-                    {p.role} {p.stat ? `• ${p.stat}` : ''}
+                  <div className="text-[10.5px] text-gray-500 font-medium">
+                    {p.role}
                   </div>
 
                   {/* Barra Percentuale Animata dopo il voto */}
@@ -608,22 +595,35 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
   // Render Componente Mobile (Mini-Barra orizzontale compatta)
   const renderMobile = () => (
     <div className="bg-gradient-to-r from-[#fffdfa] via-white to-[#fffdfa] border border-[#fef08a] rounded-2xl p-3 shadow-xs mb-3.5 relative overflow-hidden">
-      {/* Header compatto */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Header compatto mobile: Titolo completo visibile e mai tagliato */}
+      <div className="flex items-center justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-xs">🏆</span>
-          <h3 className="text-xs font-bold text-[#78350f] truncate leading-none">
-            {t('mvp.title')}
-          </h3>
+          <span className="inline-block bg-[#b45309] text-white text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0">
+            {t('mvp.badge')}
+          </span>
           {poll.match_score && (
-            <span className="text-[10px] font-bold bg-amber-100/80 text-amber-900 px-1.5 py-0.2 rounded border border-amber-200 shrink-0">
+            <span className="text-[10px] font-black bg-stone-100 text-stone-800 px-1.5 py-0.2 rounded border border-stone-200 shrink-0">
               {poll.match_title.split('-')[1]?.trim() || ''} {poll.match_score}
             </span>
           )}
         </div>
-        <span className="text-[10px] font-bold text-[#92400e] bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full shrink-0">
-          {hasVoted ? `⏱️ ${timeLeft}` : t('mvp.subtitle_mobile')}
-        </span>
+        {timeLeft && (
+          <span className="text-[10px] font-semibold text-[#92400e] bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0">
+            ⏱️ {timeLeft}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-bold text-[#78350f] leading-snug">
+          {t('mvp.title')}
+        </h3>
+        {!hasVoted && (
+          <span className="text-[9.5px] text-gray-400 font-medium shrink-0 ml-2">
+            1 tap per votare
+          </span>
+        )}
       </div>
 
       {/* 4 Avatars Orizzontali Affiancati */}

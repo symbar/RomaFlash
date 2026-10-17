@@ -480,12 +480,13 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
         )}
       </div>
 
-      <div className="text-[11px] text-gray-600 mb-3 px-0.5 flex items-center justify-between">
+      <div className="text-[11px] text-gray-600 mb-3 px-0.5 flex items-center flex-wrap gap-1.5">
         <span>
-          {t('mvp.subtitle_desktop')} <span className="font-bold text-gray-900">{poll.match_title}</span>
+          {t('mvp.subtitle_desktop')}{' '}
+          <span className="font-bold text-gray-900">{poll.match_title}</span>
         </span>
         {poll.match_score && (
-          <span className="text-[10.5px] font-black bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded border border-stone-200">
+          <span className="text-[10px] font-black bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded border border-stone-200">
             {poll.match_score}
           </span>
         )}
@@ -597,16 +598,14 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
     <div className="bg-gradient-to-r from-[#fffdfa] via-white to-[#fffdfa] border border-[#fef08a] rounded-2xl p-3 shadow-xs mb-3.5 relative overflow-hidden">
       {/* Header compatto mobile: Titolo completo visibile e mai tagliato */}
       <div className="flex items-center justify-between gap-2 mb-1.5">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
           <span className="text-xs">🏆</span>
           <span className="inline-block bg-[#b45309] text-white text-[8.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shrink-0">
             {t('mvp.badge')}
           </span>
-          {poll.match_score && (
-            <span className="text-[10px] font-black bg-stone-100 text-stone-800 px-1.5 py-0.2 rounded border border-stone-200 shrink-0">
-              {poll.match_title.split('-')[1]?.trim() || ''} {poll.match_score}
-            </span>
-          )}
+          <span className="text-[10px] font-bold text-stone-800 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200 shrink-0">
+            {poll.match_title} {poll.match_score ? `${poll.match_score}` : ''}
+          </span>
         </div>
         {timeLeft && (
           <span className="text-[10px] font-semibold text-[#92400e] bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0">

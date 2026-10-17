@@ -30,7 +30,7 @@ const DEMO_PREVIEW_POLL: MvpPollData = {
   match_score: '2 - 0',
   status: 'active',
   started_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-  closes_at: new Date(Date.now() + 3.5 * 3600 * 1000).toISOString(),
+  closes_at: new Date(Date.now() + 19 * 3600 * 1000).toISOString(),
   total_votes: 2960,
   candidates: [
     {
@@ -70,6 +70,42 @@ const DEMO_VOTES_INITIAL: Record<string, number> = {
   malen: 410,
   svilar: 240
 };
+
+// Calcola la chiusura del sondaggio alle ore 20:00 del giorno successivo al match (fuso orario italiano)
+function getPollCloseTime(matchDateIso: string): number {
+  const matchDate = new Date(matchDateIso);
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(matchDate).split('-');
+
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+
+  // Giorno successivo
+  const nextDayRef = new Date(Date.UTC(year, month - 1, day + 1, 12, 0, 0));
+  const nextParts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Rome',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(nextDayRef).split('-');
+
+  const nextY = nextParts[0];
+  const nextM = nextParts[1];
+  const nextD = nextParts[2];
+
+  // Calcola le ore 20:00:00 nel fuso orario di Roma (gestione automatica legale/solare)
+  const utcGuess = new Date(`${nextY}-${nextM}-${nextD}T20:00:00Z`);
+  const romeStr = utcGuess.toLocaleString('en-US', { timeZone: 'Europe/Rome' });
+  const utcStr = utcGuess.toLocaleString('en-US', { timeZone: 'UTC' });
+  const offsetMs = new Date(romeStr).getTime() - new Date(utcStr).getTime();
+
+  return utcGuess.getTime() - offsetMs;
+}
 
 function getOrCreateVoterToken(): string {
   if (typeof window === 'undefined') return 'server';
@@ -150,9 +186,9 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           
           // Regola concordata:
           // Inizio sondaggio: 105 min di partita + 30 minuti dal fischio finale = 135 minuti dal calcio d'inizio
-          // Durata sondaggio: esattamente 4 ore dal lancio
+          // Chiusura sondaggio: alle ore 20:00 del giorno successivo
           const pollStart = matchTime + (105 + 30) * 60 * 1000;
-          const pollCloses = pollStart + 4 * 60 * 60 * 1000;
+          const pollCloses = getPollCloseTime(match.match_date);
           const nowTime = now.getTime();
 
           const isInsideVotingWindow = nowTime >= pollStart && nowTime <= pollCloses;

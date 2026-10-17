@@ -368,6 +368,21 @@ function ArticleContent() {
                 let tweetId = hasTweet ? embedUrl.split('status/')[1]?.split('?')[0] : '';
                 if (tweetId && !/^\d+$/.test(tweetId)) tweetId = '';
                 
+                const renderFormattedInline = (text: string) => {
+                  if (!text) return null;
+                  const parts = text.split(/(\*\*.*?\*\*)/g);
+                  return parts.map((part, index) => {
+                    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+                      return (
+                        <strong key={index} className="font-bold text-foreground">
+                          {part.slice(2, -2)}
+                        </strong>
+                      );
+                    }
+                    return part;
+                  });
+                };
+
                 const renderParagraph = (p: string, key: string | number) => {
                   const trimmed = p.trim();
                   const isBlockquote = trimmed.startsWith('>');
@@ -394,7 +409,7 @@ function ArticleContent() {
                       >
                         <Quote className="w-8 h-8 text-[#8E1B23]/15 absolute top-3 right-4 pointer-events-none" />
                         <div className="font-serif italic font-medium text-lg md:text-xl text-foreground leading-snug mb-3 pr-8">
-                          &ldquo;{unquotedText}&rdquo;
+                          &ldquo;{renderFormattedInline(unquotedText)}&rdquo;
                         </div>
                         {author && (
                           <div className="flex items-center gap-2 pt-2 border-t border-[#8E1B23]/10 text-xs text-muted-foreground">
@@ -406,7 +421,16 @@ function ArticleContent() {
                     );
                   }
 
-                  return <p key={key} className="mb-6">{p}</p>;
+                  if (trimmed.startsWith('#')) {
+                    const headingText = trimmed.replace(/^#+\s*/, '');
+                    return (
+                      <h3 key={key} className="text-xl md:text-2xl font-bold font-serif text-foreground mt-8 mb-4">
+                        {renderFormattedInline(headingText)}
+                      </h3>
+                    );
+                  }
+
+                  return <p key={key} className="mb-6">{renderFormattedInline(p)}</p>;
                 };
 
                 if (tweetId === '') hasTweet = false;

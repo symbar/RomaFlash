@@ -218,10 +218,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const getArticleExcerpt = (article: any): string => {
     if (!article) return '';
-    if (lang === 'en' && article.ai_summary?.en?.excerpt) {
-      return sanitizeSourceText(article.ai_summary.en.excerpt);
-    }
-    return sanitizeSourceText(article.ai_summary?.excerpt || '');
+    const raw = lang === 'en' && article.ai_summary?.en?.excerpt
+      ? article.ai_summary.en.excerpt
+      : (article.ai_summary?.excerpt || '');
+    return sanitizeSourceText(raw).replace(/\*\*(.*?)\*\*/g, '$1');
   };
 
   const getArticleContent = (article: any): string => {

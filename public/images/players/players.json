@@ -1,0 +1,218 @@
+[
+  {
+    "id": "7048",
+    "name": "De Marzi",
+    "fullName": "Gabriele De Marzi",
+    "role": "P",
+    "slug": "demarzi",
+    "imagePath": "/images/players/demarzi.png",
+    "fileSize": 76058
+  },
+  {
+    "id": "610",
+    "name": "Gollini",
+    "fullName": "Pierluigi Gollini",
+    "role": "P",
+    "slug": "gollini",
+    "imagePath": "/images/players/gollini.png",
+    "fileSize": 166794
+  },
+  {
+    "id": "5841",
+    "name": "Svilar",
+    "fullName": "Mile Svilar",
+    "role": "P",
+    "slug": "svilar",
+    "imagePath": "/images/players/svilar.png",
+    "fileSize": 198145
+  },
+  {
+    "id": "6125",
+    "name": "Vasquez D.",
+    "fullName": "Devis Vasquez",
+    "role": "P",
+    "slug": "vasquez",
+    "imagePath": "/images/players/vasquez.png",
+    "fileSize": 209095
+  },
+  {
+    "id": "6631",
+    "name": "Ghilardi",
+    "fullName": "Daniele Ghilardi",
+    "role": "D",
+    "slug": "ghilardi",
+    "imagePath": "/images/players/ghilardi.png",
+    "fileSize": 221267
+  },
+  {
+    "id": "4807",
+    "name": "Hermoso",
+    "fullName": "Mario Hermoso",
+    "role": "D",
+    "slug": "hermoso",
+    "imagePath": "/images/players/hermoso.png",
+    "fileSize": 222977
+  },
+  {
+    "id": "7529",
+    "name": "Koulierakis",
+    "fullName": "Konstantinos Koulierakis",
+    "role": "D",
+    "slug": "koulierakis",
+    "imagePath": "/images/players/koulierakis.png",
+    "fileSize": 95839
+  },
+  {
+    "id": "2296",
+    "name": "Mancini",
+    "fullName": "Gianluca Mancini",
+    "role": "D",
+    "slug": "mancini",
+    "imagePath": "/images/players/mancini.png",
+    "fileSize": 156268
+  },
+  {
+    "id": "4317",
+    "name": "N'Dicka",
+    "fullName": "Evan N'Dicka",
+    "role": "D",
+    "slug": "ndicka",
+    "imagePath": "/images/players/ndicka.png",
+    "fileSize": 194581
+  },
+  {
+    "id": "6986",
+    "name": "Rensch",
+    "fullName": "Devyne Rensch",
+    "role": "D",
+    "slug": "rensch",
+    "imagePath": "/images/players/rensch.png",
+    "fileSize": 187770
+  },
+  {
+    "id": "7181",
+    "name": "Wesley",
+    "fullName": "Wesley Gassova",
+    "role": "D",
+    "slug": "wesley",
+    "imagePath": "/images/players/wesley.png",
+    "fileSize": 243490
+  },
+  {
+    "id": "4998",
+    "name": "Molina N.",
+    "fullName": "Nahuel Molina",
+    "role": "D",
+    "slug": "molina",
+    "imagePath": "/images/players/molina.png",
+    "fileSize": 285307
+  },
+  {
+    "id": "7599",
+    "name": "Lulli",
+    "fullName": "Tommaso Lulli",
+    "role": "D",
+    "slug": "lulli",
+    "imagePath": "/images/players/lulli.png",
+    "fileSize": 95839
+  },
+  {
+    "id": "4705",
+    "name": "Balerdi",
+    "fullName": "Leonardo Balerdi",
+    "role": "D",
+    "slug": "balerdi",
+    "imagePath": "/images/players/balerdi.png",
+    "fileSize": 200199
+  },
+  {
+    "id": "22",
+    "name": "De Roon",
+    "fullName": "Marten De Roon",
+    "role": "C",
+    "slug": "deroon",
+    "imagePath": "/images/players/deroon.png",
+    "fileSize": 238514
+  },
+  {
+    "id": "779",
+    "name": "Cristante",
+    "fullName": "Bryan Cristante",
+    "role": "C",
+    "slug": "cristante",
+    "imagePath": "/images/players/cristante.png",
+    "fileSize": 186066
+  },
+  {
+    "id": "5589",
+    "name": "Konè M.",
+    "fullName": "Manu Koné",
+    "role": "C",
+    "slug": "kone",
+    "imagePath": "/images/players/kone.png",
+    "fileSize": 215024
+  },
+  {
+    "id": "6190",
+    "name": "Pisilli",
+    "fullName": "Niccolò Pisilli",
+    "role": "C",
+    "slug": "pisilli",
+    "imagePath": "/images/players/pisilli.png",
+    "fileSize": 171121
+  },
+  {
+    "id": "530",
+    "name": "Pellegrini Lo.",
+    "fullName": "Lorenzo Pellegrini",
+    "role": "C",
+    "slug": "pellegrini",
+    "imagePath": "/images/players/pellegrini.png",
+    "fileSize": 246533
+  },
+  {
+    "id": "7556",
+    "name": "Mora",
+    "fullName": "Giacomo Mora",
+    "role": "C",
+    "slug": "mora",
+    "imagePath": "/images/players/mora.png",
+    "fileSize": 268853
+  },
+  {
+    "id": "5734",
+    "name": "Soulè",
+    "fullName": "Matías Soulé",
+    "role": "A",
+    "slug": "soule",
+    "imagePath": "/images/players/soule.png",
+    "fileSize": 180754
+  },
+  {
+    "id": "309",
+    "name": "Dybala",
+    "fullName": "Paulo Dybala",
+    "role": "A",
+    "slug": "dybala",
+    "imagePath": "/images/players/dybala.png",
+    "fileSize": 230408
+  },
+  {
+    "id": "6572",
+    "name": "Castro S.",
+    "fullName": "Santiago Castro",
+    "role": "A",
+    "slug": "castro",
+    "imagePath": "/images/players/castro.png",
+    "fileSize": 242637
+  },
+  {
+    "id": "5585",
+    "name": "Malen",
+    "fullName": "Donyell Malen",
+    "role": "A",
+    "slug": "malen",
+    "imagePath": "/images/players/malen.png",
+    "fileSize": 271287
+  }
+]

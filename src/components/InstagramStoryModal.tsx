@@ -4,14 +4,12 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
-  Download,
   Copy,
   Check,
   Share2,
   Sparkles,
   Layers,
   Film,
-  Image as ImageIcon,
 } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
 import { getArticleUrl } from "@/lib/slug";
@@ -118,25 +116,17 @@ export default function InstagramStoryModal({
   const [slide2Url, setSlide2Url] = useState<string>("");
   const [slide2File, setSlide2File] = useState<File | null>(null);
 
-  // Risorse Storia 9:16 (Standardizzate con la nuova impostazione grafica)
+  // Risorse Storia 9:16
   const [story1Url, setStory1Url] = useState<string>("");
   const [story1File, setStory1File] = useState<File | null>(null);
   const [story2Url, setStory2Url] = useState<string>("");
   const [story2File, setStory2File] = useState<File | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [packDownloading, setPackDownloading] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [copiedCaption, setCopiedCaption] = useState<boolean>(false);
   const [sharedSuccess, setSharedSuccess] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [captionText, setCaptionText] = useState<string>("");
-
-  useEffect(() => {
-    if (typeof navigator !== "undefined") {
-      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-    }
-  }, []);
 
   useEffect(() => {
     if (!article) return;
@@ -158,11 +148,11 @@ export default function InstagramStoryModal({
         bgImg = await loadImageElement("/images/archive/roma-1.jpg");
       }
 
-      // 1. Carosello 4:5 (Standardizzato TikTok & Instagram)
+      // 1. Carosello 4:5 (Standardizzato TikTok & Instagram con Mockup B)
       const s1 = renderSlide1(article, bgImg);
       const s2 = renderSlide2Outro();
 
-      // 2. Storie 9:16 (Con la nuova impostazione grafica coordinata)
+      // 2. Storie 9:16
       const st1 = renderStoryCanvas(article, bgImg);
       const st2 = renderStorySlide2Outro();
 
@@ -205,15 +195,6 @@ export default function InstagramStoryModal({
   const articleUrl = getArticleUrl(article);
   const isCarousel = format === "carousel";
 
-  const triggerDownload = (dataUrl: string, filename: string) => {
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(articleUrl);
@@ -237,55 +218,6 @@ export default function InstagramStoryModal({
       }
     } catch {
       // ignore
-    }
-  };
-
-  const handleDownloadSingle = () => {
-    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
-
-    if (isCarousel) {
-      if (activeSlide === 1 && slide1Url) {
-        triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
-      } else if (activeSlide === 2 && slide2Url) {
-        triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
-      }
-    } else {
-      if (activeSlide === 1 && story1Url) {
-        triggerDownload(story1Url, `romaflash-storia-1-${shortId}.jpg`);
-      } else if (activeSlide === 2 && story2Url) {
-        triggerDownload(story2Url, `romaflash-storia-2-outro.jpg`);
-      }
-    }
-
-    if (onMarkShared && article?.id) {
-      onMarkShared(article.id, true);
-    }
-  };
-
-  const handleDownloadPack = () => {
-    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
-    setPackDownloading(true);
-
-    if (isCarousel) {
-      if (!slide1Url || !slide2Url) return;
-      triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
-
-      setTimeout(() => {
-        triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
-        setPackDownloading(false);
-      }, 450);
-    } else {
-      if (!story1Url || !story2Url) return;
-      triggerDownload(story1Url, `romaflash-storia-1-${shortId}.jpg`);
-
-      setTimeout(() => {
-        triggerDownload(story2Url, `romaflash-storia-2-outro.jpg`);
-        setPackDownloading(false);
-      }, 450);
-    }
-
-    if (onMarkShared && article?.id) {
-      onMarkShared(article.id, true);
     }
   };
 
@@ -335,11 +267,48 @@ export default function InstagramStoryModal({
       }
     }
 
-    // Fallback: download
+    // Fallback: download affidabile tramite ObjectURL
     if (isCarousel) {
-      handleDownloadPack();
+      if (slide1File) {
+        const u1 = URL.createObjectURL(slide1File);
+        const a1 = document.createElement("a");
+        a1.href = u1;
+        a1.download = slide1File.name;
+        document.body.appendChild(a1);
+        a1.click();
+        setTimeout(() => {
+          document.body.removeChild(a1);
+          URL.revokeObjectURL(u1);
+        }, 1000);
+      }
+      if (slide2File) {
+        setTimeout(() => {
+          const u2 = URL.createObjectURL(slide2File);
+          const a2 = document.createElement("a");
+          a2.href = u2;
+          a2.download = slide2File.name;
+          document.body.appendChild(a2);
+          a2.click();
+          setTimeout(() => {
+            document.body.removeChild(a2);
+            URL.revokeObjectURL(u2);
+          }, 1000);
+        }, 500);
+      }
     } else {
-      handleDownloadSingle();
+      const activeFile = activeSlide === 1 ? story1File : story2File;
+      if (activeFile) {
+        const u = URL.createObjectURL(activeFile);
+        const a = document.createElement("a");
+        a.href = u;
+        a.download = activeFile.name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(u);
+        }, 1000);
+      }
     }
   };
 
@@ -556,19 +525,19 @@ export default function InstagramStoryModal({
               {isCarousel ? (
                 <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
                   <li>
-                    Scarica il <strong className="text-amber-300">Pack 2 Slide</strong> oppure tocca <strong className="text-white">&quot;Condividi&quot;</strong> (la didascalia viene copiata in automatico).
+                    Tocca <strong className="text-white">&quot;Condividi 2 Slide&quot;</strong> per inviare o salvare le 2 immagini (la didascalia con <strong className="text-rose-300">@romaflash</strong> viene copiata in automatico).
                   </li>
                   <li>
                     Apri Instagram, tocca <strong className="text-white">+ &gt; Post</strong>, attiva la modalità <strong className="text-amber-300">Selezione multipla</strong> e scegli <strong className="text-white">Slide 1</strong> e <strong className="text-white">Slide 2</strong>.
                   </li>
                   <li>
-                    Incolla la didascalia con la menzione <strong className="text-rose-300">@romaflash</strong> per renderla cliccabile per tutti i follower.
+                    Fai incolla nella didascalia e pubblica!
                   </li>
                 </ol>
               ) : (
                 <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
                   <li>
-                    Tocca <strong className="text-white">&quot;Condividi&quot;</strong> o scarica la Storia (il link viene copiato in automatico negli appunti).
+                    Tocca <strong className="text-white">&quot;Condividi Storia&quot;</strong> per inviare o salvare la storia (il link viene copiato in automatico negli appunti).
                   </li>
                   <li>
                     Apri Instagram, tocca <strong className="text-rose-400">+ &gt; Storia</strong> e seleziona l&apos;immagine dalla galleria.
@@ -580,44 +549,21 @@ export default function InstagramStoryModal({
               )}
             </div>
 
-            {/* Pulsanti Azione Principali */}
-            <div className="space-y-2 pt-1">
-              {/* SCARICA PACK 2 SLIDE (PRIMARIO) */}
+            {/* PULSANTE UNICO CONDIVIDI / SALVA */}
+            <div className="pt-1">
               <button
                 type="button"
-                onClick={handleDownloadPack}
-                disabled={loading || packDownloading}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                onClick={handleShare}
+                disabled={loading || (isCarousel ? !slide1File || !slide2File : (activeSlide === 1 ? !story1File : !story2File))}
+                className="w-full inline-flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:opacity-95 active:scale-95 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer disabled:opacity-50"
               >
-                <Layers className="w-4 h-4 text-white" />
+                <Share2 className="w-4 h-4 text-white stroke-[2.5]" />
                 <span>
-                  {packDownloading
-                    ? "Download Pack in corso..."
-                    : `Scarica Pack 2 Slide (${isCarousel ? "Carosello 4:5" : "Storie 9:16"})`}
+                  {isCarousel
+                    ? "Condividi 2 Slide Carosello (o Salva su Smartphone)"
+                    : `Condividi Storia ${activeSlide} (o Salva su Smartphone)`}
                 </span>
               </button>
-
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleDownloadSingle}
-                  disabled={loading || !previewImgUrl}
-                  className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 font-bold text-xs border border-slate-800 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Scarica Slide {activeSlide}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  disabled={loading}
-                  className="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Condividi {isCarousel ? "Pack" : `Slide ${activeSlide}`}</span>
-                </button>
-              </div>
             </div>
 
             {sharedSuccess && (

@@ -4,12 +4,10 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
-  Download,
   Copy,
   Check,
   Share2,
   RotateCcw,
-  Layers,
   Sparkles,
 } from "lucide-react";
 import { getArticleImageUrl } from "@/components/ArticleImage";
@@ -128,7 +126,6 @@ export default function TikTokKitModal({
   const [generating, setGenerating] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
   const [captionText, setCaptionText] = useState<string>("");
-  const [packDownloading, setPackDownloading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!article) return;
@@ -152,7 +149,7 @@ export default function TikTokKitModal({
 
       // Slide 1: Locandina Notizia
       const s1 = renderSlide1(article, loadedImg);
-      // Slide 2: Locandina Outro romaflash.app
+      // Slide 2: Locandina Outro romaflash.app (Mockup B)
       const s2 = renderSlide2Outro();
 
       if (!cancelled) {
@@ -182,72 +179,60 @@ export default function TikTokKitModal({
 
   if (!article || typeof document === "undefined") return null;
 
-  const triggerDownload = (dataUrl: string, filename: string) => {
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  const handleDownloadSingle = (slideNum: 1 | 2) => {
-    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
-    if (slideNum === 1 && slide1Url) {
-      triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
-    } else if (slideNum === 2 && slide2Url) {
-      triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
-    }
-    if (onMarkShared && article?.id) {
-      onMarkShared(article.id, true);
-    }
-  };
-
-  const handleDownloadPack = () => {
-    if (!slide1Url || !slide2Url) return;
-    setPackDownloading(true);
-    const shortId = article?.id ? String(article.id).slice(0, 8) : "news";
-
-    // Scarica Slide 1
-    triggerDownload(slide1Url, `romaflash-slide-1-${shortId}.jpg`);
-
-    // Scarica Slide 2 con un breve ritardo per evitare che il browser blocchi il multi-download
-    setTimeout(() => {
-      triggerDownload(slide2Url, `romaflash-slide-2-outro.jpg`);
-      setPackDownloading(false);
-    }, 450);
-
-    if (onMarkShared && article?.id) {
-      onMarkShared(article.id, true);
-    }
-  };
-
   const handleShareMobile = async () => {
-    if (!slide1File || !slide2File) {
-      handleDownloadPack();
-      return;
+    if (onMarkShared && article?.id) {
+      onMarkShared(article.id, true);
     }
 
-    try {
-      const filesToShare = [slide1File, slide2File];
-      if (
-        typeof navigator !== "undefined" &&
-        navigator.canShare &&
-        navigator.canShare({ files: filesToShare })
-      ) {
+    const filesToShare = [slide1File, slide2File].filter(Boolean) as File[];
+
+    if (
+      filesToShare.length > 0 &&
+      typeof navigator !== "undefined" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: filesToShare })
+    ) {
+      try {
         await navigator.share({
           files: filesToShare,
           title: article.title,
           text: captionText,
         });
-        if (onMarkShared && article?.id) {
-          onMarkShared(article.id, true);
-        }
-      } else {
-        handleDownloadPack();
+        return;
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        console.warn("navigator.share non completato:", err);
       }
-    } catch {
-      // User cancelled share
+    }
+
+    // Fallback Desktop / Browser che non supportano navigator.share con files:
+    // Scarica le 2 slide tramite ObjectURL reale
+    if (slide1File) {
+      const u1 = URL.createObjectURL(slide1File);
+      const a1 = document.createElement("a");
+      a1.href = u1;
+      a1.download = slide1File.name;
+      document.body.appendChild(a1);
+      a1.click();
+      setTimeout(() => {
+        document.body.removeChild(a1);
+        URL.revokeObjectURL(u1);
+      }, 1000);
+    }
+
+    if (slide2File) {
+      setTimeout(() => {
+        const u2 = URL.createObjectURL(slide2File);
+        const a2 = document.createElement("a");
+        a2.href = u2;
+        a2.download = slide2File.name;
+        document.body.appendChild(a2);
+        a2.click();
+        setTimeout(() => {
+          document.body.removeChild(a2);
+          URL.revokeObjectURL(u2);
+        }, 1000);
+      }, 500);
     }
   };
 
@@ -356,43 +341,18 @@ export default function TikTokKitModal({
             </p>
           </div>
 
-          {/* Right: Download Buttons & Caption */}
+          {/* Right: Single Share/Save Button & Caption */}
           <div className="md:col-span-6 flex flex-col gap-3">
-            {/* CTA 1: SCARICA PACK COMPLETO (Entrambe le Slide) */}
+            {/* PULSANTE UNICO CONDIVIDI / SALVA 2 SLIDE */}
             <button
               type="button"
-              disabled={generating || !slide1Url || !slide2Url || packDownloading}
-              onClick={handleDownloadPack}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black text-xs font-black shadow-md transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+              disabled={generating || !slide1Url || !slide2Url}
+              onClick={handleShareMobile}
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black text-sm font-black shadow-md transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
             >
-              <Layers className="w-4 h-4 text-black" />
-              <span>
-                {packDownloading ? "Download in corso..." : "Scarica Pack Completo (Slide 1 + Slide 2)"}
-              </span>
+              <Share2 className="w-4 h-4 text-black stroke-[2.5]" />
+              <span>Condividi 2 Slide (o Salva su Smartphone)</span>
             </button>
-
-            {/* Pulsanti secondari: Scarica Singola + Condividi Mobile */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={generating || !currentPreviewUrl}
-                onClick={() => handleDownloadSingle(activeSlide)}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gray-900 text-white text-xs font-bold hover:bg-black transition-colors cursor-pointer disabled:opacity-50"
-              >
-                <Download className="w-3.5 h-3.5 text-amber-400" />
-                <span>Scarica Slide {activeSlide}</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={generating || !slide1Url || !slide2Url}
-                onClick={handleShareMobile}
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gray-100 text-gray-900 text-xs font-bold hover:bg-gray-200 border border-gray-200 transition-colors cursor-pointer disabled:opacity-50"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Condividi (Mobile)</span>
-              </button>
-            </div>
 
             {/* Caption Box */}
             <div className="bg-gray-50 border border-border rounded-xl p-3 mt-0.5 flex flex-col gap-2">
@@ -450,7 +410,7 @@ export default function TikTokKitModal({
               <div className="p-2 rounded-lg bg-amber-50 border border-amber-200/80 text-[10.5px] text-amber-900 leading-snug flex items-start gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Come pubblicare su TikTok:</strong> tocca <strong>+</strong> &gt; modalità <strong>Foto</strong> &gt; seleziona Slide 1 e Slide 2 in sequenza &gt; incolla questa didascalia per comparire nel feed <em>&quot;Per Te&quot;</em>.
+                  <strong>Come pubblicare su TikTok:</strong> tocca <strong>Condividi</strong> per inviare o salvare le 2 immagini &gt; su TikTok tocca <strong>+</strong> &gt; modalità <strong>Foto</strong> &gt; seleziona Slide 1 e Slide 2 &gt; incolla la didascalia.
                 </span>
               </div>
             </div>

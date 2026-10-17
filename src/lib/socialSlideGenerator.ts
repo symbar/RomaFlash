@@ -345,27 +345,33 @@ export function renderSlide2Outro(): {
   const H = SLIDE_H;
   const condensedFont = getCondensedFontFamily();
 
-  // 1. Sfondo scuro carminio profondo
-  ctx.fillStyle = "#140205";
+  // 1. Sfondo Rosso Roma Imperiale Caldo e Luminoso (Mockup B)
+  const bgGrad = ctx.createRadialGradient(W / 2, 450, 50, W / 2, 450, 850);
+  bgGrad.addColorStop(0, "#9c1725");   // Rosso cardinalizio caldo
+  bgGrad.addColorStop(0.5, "#680d17");
+  bgGrad.addColorStop(0.85, "#30050b");
+  bgGrad.addColorStop(1, "#180205");
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // 2. Tipografia GIGANTE in background outline
+  // 2. Halo di luce dorata calda dietro lo stemma
+  const halo = ctx.createRadialGradient(W / 2, 410, 30, W / 2, 410, 480);
+  halo.addColorStop(0, "rgba(245, 184, 0, 0.28)");
+  halo.addColorStop(0.7, "rgba(245, 184, 0, 0.05)");
+  halo.addColorStop(1, "transparent");
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, W, H);
+
+  // 3. Tipografia GIGANTE in background outline
   ctx.save();
   ctx.font = `900 240px ${condensedFont}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.06)";
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(245, 184, 0, 0.08)";
+  ctx.lineWidth = 3.5;
   ctx.strokeText("ROMA", W / 2, 280);
   ctx.strokeText("FLASH", W / 2, 540);
   ctx.restore();
-
-  // 3. Bagliore radiale dorato al centro
-  const rad = ctx.createRadialGradient(W / 2, 410, 30, W / 2, 410, 500);
-  rad.addColorStop(0, "rgba(240, 181, 22, 0.2)");
-  rad.addColorStop(1, "transparent");
-  ctx.fillStyle = rad;
-  ctx.fillRect(0, 0, W, H);
 
   // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 280px)
   drawCircularLogo(ctx, W / 2, 410, 140);
@@ -705,27 +711,33 @@ export function renderStorySlide2Outro(): {
   const H = STORY_H;
   const condensedFont = getCondensedFontFamily();
 
-  // 1. Sfondo scuro carminio profondo
-  ctx.fillStyle = "#140205";
+  // 1. Sfondo Rosso Roma Imperiale Caldo e Luminoso (Mockup B 9:16)
+  const bgGrad = ctx.createRadialGradient(W / 2, 540, 60, W / 2, 540, 1100);
+  bgGrad.addColorStop(0, "#9c1725");   // Rosso cardinalizio caldo
+  bgGrad.addColorStop(0.5, "#680d17");
+  bgGrad.addColorStop(0.85, "#30050b");
+  bgGrad.addColorStop(1, "#180205");
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // 2. Tipografia GIGANTE in background outline
+  // 2. Halo di luce dorata calda dietro lo stemma
+  const halo = ctx.createRadialGradient(W / 2, 530, 40, W / 2, 530, 600);
+  halo.addColorStop(0, "rgba(245, 184, 0, 0.28)");
+  halo.addColorStop(0.7, "rgba(245, 184, 0, 0.05)");
+  halo.addColorStop(1, "transparent");
+  ctx.fillStyle = halo;
+  ctx.fillRect(0, 0, W, H);
+
+  // 3. Tipografia GIGANTE in background outline
   ctx.save();
   ctx.font = `900 280px ${condensedFont}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.strokeStyle = "rgba(240, 181, 22, 0.06)";
+  ctx.strokeStyle = "rgba(245, 184, 0, 0.08)";
   ctx.lineWidth = 3.5;
   ctx.strokeText("ROMA", W / 2, 360);
   ctx.strokeText("FLASH", W / 2, 700);
   ctx.restore();
-
-  // 3. Bagliore radiale dorato al centro
-  const rad = ctx.createRadialGradient(W / 2, 530, 40, W / 2, 530, 600);
-  rad.addColorStop(0, "rgba(240, 181, 22, 0.22)");
-  rad.addColorStop(1, "transparent");
-  ctx.fillStyle = rad;
-  ctx.fillRect(0, 0, W, H);
 
   // 4. STEMMA CENTRALE GIGANTE PROTAGONISTA (Diametro 320px)
   drawCircularLogo(ctx, W / 2, 530, 160);

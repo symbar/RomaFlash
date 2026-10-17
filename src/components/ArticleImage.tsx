@@ -313,7 +313,7 @@ export default function ArticleImage({
       return (
         <div className={`relative w-full h-full overflow-hidden bg-gradient-to-br from-[#2a070c] via-[#1a0407] to-gray-900 ${className}`}>
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
-          <div className="absolute top-4 left-4 z-20 w-8 h-8 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-md border border-[#f0b516]/50 pointer-events-none">
+          <div className="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-[#26050a]/90 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-md border-2 border-[#f0b516] pointer-events-none">
             <WolfLogo className="w-full h-full" />
           </div>
         </div>
@@ -346,9 +346,9 @@ export default function ArticleImage({
           onError={handleError}
           className={`w-full h-full object-cover ${isDailyBriefing ? 'object-[center_40%]' : ''} group-hover:scale-105 transition-transform duration-700`}
         />
-        {/* RomaFlash Wolf Logo Badge (Top-Left) - Nascosto solo per L'Analista nelle card piccole */}
+        {/* RomaFlash Circular Wolf Logo Badge (Top-Left) - Nascosto solo per L'Analista nelle card piccole */}
         {!isAnalyst && (
-          <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1 shadow-md border border-[#f0b516]/50 pointer-events-none">
+          <div className="absolute top-3 left-3 z-10 w-7 h-7 rounded-full bg-[#26050a]/90 backdrop-blur-sm flex items-center justify-center p-1 shadow-md border-2 border-[#f0b516] pointer-events-none">
             <WolfLogo className="w-full h-full" />
           </div>
         )}
@@ -372,8 +372,8 @@ export default function ArticleImage({
         />
         {/* Gradient shadow for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none" />
-        {/* RomaFlash Wolf Logo Badge (Top-Left) */}
-        <div className="absolute top-4 left-4 z-20 w-8 h-8 rounded-lg bg-[#2a070c]/85 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-md border border-[#f0b516]/50 pointer-events-none">
+        {/* RomaFlash Circular Wolf Logo Badge (Top-Left) */}
+        <div className="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-[#26050a]/90 backdrop-blur-sm flex items-center justify-center p-1.5 shadow-md border-2 border-[#f0b516] pointer-events-none">
           <WolfLogo className="w-full h-full" />
         </div>
 
@@ -396,8 +396,8 @@ export default function ArticleImage({
         onError={handleError}
         className={`w-full h-full object-cover ${isDailyBriefing ? 'object-[center_40%]' : ''}`}
       />
-      {/* RomaFlash Wolf Logo Badge (Top-Left) */}
-      <div className="absolute top-3.5 left-3.5 z-10 w-9 h-9 rounded-xl bg-[#2a070c]/85 backdrop-blur-md flex items-center justify-center p-1.5 shadow-md border border-[#f0b516]/50 pointer-events-none">
+      {/* RomaFlash Circular Wolf Logo Badge (Top-Left) */}
+      <div className="absolute top-3.5 left-3.5 z-10 w-9 h-9 rounded-full bg-[#26050a]/90 backdrop-blur-md flex items-center justify-center p-1.5 shadow-md border-2 border-[#f0b516] pointer-events-none">
         <WolfLogo className="w-full h-full" />
       </div>
 

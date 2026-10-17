@@ -107,23 +107,16 @@ export function drawCircularLogo(
   ctx.strokeStyle = "rgba(224, 45, 71, 0.9)";
   ctx.stroke();
 
-  // Lupetto in oro
-  const wolfSize = r * 1.15;
+  // Lupetto in oro - perfettamente centrato nel cerchio (senza scritta)
+  const wolfSize = r * 1.34;
   ctx.save();
-  ctx.translate(cx - wolfSize / 2, cy - r * 0.65);
+  ctx.translate(cx - wolfSize * 0.495, cy - wolfSize * 0.515);
   const scale = wolfSize / 512;
   ctx.scale(scale, scale);
   const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
   ctx.fillStyle = "#f0b516";
   ctx.fill(wolfPath);
   ctx.restore();
-
-  // Testo ROMAFLASH
-  ctx.font = `900 ${Math.round(r * 0.22)}px system-ui, -apple-system, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("ROMAFLASH", cx, cy + r * 0.52);
 
   ctx.restore();
 }

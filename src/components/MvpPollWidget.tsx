@@ -87,8 +87,8 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
   const [loading, setLoading] = useState(true);
   const [hasVoted, setHasVoted] = useState(false);
   const [votedSlug, setVotedSlug] = useState<string | null>(null);
-  const [votesByPlayer, setVotesByPlayer] = useState<Record<string, number>>(DEMO_VOTES_INITIAL);
-  const [totalVotes, setTotalVotes] = useState(3411);
+  const [votesByPlayer, setVotesByPlayer] = useState<Record<string, number>>({});
+  const [totalVotes, setTotalVotes] = useState(0);
   const [isVoting, setIsVoting] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>('');
 
@@ -97,12 +97,14 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
 
     async function loadPoll() {
       try {
-        // Cerca un sondaggio attivo su Supabase
+        const nowIso = new Date().toISOString();
+        // Cerca un sondaggio attivo su Supabase (tra started_at e closes_at)
         const { data, error } = await supabase
           .from('match_mvp_polls')
           .select('*')
           .eq('status', 'active')
-          .gt('closes_at', new Date().toISOString())
+          .lte('started_at', nowIso)
+          .gt('closes_at', nowIso)
           .order('started_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -126,19 +128,31 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               setVotedSlug(localVote);
             }
           } else {
-            // Fallback con dati demo attivi per visualizzazione immediata
-            setPoll(DEFAULT_DEMO_POLL);
-            const localVote = localStorage.getItem(`romaflash_mvp_voted_${DEFAULT_DEMO_POLL.id}`);
-            if (localVote) {
-              setHasVoted(true);
-              setVotedSlug(localVote);
+            // Se non c'è nessun match terminato negli ultimi 30m-4h, verifica se è richiesta la preview di test via URL (?mvp_preview=1)
+            const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
+            if (isPreview) {
+              setPoll(DEFAULT_DEMO_POLL);
+              setTotalVotes(DEFAULT_DEMO_POLL.total_votes);
+              setVotesByPlayer(DEMO_VOTES_INITIAL);
+              const localVote = localStorage.getItem(`romaflash_mvp_voted_${DEFAULT_DEMO_POLL.id}`);
+              if (localVote) {
+                setHasVoted(true);
+                setVotedSlug(localVote);
+              }
+            } else {
+              setPoll(null);
             }
           }
           setLoading(false);
         }
       } catch {
         if (isMounted) {
-          setPoll(DEFAULT_DEMO_POLL);
+          const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
+          if (isPreview) {
+            setPoll(DEFAULT_DEMO_POLL);
+          } else {
+            setPoll(null);
+          }
           setLoading(false);
         }
       }

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Download, Copy, Check, BarChart3, Sparkles } from "lucide-react";
+import { X, Download, Copy, Check, BarChart3 } from "lucide-react";
 import { getStatsForArticle, MatchStatsData } from "./MatchStatsWidget";
 
 interface AnalistaStatsModalProps {
@@ -10,7 +10,22 @@ interface AnalistaStatsModalProps {
   onClose: () => void;
 }
 
-export function drawAnalistaPoster(canvas: HTMLCanvasElement, stats: MatchStatsData) {
+function loadImg(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load ${src}`));
+    img.src = src;
+  });
+}
+
+export function drawAnalistaPoster(
+  canvas: HTMLCanvasElement,
+  stats: MatchStatsData,
+  homeImg?: HTMLImageElement | null,
+  awayImg?: HTMLImageElement | null
+) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
@@ -105,7 +120,7 @@ export function drawAnalistaPoster(canvas: HTMLCanvasElement, stats: MatchStatsD
   ctx.lineTo(width - 70, 180);
   ctx.stroke();
 
-  // 6. Scoreboard Hero
+  // 6. Scoreboard Hero con Loghi Ufficiali Squadre
   ctx.save();
   ctx.fillStyle = "rgba(10, 2, 4, 0.7)";
   ctx.strokeStyle = "rgba(240, 181, 22, 0.25)";
@@ -115,20 +130,41 @@ export function drawAnalistaPoster(canvas: HTMLCanvasElement, stats: MatchStatsD
   ctx.fill();
   ctx.stroke();
 
-  // Home Team
+  // Home Team Logo & Card
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  ctx.strokeStyle = "rgba(240, 181, 22, 0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(95, 225, 90, 95, 18);
+  ctx.fill();
+  ctx.stroke();
+
+  if (homeImg) {
+    ctx.drawImage(homeImg, 105, 237, 70, 70);
+  } else {
+    ctx.fillStyle = "#f0b516";
+    ctx.font = "900 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("ASR", 140, 272);
+  }
+  ctx.restore();
+
+  // Home Team Name & Scorers
   ctx.fillStyle = "#ffffff";
-  ctx.font = "900 36px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(stats.homeTeam, 270, 260);
+  ctx.font = "900 30px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(stats.homeTeam, 205, 265);
 
   if (stats.scorersHome) {
     ctx.fillStyle = "#f0b516";
-    ctx.font = "600 18px sans-serif";
-    ctx.fillText(stats.scorersHome, 270, 298);
+    ctx.font = "600 17px sans-serif";
+    ctx.fillText(stats.scorersHome, 205, 298);
   }
 
   // Central Score badge
-  const scoreGrad = ctx.createLinearGradient(width / 2 - 80, 225, width / 2 + 80, 315);
+  const scoreGrad = ctx.createLinearGradient(width / 2 - 85, 225, width / 2 + 85, 315);
   scoreGrad.addColorStop(0, "#8e1b23");
   scoreGrad.addColorStop(1, "#540a11");
   ctx.fillStyle = scoreGrad;
@@ -144,15 +180,36 @@ export function drawAnalistaPoster(canvas: HTMLCanvasElement, stats: MatchStatsD
   ctx.textAlign = "center";
   ctx.fillText(`${stats.homeScore} - ${stats.awayScore}`, width / 2, 290);
 
-  // Away Team
+  // Away Team Logo & Card
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(width - 185, 225, 90, 95, 18);
+  ctx.fill();
+  ctx.stroke();
+
+  if (awayImg) {
+    ctx.drawImage(awayImg, width - 175, 237, 70, 70);
+  } else {
+    ctx.fillStyle = "#cbd5e1";
+    ctx.font = "900 24px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("GEN", width - 140, 272);
+  }
+  ctx.restore();
+
+  // Away Team Name & Scorers
   ctx.fillStyle = "#cbd5e1";
-  ctx.font = "900 36px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(stats.awayTeam, width - 270, 260);
+  ctx.font = "900 30px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(stats.awayTeam, width - 205, 265);
 
   ctx.fillStyle = "#64748b";
-  ctx.font = "600 18px sans-serif";
-  ctx.fillText(stats.scorersAway || "0 Gol", width - 270, 298);
+  ctx.font = "600 17px sans-serif";
+  ctx.fillText(stats.scorersAway || "0 Gol", width - 205, 298);
   ctx.restore();
 
   // 7. Stats Bars Cards
@@ -307,9 +364,32 @@ export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsMo
   const stats = article ? getStatsForArticle(article) : null;
 
   useEffect(() => {
-    if (canvasRef.current && stats) {
-      drawAnalistaPoster(canvasRef.current, stats);
-    }
+    let isMounted = true;
+    if (!stats || !canvasRef.current) return;
+
+    // 1. Initial draw with fallbacks
+    drawAnalistaPoster(canvasRef.current, stats);
+
+    // 2. Load high-res images and re-render with official logos
+    const renderWithLogos = async () => {
+      try {
+        const [homeImg, awayImg] = await Promise.all([
+          loadImg(stats.homeLogo).catch(() => null),
+          loadImg(stats.awayLogo).catch(() => null),
+        ]);
+        if (isMounted && canvasRef.current) {
+          drawAnalistaPoster(canvasRef.current, stats, homeImg, awayImg);
+        }
+      } catch (e) {
+        console.warn("Logo loading fallback:", e);
+      }
+    };
+
+    renderWithLogos();
+
+    return () => {
+      isMounted = false;
+    };
   }, [stats]);
 
   if (!mounted || !article || !stats) return null;

@@ -5,6 +5,8 @@ import React from 'react';
 export interface MatchStatsData {
   homeTeam: string;
   awayTeam: string;
+  homeLogo: string;
+  awayLogo: string;
   homeScore: number | string;
   awayScore: number | string;
   competition: string;
@@ -18,15 +20,50 @@ export interface MatchStatsData {
   verdict?: string;
 }
 
+export const TEAM_LOGOS: Record<string, string> = {
+  roma: 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png',
+  genoa: 'https://a.espncdn.com/i/teamlogos/soccer/500/3263.png',
+  como: 'https://a.espncdn.com/i/teamlogos/soccer/500/2572.png',
+  'real madrid': 'https://a.espncdn.com/i/teamlogos/soccer/500/86.png',
+  fiorentina: 'https://a.espncdn.com/i/teamlogos/soccer/500/109.png',
+  juventus: 'https://a.espncdn.com/i/teamlogos/soccer/500/111.png',
+  milan: 'https://a.espncdn.com/i/teamlogos/soccer/500/103.png',
+  inter: 'https://a.espncdn.com/i/teamlogos/soccer/500/110.png',
+  napoli: 'https://a.espncdn.com/i/teamlogos/soccer/500/114.png',
+  lazio: 'https://a.espncdn.com/i/teamlogos/soccer/500/112.png',
+  atalanta: 'https://a.espncdn.com/i/teamlogos/soccer/500/122.png',
+  bologna: 'https://a.espncdn.com/i/teamlogos/soccer/500/107.png',
+  torino: 'https://a.espncdn.com/i/teamlogos/soccer/500/239.png',
+  verona: 'https://a.espncdn.com/i/teamlogos/soccer/500/118.png',
+  monza: 'https://a.espncdn.com/i/teamlogos/soccer/500/2729.png',
+  udinese: 'https://a.espncdn.com/i/teamlogos/soccer/500/117.png',
+  parma: 'https://a.espncdn.com/i/teamlogos/soccer/500/115.png',
+  cagliari: 'https://a.espncdn.com/i/teamlogos/soccer/500/108.png',
+  empoli: 'https://a.espncdn.com/i/teamlogos/soccer/500/1277.png',
+  venezia: 'https://a.espncdn.com/i/teamlogos/soccer/500/2730.png',
+  lecce: 'https://a.espncdn.com/i/teamlogos/soccer/500/113.png',
+};
+
+export function resolveTeamLogo(name: string): string {
+  if (!name) return 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png';
+  const lower = name.toLowerCase().trim();
+  for (const [key, url] of Object.entries(TEAM_LOGOS)) {
+    if (lower.includes(key)) return url;
+  }
+  return 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png';
+}
+
 export function getStatsForArticle(article: any): MatchStatsData {
   const title = (article?.title || '').toLowerCase();
-  const content = (article?.ai_summary?.content || '') + ' ' + (article?.content || '');
+  const matchInfo = article?.ai_summary?.match_info;
 
   // 1. Specific verified data for Roma - Genoa 2-0
   if (title.includes('genoa')) {
     return {
       homeTeam: 'AS ROMA',
       awayTeam: 'GENOA',
+      homeLogo: matchInfo?.home_logo || TEAM_LOGOS.roma,
+      awayLogo: matchInfo?.away_logo || TEAM_LOGOS.genoa,
       homeScore: 2,
       awayScore: 0,
       competition: 'SERIE A',
@@ -45,6 +82,8 @@ export function getStatsForArticle(article: any): MatchStatsData {
     return {
       homeTeam: 'AS ROMA',
       awayTeam: 'REAL MADRID',
+      homeLogo: matchInfo?.home_logo || TEAM_LOGOS.roma,
+      awayLogo: matchInfo?.away_logo || TEAM_LOGOS['real madrid'],
       homeScore: 3,
       awayScore: 4,
       competition: 'CHAMPIONS LEAGUE',
@@ -62,6 +101,8 @@ export function getStatsForArticle(article: any): MatchStatsData {
     return {
       homeTeam: 'COMO',
       awayTeam: 'AS ROMA',
+      homeLogo: matchInfo?.home_logo || TEAM_LOGOS.como,
+      awayLogo: matchInfo?.away_logo || TEAM_LOGOS.roma,
       homeScore: 0,
       awayScore: 0,
       competition: 'SERIE A',
@@ -74,13 +115,18 @@ export function getStatsForArticle(article: any): MatchStatsData {
     };
   }
 
-  // Fallback defaults (Roma-Genoa baseline)
+  // Fallback defaults (Roma baseline)
+  const homeName = matchInfo?.home_name || 'AS ROMA';
+  const awayName = matchInfo?.away_name || 'AVVERSARIO';
+
   return {
-    homeTeam: 'AS ROMA',
-    awayTeam: 'AVVERSARIO',
-    homeScore: 2,
-    awayScore: 0,
-    competition: 'SERIE A',
+    homeTeam: homeName,
+    awayTeam: awayName,
+    homeLogo: matchInfo?.home_logo || resolveTeamLogo(homeName),
+    awayLogo: matchInfo?.away_logo || resolveTeamLogo(awayName),
+    homeScore: matchInfo?.home_score ?? 2,
+    awayScore: matchInfo?.away_score ?? 0,
+    competition: matchInfo?.competition || 'SERIE A',
     possession: { home: 65.5, away: 34.5 },
     shots: { home: 15, homeOnTarget: 5, away: 9, awayOnTarget: 1 },
     passes: { home: 500, homeAcc: 80, away: 220, awayAcc: 70 },
@@ -97,9 +143,6 @@ interface MatchStatsWidgetProps {
 export default function MatchStatsWidget({ article }: MatchStatsWidgetProps) {
   const stats = getStatsForArticle(article);
 
-  const homeInitials = stats.homeTeam.includes('ROMA') ? 'ASR' : stats.homeTeam.slice(0, 3).toUpperCase();
-  const awayInitials = stats.awayTeam.includes('ROMA') ? 'ASR' : stats.awayTeam.slice(0, 3).toUpperCase();
-
   const totalShots = stats.shots.home + stats.shots.away;
   const shotsHomePercent = totalShots > 0 ? (stats.shots.home / totalShots) * 100 : 50;
 
@@ -115,12 +158,17 @@ export default function MatchStatsWidget({ article }: MatchStatsWidgetProps) {
       <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header Match Stats */}
+      {/* Header Match Stats con Loghi Ufficiali Squadre */}
       <div className="flex items-center justify-between border-b border-amber-500/20 pb-4 mb-5 relative z-10">
         {/* Squadra Casa */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#8e1b23] border border-amber-400 flex items-center justify-center font-black text-amber-400 text-xs shadow-md">
-            {homeInitials}
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-black/40 border border-amber-500/30 p-1.5 flex items-center justify-center shrink-0 shadow-md">
+            <img
+              src={stats.homeLogo}
+              alt={stats.homeTeam}
+              className="w-full h-full object-contain filter drop-shadow-sm"
+              loading="lazy"
+            />
           </div>
           <div>
             <span className="text-[10px] sm:text-xs text-slate-400 block font-medium">Casa</span>
@@ -139,8 +187,13 @@ export default function MatchStatsWidget({ article }: MatchStatsWidgetProps) {
 
         {/* Squadra Ospite */}
         <div className="flex items-center gap-2.5 sm:gap-3 flex-row-reverse text-right">
-          <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center font-black text-slate-200 text-xs shadow-md">
-            {awayInitials}
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-black/40 border border-slate-700/60 p-1.5 flex items-center justify-center shrink-0 shadow-md">
+            <img
+              src={stats.awayLogo}
+              alt={stats.awayTeam}
+              className="w-full h-full object-contain filter drop-shadow-sm"
+              loading="lazy"
+            />
           </div>
           <div>
             <span className="text-[10px] sm:text-xs text-slate-400 block font-medium">Ospite</span>

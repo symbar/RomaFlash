@@ -43,90 +43,39 @@ async function postToX(
   }
 
   const publicImageUrl = resolvePublicImageUrl(imageUrl)
+  const rootAssets = publicImageUrl ? [{ image: { url: publicImageUrl } }] : []
 
-  const twitterMetadata = threadCommentText && threadCommentText.trim()
-    ? {
-        twitter: {
-          thread: [
-            {
-              text: threadCommentText.trim()
-            }
-          ]
-        }
-      }
-    : null;
-
-  if (publicImageUrl) {
-    const mediaMutation = `
-      mutation CreatePostWithImage($text: String!, $channelId: ChannelId!, $imageUrl: String!, $metadata: PostInputMetaData) {
-        createPost(
-          input: {
-            text: $text
-            channelId: $channelId
-            schedulingType: automatic
-            mode: shareNow
-            assets: [
-              {
-                image: {
-                  url: $imageUrl
-                }
-              }
-            ]
-            metadata: $metadata
-          }
-        ) {
-          ... on PostActionSuccess {
-            post {
-              id
-              text
-              externalLink
-            }
-          }
-          ... on MutationError {
-            message
-          }
-        }
-      }
-    `
-    try {
-      const mediaRes = await fetch('https://api.buffer.com', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${bufferApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mediaMutation,
-          variables: {
+  // Regola Buffer per i Thread su Twitter/𝕏:
+  // L'array metadata.twitter.thread[] è la fonte di verità:
+  // - Elemento 0: root tweet (testo uguale al padre e relativi assets)
+  // - Elemento 1: primo commento in risposta (thread con link, assets: [])
+  const buildTwitterMetadata = (assets: any[]) => {
+    if (!threadCommentText || !threadCommentText.trim()) return null
+    return {
+      twitter: {
+        thread: [
+          {
             text: tweetText,
-            channelId: bufferChannelId,
-            imageUrl: publicImageUrl,
-            metadata: twitterMetadata,
+            assets: assets,
           },
-        }),
-      })
-      const mediaData = await mediaRes.json()
-      const mediaPost = mediaData?.data?.createPost?.post
-      if (mediaPost?.id) {
-        return { id: mediaPost.id, url: mediaPost.externalLink || undefined }
-      }
-      console.warn(
-        '[X AUTO-POST] Invio con immagine non riuscito, fallback a link card:',
-        mediaData?.data?.createPost?.message || JSON.stringify(mediaData)
-      )
-    } catch (e) {
-      console.warn('[X AUTO-POST] Errore invio immagine a Buffer, fallback a link card:', e)
+          {
+            text: threadCommentText.trim(),
+            assets: [],
+          },
+        ],
+      },
     }
   }
 
   const mutation = `
-    mutation CreatePost($text: String!, $channelId: ChannelId!, $metadata: PostInputMetaData) {
+    mutation CreatePost($text: String!, $channelId: ChannelId!, $assets: [AssetInput!]!, $metadata: PostInputMetaData) {
       createPost(
         input: {
           text: $text
           channelId: $channelId
           schedulingType: automatic
           mode: shareNow
+          assets: $assets
           metadata: $metadata
         }
       ) {
@@ -144,6 +93,7 @@ async function postToX(
     }
   `
 
+  // Tentativo 1: Con immagine (se disponibile) e thread
   try {
     const res = await fetch('https://api.buffer.com', {
       method: 'POST',
@@ -156,7 +106,8 @@ async function postToX(
         variables: {
           text: tweetText,
           channelId: bufferChannelId,
-          metadata: twitterMetadata,
+          assets: rootAssets,
+          metadata: buildTwitterMetadata(rootAssets),
         },
       }),
     })
@@ -166,8 +117,37 @@ async function postToX(
     if (post?.id) {
       return { id: post.id, url: post.externalLink || undefined }
     }
+
     const errMsg = data?.data?.createPost?.message || JSON.stringify(data)
-    console.error('Errore Buffer API:', errMsg)
+    console.warn('[X PUBLISH] Tentativo con immagine fallito, riprovo senza immagine:', errMsg)
+
+    // Se il fallimento era dovuto all'immagine e avevamo un'immagine, riprova senza immagine ma con thread intatto
+    if (rootAssets.length > 0) {
+      const fallbackRes = await fetch('https://api.buffer.com', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${bufferApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            text: tweetText,
+            channelId: bufferChannelId,
+            assets: [],
+            metadata: buildTwitterMetadata([]),
+          },
+        }),
+      })
+
+      const fallbackData = await fallbackRes.json()
+      const fallbackPost = fallbackData?.data?.createPost?.post
+      if (fallbackPost?.id) {
+        return { id: fallbackPost.id, url: fallbackPost.externalLink || undefined }
+      }
+      return { error: fallbackData?.data?.createPost?.message || JSON.stringify(fallbackData) }
+    }
+
     return { error: errMsg }
   } catch (err: any) {
     console.error('Errore di rete verso Buffer:', err)

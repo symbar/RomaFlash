@@ -30,76 +30,17 @@ async function postToX(
   }
 
   const publicImageUrl = resolvePublicImageUrl(imageUrl)
-
-  if (publicImageUrl) {
-    const mediaMutation = `
-      mutation CreatePostWithImage($text: String!, $channelId: ChannelId!, $imageUrl: String!) {
-        createPost(
-          input: {
-            text: $text
-            channelId: $channelId
-            schedulingType: automatic
-            mode: shareNow
-            assets: [
-              {
-                image: {
-                  url: $imageUrl
-                }
-              }
-            ]
-          }
-        ) {
-          ... on PostActionSuccess {
-            post {
-              id
-              text
-              externalLink
-            }
-          }
-          ... on MutationError {
-            message
-          }
-        }
-      }
-    `
-    try {
-      const mediaRes = await fetch('https://api.buffer.com', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${bufferApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: mediaMutation,
-          variables: {
-            text: tweetText,
-            channelId: bufferChannelId,
-            imageUrl: publicImageUrl,
-          },
-        }),
-      })
-      const mediaData = await mediaRes.json()
-      const mediaPost = mediaData?.data?.createPost?.post
-      if (mediaPost?.id) {
-        return { id: mediaPost.id, url: mediaPost.externalLink || undefined }
-      }
-      console.warn(
-        '[X AUTO-POST] Invio con immagine non riuscito, fallback a link card:',
-        mediaData?.data?.createPost?.message || JSON.stringify(mediaData)
-      )
-    } catch (e) {
-      console.warn('[X AUTO-POST] Errore invio immagine a Buffer, fallback a link card:', e)
-    }
-  }
+  const rootAssets = publicImageUrl ? [{ image: { url: publicImageUrl } }] : []
 
   const mutation = `
-    mutation CreatePost($text: String!, $channelId: ChannelId!) {
+    mutation CreatePost($text: String!, $channelId: ChannelId!, $assets: [AssetInput!]!) {
       createPost(
         input: {
           text: $text
           channelId: $channelId
           schedulingType: automatic
           mode: shareNow
+          assets: $assets
         }
       ) {
         ... on PostActionSuccess {
@@ -128,6 +69,7 @@ async function postToX(
         variables: {
           text: tweetText,
           channelId: bufferChannelId,
+          assets: rootAssets,
         },
       }),
     })
@@ -137,6 +79,30 @@ async function postToX(
     if (post?.id) {
       return { id: post.id, url: post.externalLink || undefined }
     }
+
+    if (rootAssets.length > 0) {
+      const fallbackRes = await fetch('https://api.buffer.com', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${bufferApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables: {
+            text: tweetText,
+            channelId: bufferChannelId,
+            assets: [],
+          },
+        }),
+      })
+      const fallbackData = await fallbackRes.json()
+      const fallbackPost = fallbackData?.data?.createPost?.post
+      if (fallbackPost?.id) {
+        return { id: fallbackPost.id, url: fallbackPost.externalLink || undefined }
+      }
+    }
+
     const errMsg = data?.data?.createPost?.message || JSON.stringify(data)
     console.error('Errore Buffer API:', errMsg)
     return { error: errMsg }

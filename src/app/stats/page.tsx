@@ -7,6 +7,7 @@ import GlobalHeader from "@/components/GlobalHeader";
 import TikTokKitModal, { TikTokIcon } from "@/components/TikTokKitModal";
 import InstagramStoryModal, { InstagramIcon } from "@/components/InstagramStoryModal";
 import AnalistaStatsModal from "@/components/AnalistaStatsModal";
+import XPublishModal, { XLogoIcon } from "@/components/XPublishModal";
 import {
   Eye,
   Flame,
@@ -22,12 +23,20 @@ import {
   Vote,
   TrendingUp,
   ThumbsUp,
+  Send,
 } from "lucide-react";
 
 const ADMIN_PIN = "1927";
 const STORAGE_PIN_KEY = "romaflash_admin_unlocked_pin";
 
-type SortMode = "recent" | "most_read" | "least_read" | "most_liked" | "most_voted";
+type SortMode =
+  | "recent"
+  | "most_read"
+  | "least_read"
+  | "most_liked"
+  | "most_voted"
+  | "not_on_x"
+  | "on_x";
 
 export default function StatsBackofficePage() {
   const [pinInput, setPinInput] = useState("");
@@ -46,6 +55,7 @@ export default function StatsBackofficePage() {
   const [tiktokArticle, setTiktokArticle] = useState<any | null>(null);
   const [instagramArticle, setInstagramArticle] = useState<any | null>(null);
   const [analystArticle, setAnalystArticle] = useState<any | null>(null);
+  const [xArticle, setXArticle] = useState<any | null>(null);
 
   useEffect(() => {
     try {
@@ -261,6 +271,22 @@ export default function StatsBackofficePage() {
           (pollVotesMap[b.id] || 0) - (pollVotesMap[a.id] || 0) ||
           (b.views || 0) - (a.views || 0)
       );
+    }
+    if (sortMode === "not_on_x") {
+      return copy
+        .filter((a) => !a.ai_summary?.x_tweet_id)
+        .sort(
+          (a, b) =>
+            new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        );
+    }
+    if (sortMode === "on_x") {
+      return copy
+        .filter((a) => Boolean(a.ai_summary?.x_tweet_id))
+        .sort(
+          (a, b) =>
+            new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        );
     }
     return copy.sort(
       (a, b) =>
@@ -534,6 +560,32 @@ export default function StatsBackofficePage() {
             <Vote className="w-3.5 h-3.5" />
             Più Votati (Sondaggi)
           </button>
+
+          <button
+            type="button"
+            onClick={() => setSortMode("not_on_x")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "not_on_x"
+                ? "bg-black text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <XLogoIcon className="w-3 h-3" />
+            Da twittare ({articles.filter((a) => !a.ai_summary?.x_tweet_id).length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSortMode("on_x")}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              sortMode === "on_x"
+                ? "bg-black text-white shadow-xs"
+                : "bg-white text-gray-600 border border-border hover:text-gray-900"
+            }`}
+          >
+            <XLogoIcon className="w-3 h-3 text-sky-400" />
+            Pubblicati su 𝕏 ({articles.filter((a) => Boolean(a.ai_summary?.x_tweet_id)).length})
+          </button>
         </div>
       </div>
 
@@ -649,6 +701,26 @@ export default function StatsBackofficePage() {
                     <Vote className="w-3 h-3" />
                     {votes}
                   </span>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setXArticle(art);
+                    }}
+                    className={`p-1.5 rounded-lg transition-all cursor-pointer hover:scale-105 shadow-xs ${
+                      art.ai_summary?.x_tweet_id
+                        ? "bg-black text-white hover:bg-neutral-800"
+                        : "bg-gray-100 text-gray-700 hover:bg-black hover:text-white border border-gray-200"
+                    }`}
+                    title={
+                      art.ai_summary?.x_tweet_id
+                        ? "Già pubblicato su 𝕏 (apri per dettagli o ripubblica)"
+                        : "Pubblica su 𝕏 con Formula a 3 Blocchi e Thread"
+                    }
+                  >
+                    <XLogoIcon className="w-3.5 h-3.5" />
+                  </button>
 
                   <button
                     type="button"
@@ -875,6 +947,25 @@ export default function StatsBackofficePage() {
                       <div className="inline-flex items-center justify-center gap-1">
                         <button
                           type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setXArticle(art);
+                          }}
+                          className={`p-1.5 rounded-lg transition-all cursor-pointer hover:scale-105 shadow-xs ${
+                            art.ai_summary?.x_tweet_id
+                              ? "bg-black text-white hover:bg-neutral-800"
+                              : "bg-gray-100 text-gray-700 hover:bg-black hover:text-white border border-gray-200"
+                          }`}
+                          title={
+                            art.ai_summary?.x_tweet_id
+                              ? "Già pubblicato su 𝕏 (apri per dettagli o ripubblica)"
+                              : "Pubblica su 𝕏 con Formula a 3 Blocchi e Thread"
+                          }
+                        >
+                          <XLogoIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setTiktokArticle(art)}
                           className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                             art.ai_summary?.poll || art.ai_summary?.is_daily_recap
@@ -958,6 +1049,18 @@ export default function StatsBackofficePage() {
       <AnalistaStatsModal
         article={analystArticle}
         onClose={() => setAnalystArticle(null)}
+      />
+
+      {/* Modal Pubblicazione 𝕏 (Twitter) Buffer */}
+      <XPublishModal
+        article={xArticle}
+        isOpen={Boolean(xArticle)}
+        onClose={() => setXArticle(null)}
+        onPublished={(updatedArt) => {
+          setArticles((prev) =>
+            prev.map((a) => (a.id === updatedArt.id ? updatedArt : a))
+          );
+        }}
       />
     </main>
   );

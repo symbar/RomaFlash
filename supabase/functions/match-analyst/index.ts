@@ -453,45 +453,9 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi di codice markdown:
       throw insertError
     }
 
-    // Auto-Post su X tramite Buffer
-    let xTweetId: string | undefined = undefined
-    if (savedArticle?.id) {
-      const cleanBase = (aiSummary.tweet_text || aiSummary.excerpt || articleTitle || '')
-        .replace(/https?:\/\/\S+/gi, '')
-        .replace(/#[a-zA-Z0-9_]+/g, '')
-        .trim();
-      const extraTags = (aiSummary.dynamic_hashtags || '')
-        .replace(/#ASRoma/gi, '')
-        .replace(/#RomaFlash/gi, '')
-        .trim();
-      const footer = `\n\n#ASRoma #AnalisiTattica${extraTags ? ` ${extraTags}` : ''}`;
-      
-      const maxBaseLength = 278 - footer.length;
-      let truncatedBase = cleanBase;
-      if (cleanBase.length > maxBaseLength) {
-        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
-      }
-      const fullTweet = `${truncatedBase}${footer}`;
-
-      console.log(`[X AUTO-POST] Pubblicazione L'Analista nativo su X...`)
-      const xRes = await postToX(fullTweet, tacticalBoardImg)
-      if (xRes.id) {
-        console.log(`[X AUTO-POST] Articolo L'Analista pubblicato su X! ID: ${xRes.id}`)
-        xTweetId = xRes.id
-        aiSummary.x_tweet_id = xRes.id
-        if (xRes.url) {
-          aiSummary.x_tweet_url = xRes.url
-        }
-        aiSummary.x_posted_at = new Date().toISOString()
-        await supabase
-          .from('articles')
-          .update({ ai_summary: aiSummary })
-          .eq('id', savedArticle.id)
-      } else {
-        console.error(`[X AUTO-POST] Errore pubblicazione L'Analista su X:`, xRes.error)
-      }
-    }
+    // Auto-Post su X disattivato: la pubblicazione su X viene gestita manualmente tramite la dashboard /stats
+    let xTweetId: string | undefined = undefined;
+    console.log(`[X POSTING] Pubblicazione automatica L'Analista in background disattivata. Gestione manuale on-demand attiva su /stats.`);
 
     // Invia Web Push ai tifosi iscritti
     const vapidPublic = Deno.env.get('VAPID_PUBLIC_KEY')

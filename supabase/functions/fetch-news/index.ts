@@ -32,7 +32,8 @@ function generateArticleSlug(title: string, id: string): string {
 
 async function postToX(
   tweetText: string,
-  imageUrl?: string | null
+  imageUrl?: string | null,
+  threadCommentText?: string | null
 ): Promise<{ id?: string; url?: string; error?: string }> {
   const bufferApiKey = Deno.env.get('BUFFER_API_KEY')
   const bufferChannelId = Deno.env.get('BUFFER_CHANNEL_ID') || '6acbee4e778b240e2fdc27e7'
@@ -43,9 +44,21 @@ async function postToX(
 
   const publicImageUrl = resolvePublicImageUrl(imageUrl)
 
+  const twitterMetadata = threadCommentText && threadCommentText.trim()
+    ? {
+        twitter: {
+          thread: [
+            {
+              text: threadCommentText.trim()
+            }
+          ]
+        }
+      }
+    : null;
+
   if (publicImageUrl) {
     const mediaMutation = `
-      mutation CreatePostWithImage($text: String!, $channelId: ChannelId!, $imageUrl: String!) {
+      mutation CreatePostWithImage($text: String!, $channelId: ChannelId!, $imageUrl: String!, $metadata: PostInputMetaData) {
         createPost(
           input: {
             text: $text
@@ -59,6 +72,7 @@ async function postToX(
                 }
               }
             ]
+            metadata: $metadata
           }
         ) {
           ... on PostActionSuccess {
@@ -87,6 +101,7 @@ async function postToX(
             text: tweetText,
             channelId: bufferChannelId,
             imageUrl: publicImageUrl,
+            metadata: twitterMetadata,
           },
         }),
       })
@@ -105,13 +120,14 @@ async function postToX(
   }
 
   const mutation = `
-    mutation CreatePost($text: String!, $channelId: ChannelId!) {
+    mutation CreatePost($text: String!, $channelId: ChannelId!, $metadata: PostInputMetaData) {
       createPost(
         input: {
           text: $text
           channelId: $channelId
           schedulingType: automatic
           mode: shareNow
+          metadata: $metadata
         }
       ) {
         ... on PostActionSuccess {
@@ -140,6 +156,7 @@ async function postToX(
         variables: {
           text: tweetText,
           channelId: bufferChannelId,
+          metadata: twitterMetadata,
         },
       }),
     })
@@ -196,33 +213,51 @@ serve(async (req) => {
       }
 
       const aiSummary = art.ai_summary || {};
-      const cleanBase = (aiSummary.tweet_text || aiSummary.excerpt || art.title || '')
-        .replace(/https?:\/\/\S+/gi, '')
-        .replace(/#[a-zA-Z0-9_]+/g, '')
-        .trim();
-      const extraTags = (aiSummary.dynamic_hashtags || '')
-        .replace(/#ASRoma/gi, '')
-        .replace(/#RomaFlash/gi, '')
-        .trim();
-      const footer = `\n\n#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
-      
-      const maxBaseLength = 278 - footer.length;
-      let truncatedBase = cleanBase;
-      if (cleanBase.length > maxBaseLength) {
-        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
-      }
-      const fullTweet = `${truncatedBase}${footer}`;
+      let fullTweet = '';
 
-      console.log(`[X MANUAL REPUBLISH] Invio tweet nativo per articolo ${art.id}: "${fullTweet}"`);
-      const xRes = await postToX(fullTweet, art.image_url);
+      if (reqBody.customTweetText && typeof reqBody.customTweetText === 'string' && reqBody.customTweetText.trim()) {
+        fullTweet = reqBody.customTweetText.trim();
+      } else {
+        const cleanBase = (aiSummary.tweet_text || aiSummary.excerpt || art.title || '')
+          .replace(/https?:\/\/\S+/gi, '')
+          .replace(/#[a-zA-Z0-9_]+/g, '')
+          .trim();
+        const extraTags = (aiSummary.dynamic_hashtags || '')
+          .replace(/#ASRoma/gi, '')
+          .replace(/#RomaFlash/gi, '')
+          .trim();
+        const footer = `\n\n#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+        
+        const maxBaseLength = 278 - footer.length;
+        let truncatedBase = cleanBase;
+        if (cleanBase.length > maxBaseLength) {
+          const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
+          truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
+        }
+        fullTweet = `${truncatedBase}${footer}`;
+      }
+
+      // Preparazione primo commento / thread con il link all'articolo
+      let threadComment: string | null = null;
+      if (reqBody.customCommentText !== undefined) {
+        threadComment = reqBody.customCommentText ? String(reqBody.customCommentText).trim() : null;
+      } else if (reqBody.includeThreadComment !== false) {
+        const articleSlug = generateArticleSlug(art.title, art.id);
+        threadComment = `📖 Approfondimento completo e dati su RomaFlash:\nhttps://romaflash.app/notizie/${articleSlug}`;
+      }
+
+      console.log(`[X MANUAL PUBLISH] Invio tweet per articolo ${art.id}: "${fullTweet}" (Thread: "${threadComment}")`);
+      const xRes = await postToX(fullTweet, art.image_url, threadComment);
 
       if (xRes.id) {
         aiSummary.x_tweet_id = xRes.id;
         if (xRes.url) aiSummary.x_tweet_url = xRes.url;
         aiSummary.x_posted_at = new Date().toISOString();
+        if (reqBody.customTweetText) {
+          aiSummary.tweet_text = reqBody.customTweetText.trim();
+        }
         await supabase.from('articles').update({ ai_summary: aiSummary }).eq('id', art.id);
-        return new Response(JSON.stringify({ success: true, tweetId: xRes.id, tweetUrl: xRes.url, fullTweet }), {
+        return new Response(JSON.stringify({ success: true, tweetId: xRes.id, tweetUrl: xRes.url, fullTweet, threadComment }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       } else {
@@ -635,13 +670,15 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 5. NUOVA REGOLA (Sondaggi): Se l'articolo riguarda un tema dibattuto (es. calciomercato, esonero, polemica, scelta di formazione), genera un SONDAGGIO con una domanda e 3 opzioni per far votare i tifosi. Altrimenti "poll": null.
 6. NUOVA REGOLA (Social Embed): Se IL NOME DELLA FONTE è "AS Roma (Ufficiale)", questa è una notizia Social: estrai l'URL del post (modificando eventuali nitter in twitter.com) e salvalo in "social_embed_url" e imposta TASSATIVAMENTE "category" a "Social". SE INVECE IL NOME DELLA FONTE NON E' "AS Roma (Ufficiale)" ALLORA NON DEVI MAI categorizzarlo come "Social" E NON DEVI MAI ESTRARRE UN "social_embed_url" (impostalo a null), anche se l'articolo contiene dei tweet all'interno.
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma. Per i virgolettati, mantieni la riga isolata con '>' e le parole esatte tradotte (es. > "Exact translated quote..." — Author Name).
-8. AUTO-PUBBLICAZIONE X / TWITTER ("tweet_text" e "dynamic_hashtags"):
-   Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash.
-   I post devono essere puramente editoriali, CORTI, SECCHI e D'IMPATTO (MASSIMO 100-120 caratteri, 1-2 frasi essenziali, 1 sola emoji a inizio testo).
-   ESTRAPOLA ESCLUSIVAMENTE IL FATTO O IL DATO SUPER SALIENTE (es. notizie bomba, verdetti medici/infortuni, cifre/numeri chiave, firme o scelte a sorpresa).
-   DIVIETO ASSOLUTO DI PREAMBOLI O INTRODUZIONI NARRATIVE/CELEBRATIVE (MAI iniziare con "Serata speciale...", "Buone notizie...", "Si chiude la...", "Pienamente integrato...", "Arrivano conferme...", "Ex Roma..."). Vai dritto al nocciolo: Soggetto + Fatto saliente.
-   Assolutamente SENZA LINK, SENZA URL, SENZA domini web e SENZA hashtag nel testo (vengono aggiunti automaticamente dal sistema).
-   Scrivi in "dynamic_hashtags" AL MASSIMO 1 hashtag caldo e specifico (es. "#Dybala", "#Bove", "#Derby", "#Calciomercato"), oppure lascialo vuoto "" se la notizia è generica. NON inserire #ASRoma e #RomaFlash.
+8. PREPARAZIONE POST X / TWITTER ("tweet_text" e "dynamic_hashtags"):
+   Tutte le notizie (eccetto quelle Social) vengono preparate per la pubblicazione su X.
+   I post devono essere puramente editoriali, INCISIVI e STRUTTURATI RIGOROSAMENTE IN 3 BLOCCHI (massimo 130-150 caratteri complessivi):
+   - Blocco 1 (L'Hook iniziale): Notizia nuda e cruda (8-10 parole) introdotta da 1 sola emoji tematica (🚨, 💣, 📉, 🎙️ o 📊).
+   - Blocco 2 (Dettaglio/Tensione): La cifra esatta, il verdetto medico, il minuto o il virgolettato chiave.
+   - Blocco 3 (La Miccia / Bivio obbligatorio): Una domanda secca a bivio polarizzante che spinge i tifosi a commentare (es: "Scelta giusta o azzardo? ⬇️", "Cessione inevitabile o errore? ⬇️", "Favorevoli o contrari? ⬇️", "Da 1 a 10 quanto vi convince? ⬇️").
+   DIVIETO ASSOLUTO di preamboli narrativi o celebrativi ("Serata speciale...", "Buone notizie...", "Si chiude la...", "Pienamente integrato...", "Arrivano conferme...", "Ex Roma...").
+   Assolutamente SENZA LINK, SENZA URL e SENZA hashtag nel testo (gli hashtag vengono gestiti dal sistema).
+   Scrivi in "dynamic_hashtags" AL MASSIMO 1 hashtag caldo e specifico (es. "#Dybala", "#Bove", "#Calciomercato"), oppure lascialo vuoto "" se la notizia è generica. NON inserire #ASRoma e #RomaFlash.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
    Se ti è stata allegata un'immagine, verifica se è una FOTOGRAFIA REALE utilizzabile oppure se ha un watermark del sito fonte / è una grafica digitale.
    Imposta "is_clean_real_photo": true per TUTTE le fotografie reali (di partite, calciatori, allenatori, stadi, trofei, conferenze stampa, cene o eventi), ANCHE SE all'interno della scena fotografata compaiono normali elementi del mondo reale come:
@@ -656,7 +693,7 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "is_duplicate": false, 
   "is_spam": false, 
   "is_clean_real_photo": true,
-  "tweet_text": "🚨 Dybala torna in gruppo a Trigoria: lesione esclusa, la Joya ci sarà contro l'Inter.",
+  "tweet_text": "🚨 Esami per Dybala: lesione esclusa. La Joya punta alla maglia da titolare con l'Inter.\n\nGiusto rischiarlo dal 1' o meglio tenerlo per la ripresa? ⬇️",
   "dynamic_hashtags": "#Dybala",
   "titolo": "Nuovo titolo", 
   "excerpt": "Breve riassunto", 
@@ -887,80 +924,8 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
     }
 
     // 7. Gestione intelligente della coda X: massimo 1 tweet per run, spaziato di almeno 20 minuti
-    const MIN_INTERVAL_MS = 20 * 60 * 1000; // 20 minuti
-    const now = Date.now();
-    const timeSinceLastTweet = now - lastTweetTime;
-    const canPostToX = lastTweetTime === 0 || timeSinceLastTweet >= MIN_INTERVAL_MS;
-
-    console.log(`[X QUEUE] Ultimo tweet uscito: ${lastTweetTime > 0 ? Math.round(timeSinceLastTweet / 60000) + ' min fa' : 'Nessuno recente'}. Pronto per X? ${canPostToX}`);
-
-    let articleToTweet: { id: string; title: string; image_url: string; ai_summary: any } | null = null;
-
-    if (canPostToX) {
-      if (eligibleNewArticlesForX.length > 0) {
-        articleToTweet = eligibleNewArticlesForX[0];
-        console.log(`[X QUEUE] Selezionata nuova notizia appena inserita: "${articleToTweet.title}"`);
-      } else {
-        const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
-        const { data: pendingArticles } = await supabase
-          .from('articles')
-          .select('id, title, image_url, ai_summary, published_at')
-          .gte('published_at', twentyFourHoursAgo)
-          .not('original_url', 'like', 'romaflash-daily-briefing-%')
-          .is('ai_summary->x_posted_at', null)
-          .neq('ai_summary->>category', 'Social')
-          .order('published_at', { ascending: false })
-          .limit(1);
-
-        if (pendingArticles && pendingArticles.length > 0) {
-          articleToTweet = pendingArticles[0];
-          console.log(`[X QUEUE] Ripescata notizia in coda da pubblicare su X: "${articleToTweet.title}"`);
-        }
-      }
-    } else {
-      if (eligibleNewArticlesForX.length > 0) {
-        console.log(`[X QUEUE] ${eligibleNewArticlesForX.length} nuovi articoli salvati sul sito ma accodati per X (ultimo tweet solo ${Math.round(timeSinceLastTweet / 60000)} min fa, attesa minima 20 min).`);
-      }
-    }
-
-    if (articleToTweet && articleToTweet.id) {
-      const artAi = articleToTweet.ai_summary || {};
-      const cleanBase = (artAi.tweet_text || artAi.excerpt || articleToTweet.title || '')
-        .replace(/https?:\/\/\S+/gi, '')
-        .replace(/#[a-zA-Z0-9_]+/g, '')
-        .trim();
-      const extraTags = (artAi.dynamic_hashtags || '')
-        .replace(/#ASRoma/gi, '')
-        .replace(/#RomaFlash/gi, '')
-        .trim();
-      const footer = `\n\n#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
-      
-      const maxBaseLength = 278 - footer.length;
-      let truncatedBase = cleanBase;
-      if (cleanBase.length > maxBaseLength) {
-        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
-      }
-      const fullTweet = `${truncatedBase}${footer}`;
-
-      console.log(`[X AUTO-POST] Pubblicazione tweet nativo spaziato (#${tweetsTodayCount + 1} di oggi): ${articleToTweet.title}`);
-      const xRes = await postToX(fullTweet, articleToTweet.image_url);
-      if (xRes.id) {
-        console.log(`[X AUTO-POST] Tweet pubblicato con successo! ID: ${xRes.id}`);
-        tweetsTodayCount++;
-        artAi.x_tweet_id = xRes.id;
-        if (xRes.url) {
-          artAi.x_tweet_url = xRes.url;
-        }
-        artAi.x_posted_at = new Date().toISOString();
-        await supabase
-          .from('articles')
-          .update({ ai_summary: artAi })
-          .eq('id', articleToTweet.id);
-      } else {
-        console.error(`[X AUTO-POST] Errore pubblicazione su X:`, xRes.error);
-      }
-    }
+    // 7. Auto-pubblicazione automatica disattivata: la pubblicazione su X viene gestita manualmente on-demand dalla dashboard /stats per garantire massimo controllo su copy, bivio e tempismo strategico.
+    console.log(`[X POSTING] Pubblicazione automatica in background disattivata. Gestione manuale on-demand attiva su /stats.`);
 
     return new Response(JSON.stringify({ 
       success: true, 

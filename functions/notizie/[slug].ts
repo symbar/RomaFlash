@@ -236,7 +236,7 @@ export async function onRequestGet(context: any) {
     status: 200,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=600, s-maxage=900, stale-while-revalidate=86400",
+      "Cache-Control": "public, max-age=0, must-revalidate, s-maxage=60, stale-while-revalidate=300",
     },
   });
 }

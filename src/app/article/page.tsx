@@ -96,17 +96,16 @@ function ArticleContent() {
 
       let currentArticle = article;
 
-      if (!currentArticle || currentArticle.id !== id) {
-        const { data } = await supabase
-          .from('articles')
-          .select('*, sources(name)')
-          .eq('id', id)
-          .single();
-        
-        if (data) {
-          currentArticle = data;
-          setArticle(data);
-        }
+      // Recupera sempre l'articolo aggiornato da Supabase per evitare cache stale (es. cambio immagine/modifiche)
+      const { data } = await supabase
+        .from('articles')
+        .select('*, sources(name)')
+        .eq('id', id)
+        .single();
+      
+      if (data) {
+        currentArticle = data;
+        setArticle(data);
       }
       
       if (currentArticle) {

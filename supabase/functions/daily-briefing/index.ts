@@ -192,16 +192,16 @@ ${articlesContext}
 Istruzioni per l'output JSON:
 Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
-Includi anche "tweet_text": un copy serale CORTO, SECCO e INCISIVO per X (massimo 100-140 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che isoli esclusivamente la notizia/fatto super saliente emerso oggi a Trigoria.
-Includi anche "dynamic_hashtags": 1-2 hashtag caldi sui temi principali della giornata (es. "#Trigoria #SerieA"), SENZA includere #ASRoma e #RomaFlash.
+Includi anche "tweet_text": un copy serale CORTO, SECCO e D'IMPATTO per X (MASSIMO 100-120 caratteri, con emoji 🌙 o 🐺, SENZA hashtag e SENZA link), isolando esclusivamente il verdetto o fatto chiave emerso oggi a Trigoria.
+Includi anche "dynamic_hashtags": AL MASSIMO 1 hashtag caldo sul tema principale della giornata (es. "#Trigoria" o "#SerieA"), SENZA includere #ASRoma e #RomaFlash.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {
   "excerpt": "Breve frase ad effetto che riassume l'umore generale della giornata (es: 'Giornata frenetica a Trigoria tra infortuni e dichiarazioni infuocate.')",
   "content": "Il testo completo del recap, diviso in paragrafi usando \\n. Includi le notizie più calde raggruppate per argomento.",
   "category": "Il Punto della Giornata",
   "sentiment": "Positivo|Negativo|Neutro",
-  "tweet_text": "🌙🐺 Il Punto della Giornata: tutte le notizie chiave di oggi da Trigoria riassunte in 2 minuti! 🟡🔴",
-  "dynamic_hashtags": "#SerieA #Trigoria",
+  "tweet_text": "🌙 Trigoria: Dybala recupera per l'Inter, Gasperini prepara la rivoluzione a centrocampo 🐺",
+  "dynamic_hashtags": "#Trigoria",
   "en": {
     "title": "Daily Briefing: October 11",
     "excerpt": "Short punchy English summary of the day's mood at Trigoria...",

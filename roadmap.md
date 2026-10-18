@@ -55,7 +55,7 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.4 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
 *   **5.5 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
 *   **5.6 Canale WhatsApp / Telegram Ufficiale "Zero Rumore":** Bot automatico che inoltra esclusivamente 3 notifiche al giorno (il buongiorno alle 8:00, la breaking news se ufficiale, il punto serale alle 20:00).
-*   **5.7 Revisione Auto-Pubblicazione su X (Post Più Corti & Sintesi Ultra-Saliente):** Rivedere i testi generati per X. I post devono essere corti, secchi e d'impatto (massimo 120-150 caratteri, 1-2 frasi essenziali), estrapolando esclusivamente le informazioni super salienti dell'articolo (es. notizie bomba, recuperi/infortuni, numeri chiave) per massimizzare la leggibilità istantanea e il CTR.
+*   [x] ✅ **5.7 Revisione Auto-Pubblicazione su X (Post Più Corti & Sintesi Ultra-Saliente) (COMPLETATO):** Riveduti i testi generati per X in formato puramente editoriale, corto, secco e d'impatto (massimo 100-120 caratteri per il copy, 120-140 caratteri complessivi con hashtag). Eliminata la concatenazione forzata dell'excerpt, vietati preamboli narrativi da Gemini ed eliminati testi superflui nel footer in favore di una firma snella `#ASRoma #TagDinamico`.
 
 ---
 

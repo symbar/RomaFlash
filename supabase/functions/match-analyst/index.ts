@@ -351,11 +351,11 @@ Istruzioni per l'output:
    - Promossi & Da Rivedere: Sintesi tecnica finale con i punti di forza confermati e gli aspetti da registrare.
 4. "sentiment": "Positivo" | "Negativo" | "Neutro" (in base alla prestazione della Roma e al risultato).
 5. "category": "L'Analista"
-6. "tweet_text": Un copy post-gara CORTO, SECCO e INCISIVO per X (massimo 100-140 caratteri, con emoji 📊 o ♟️, SENZA hashtag e SENZA link), estrapolando esclusivamente il dato numerico o il verdetto tattico super saliente del match.
-7. "dynamic_hashtags": 2 hashtag caldi sulla partita (es. "#RomaFiorentina #SerieA" o "#ChampionsLeague #Gasperini"), SENZA #ASRoma e #RomaFlash.
+6. "tweet_text": Un copy post-gara CORTO, SECCO e D'IMPATTO per X (MASSIMO 100-120 caratteri, con 1 emoji a inizio testo come 📊 o ♟️, SENZA hashtag e SENZA link), estrapolando esclusivamente il dato numerico o il verdetto tattico super saliente del match (zero preamboli, dritto al nocciolo).
+7. "dynamic_hashtags": AL MASSIMO 1 hashtag specifico sulla partita o protagonista (es. "#RomaInter" o "#Gasperini"), SENZA #ASRoma e #RomaFlash.
 8. "en": Versione inglese completa con gli stessi 4 paragrafi in "content", "title" ("The Analyst | ...") e "excerpt".
 
-Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (```json):
+Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi di codice markdown:
 {
   "title": "...",
   "excerpt": "...",
@@ -456,31 +456,23 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (```json):
     // Auto-Post su X tramite Buffer
     let xTweetId: string | undefined = undefined
     if (savedArticle?.id) {
-      const cleanBase = (aiSummary.tweet_text || `📊♟️ ${articleTitle}\n\n${aiSummary.excerpt}`)
+      const cleanBase = (aiSummary.tweet_text || aiSummary.excerpt || articleTitle || '')
         .replace(/https?:\/\/\S+/gi, '')
         .replace(/#[a-zA-Z0-9_]+/g, '')
-        .trim()
+        .trim();
       const extraTags = (aiSummary.dynamic_hashtags || '')
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
-        .trim()
-      const footer = `\n\n⚡ RomaFlash  #ASRoma #AnalisiTattica${extraTags ? ` ${extraTags}` : ''}`
+        .trim();
+      const footer = `\n\n#ASRoma #AnalisiTattica${extraTags ? ` ${extraTags}` : ''}`;
       
-      let baseText = cleanBase
-      if (baseText.length < 180 && aiSummary.excerpt) {
-        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim()
-        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
-          baseText = `${baseText} ${cleanExcerpt}`.trim()
-        }
+      const maxBaseLength = 278 - footer.length;
+      let truncatedBase = cleanBase;
+      if (cleanBase.length > maxBaseLength) {
+        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
       }
-
-      const maxBaseLength = 278 - footer.length
-      let truncatedBase = baseText
-      if (baseText.length > maxBaseLength) {
-        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3)
-        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...'
-      }
-      const fullTweet = `${truncatedBase}${footer}`
+      const fullTweet = `${truncatedBase}${footer}`;
 
       console.log(`[X AUTO-POST] Pubblicazione L'Analista nativo su X...`)
       const xRes = await postToX(fullTweet, tacticalBoardImg)

@@ -196,7 +196,7 @@ serve(async (req) => {
       }
 
       const aiSummary = art.ai_summary || {};
-      const cleanBase = (aiSummary.tweet_text || `🐺🟡🔴 ${art.title}\n\n${aiSummary.excerpt}`)
+      const cleanBase = (aiSummary.tweet_text || aiSummary.excerpt || art.title || '')
         .replace(/https?:\/\/\S+/gi, '')
         .replace(/#[a-zA-Z0-9_]+/g, '')
         .trim();
@@ -204,21 +204,13 @@ serve(async (req) => {
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      const footer = `\n\n#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
       
-      let baseText = cleanBase;
-      if (baseText.length < 180 && aiSummary.excerpt) {
-        const cleanExcerpt = aiSummary.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
-        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
-          baseText = `${baseText} ${cleanExcerpt}`.trim();
-        }
-      }
-
       const maxBaseLength = 278 - footer.length;
-      let truncatedBase = baseText;
-      if (baseText.length > maxBaseLength) {
-        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+      let truncatedBase = cleanBase;
+      if (cleanBase.length > maxBaseLength) {
+        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
       }
       const fullTweet = `${truncatedBase}${footer}`;
 
@@ -645,10 +637,11 @@ Se l'articolo è valido (non è un duplicato e non è spam), procedi con la riel
 7. VERSIONE INGLESE ("en"): Fornisci sempre anche l'adattamento giornalistico in lingua inglese nell'oggetto "en" (title, excerpt, content, e poll se presente), usando il naturale gergo calcistico anglosassone per i tifosi internazionali dell'AS Roma. Per i virgolettati, mantieni la riga isolata con '>' e le parole esatte tradotte (es. > "Exact translated quote..." — Author Name).
 8. AUTO-PUBBLICAZIONE X / TWITTER ("tweet_text" e "dynamic_hashtags"):
    Tutte le notizie (eccetto quelle Social) vengono pubblicate sul profilo ufficiale X di RomaFlash.
-   Scrivi in "tweet_text" un copy CORTO, SECCO, ULTRA-INCISIVO (massimo 100-140 caratteri, 1 sola frase o al massimo 2 brevissime, con 1 emoji pertinente).
-   ESTRAPOLA ESCLUSIVAMENTE IL FATTO SUPER SALIENTE della notizia (es. l'infortunio, l'esito degli esami, la firma, la scelta a sorpresa o il virgolettato chiave). Niente preamboli o giri di parole.
-   Assolutamente SENZA LINK, SENZA URL, SENZA domini web e SENZA hashtag (vengono aggiunti automaticamente dal sistema).
-   Scrivi in "dynamic_hashtags" 1 o 2 hashtag caldi e pertinenti alla notizia specifica (es. "#Dybala", "#RomaInter", "#Calciomercato"), SENZA includere #ASRoma e #RomaFlash che sono già fissi.
+   I post devono essere puramente editoriali, CORTI, SECCHI e D'IMPATTO (MASSIMO 100-120 caratteri, 1-2 frasi essenziali, 1 sola emoji a inizio testo).
+   ESTRAPOLA ESCLUSIVAMENTE IL FATTO O IL DATO SUPER SALIENTE (es. notizie bomba, verdetti medici/infortuni, cifre/numeri chiave, firme o scelte a sorpresa).
+   DIVIETO ASSOLUTO DI PREAMBOLI O INTRODUZIONI NARRATIVE/CELEBRATIVE (MAI iniziare con "Serata speciale...", "Buone notizie...", "Si chiude la...", "Pienamente integrato...", "Arrivano conferme...", "Ex Roma..."). Vai dritto al nocciolo: Soggetto + Fatto saliente.
+   Assolutamente SENZA LINK, SENZA URL, SENZA domini web e SENZA hashtag nel testo (vengono aggiunti automaticamente dal sistema).
+   Scrivi in "dynamic_hashtags" AL MASSIMO 1 hashtag caldo e specifico (es. "#Dybala", "#Bove", "#Derby", "#Calciomercato"), oppure lascialo vuoto "" se la notizia è generica. NON inserire #ASRoma e #RomaFlash.
 9. CONTROLLO VISIVO IMMAGINE ("is_clean_real_photo"):
    Se ti è stata allegata un'immagine, verifica se è una FOTOGRAFIA REALE utilizzabile oppure se ha un watermark del sito fonte / è una grafica digitale.
    Imposta "is_clean_real_photo": true per TUTTE le fotografie reali (di partite, calciatori, allenatori, stadi, trofei, conferenze stampa, cene o eventi), ANCHE SE all'interno della scena fotografata compaiono normali elementi del mondo reale come:
@@ -663,8 +656,8 @@ Rispondi SOLO con un oggetto JSON valido con questa struttura esatta:
   "is_duplicate": false, 
   "is_spam": false, 
   "is_clean_real_photo": true,
-  "tweet_text": "🚨 Ultime da Trigoria: Dybala torna in gruppo alla vigilia del match! Scelte quasi fatte in attacco 🐺🟡🔴",
-  "dynamic_hashtags": "#Dybala #SerieA",
+  "tweet_text": "🚨 Dybala torna in gruppo a Trigoria: lesione esclusa, la Joya ci sarà contro l'Inter.",
+  "dynamic_hashtags": "#Dybala",
   "titolo": "Nuovo titolo", 
   "excerpt": "Breve riassunto", 
   "content": "Testo completo dell'articolo riscritto...", 
@@ -932,7 +925,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
 
     if (articleToTweet && articleToTweet.id) {
       const artAi = articleToTweet.ai_summary || {};
-      const cleanBase = (artAi.tweet_text || `🐺🟡🔴 ${articleToTweet.title}\n\n${artAi.excerpt}`)
+      const cleanBase = (artAi.tweet_text || artAi.excerpt || articleToTweet.title || '')
         .replace(/https?:\/\/\S+/gi, '')
         .replace(/#[a-zA-Z0-9_]+/g, '')
         .trim();
@@ -940,21 +933,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
         .replace(/#ASRoma/gi, '')
         .replace(/#RomaFlash/gi, '')
         .trim();
-      const footer = `\n\n⚡ RomaFlash  #ASRoma${extraTags ? ` ${extraTags}` : ''}`;
+      const footer = `\n\n#ASRoma${extraTags ? ` ${extraTags}` : ''}`;
       
-      let baseText = cleanBase;
-      if (baseText.length < 180 && artAi.excerpt) {
-        const cleanExcerpt = artAi.excerpt.replace(/https?:\/\/\S+/gi, '').replace(/#[a-zA-Z0-9_]+/g, '').trim();
-        if (!baseText.toLowerCase().includes(cleanExcerpt.substring(0, 25).toLowerCase())) {
-          baseText = `${baseText} ${cleanExcerpt}`.trim();
-        }
-      }
-
       const maxBaseLength = 278 - footer.length;
-      let truncatedBase = baseText;
-      if (baseText.length > maxBaseLength) {
-        const lastSpace = baseText.lastIndexOf(' ', maxBaseLength - 3);
-        truncatedBase = (lastSpace > 100 ? baseText.substring(0, lastSpace) : baseText.substring(0, maxBaseLength - 3)).trim() + '...';
+      let truncatedBase = cleanBase;
+      if (cleanBase.length > maxBaseLength) {
+        const lastSpace = cleanBase.lastIndexOf(' ', maxBaseLength - 3);
+        truncatedBase = (lastSpace > 60 ? cleanBase.substring(0, lastSpace) : cleanBase.substring(0, maxBaseLength - 3)).trim() + '...';
       }
       const fullTweet = `${truncatedBase}${footer}`;
 

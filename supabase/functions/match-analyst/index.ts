@@ -351,7 +351,7 @@ Istruzioni per l'output:
    - Promossi & Da Rivedere: Sintesi tecnica finale con i punti di forza confermati e gli aspetti da registrare.
 4. "sentiment": "Positivo" | "Negativo" | "Neutro" (in base alla prestazione della Roma e al risultato).
 5. "category": "L'Analista"
-6. "tweet_text": Un'analisi tattica post-gara densa, approfondita e incisiva per X che sfrutti appieno i 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con emoji 📊♟️🟡🔴, SENZA hashtag e SENZA link), spiegando i numeri chiave e la chiave tattica del match.
+6. "tweet_text": Un copy post-gara CORTO, SECCO e INCISIVO per X (massimo 100-140 caratteri, con emoji 📊 o ♟️, SENZA hashtag e SENZA link), estrapolando esclusivamente il dato numerico o il verdetto tattico super saliente del match.
 7. "dynamic_hashtags": 2 hashtag caldi sulla partita (es. "#RomaFiorentina #SerieA" o "#ChampionsLeague #Gasperini"), SENZA #ASRoma e #RomaFlash.
 8. "en": Versione inglese completa con gli stessi 4 paragrafi in "content", "title" ("The Analyst | ...") e "excerpt".
 

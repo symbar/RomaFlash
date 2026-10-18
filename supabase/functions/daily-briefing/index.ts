@@ -192,7 +192,7 @@ ${articlesContext}
 Istruzioni per l'output JSON:
 Scrivi il briefing giornaliero sia in italiano che in inglese (nell'oggetto "en"). Unisci le notizie correlate, evidenzia le più importanti, usa un tono professionale ma appassionato.
 Invece di elencare semplicemente le notizie, crea un vero e proprio "recap" in paragrafi.
-Includi anche "tweet_text": un recap serale completo, denso e approfondito per X che sfrutti appieno lo spazio dei 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che riassuma in pillole dense i temi più importanti della giornata da Trigoria.
+Includi anche "tweet_text": un copy serale CORTO, SECCO e INCISIVO per X (massimo 100-140 caratteri, con emoji 🌙🐺🟡🔴, assolutamente SENZA LINK, SENZA URL e SENZA domini web, e SENZA hashtag perché verranno aggiunti dal sistema) che isoli esclusivamente la notizia/fatto super saliente emerso oggi a Trigoria.
 Includi anche "dynamic_hashtags": 1-2 hashtag caldi sui temi principali della giornata (es. "#Trigoria #SerieA"), SENZA includere #ASRoma e #RomaFlash.
 Restituisci ESCLUSIVAMENTE un JSON con questa struttura:
 {

@@ -1,7 +1,29 @@
 # Roadmap di Sviluppo: RomaFlash PWA 🐺
 
 > [!NOTE]
-> Questa roadmap include **esclusivamente le funzionalità aperte e le nuove idee strategiche** approvate per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma. Tutte le funzionalità completate sono state archiviate.
+> Questa roadmap include le funzionalità aperte, le nuove idee strategiche approvate e il registro delle feature completate di recente per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma.
+
+---
+
+### ✅ Funzionalità Completate di Recente
+
+*   **Sondaggio MVP Post-Partita ("Migliore in Campo"):**
+    *   Attivazione automatica post-gara con i candidati reali scesi in campo (esclusi infortunati/non a referto).
+    *   Conteggi voti 100% reali con protezione anti-bot (IP + device fingerprint) e memorizzazione nel DB.
+    *   Chiusura automatica alle 23:59 del giorno antecedente la partita successiva.
+    *   Header e layout responsive ottimizzati per mobile e desktop.
+*   **Match Telemetry & Widget Statistiche ("L'Analista") nell'Articolo:**
+    *   Inserimento del widget comparativo bicolore posizionato strategicamente tra *"La Chiave Tattica"* e *"L'Impatto Statistico"*.
+    *   Loghi ufficiali delle squadre in alta definizione (AS Roma e club avversari).
+    *   Barre di telemetria per 5 metriche chiave (possesso palla, tiri totali/nello specchio, passaggi riusciti, contrasti vinti, respinte difensive) e verdetto tattico.
+    *   Eliminazione definitiva di ogni residuo di asterischi markdown (`**`) sia in Edge SSR che nel client.
+*   **Generatore Scheda Grafica Partita nel Backoffice (`/stats`):**
+    *   Modale dedicata per gli articoli di analisi con anteprima broadcast 1200x1200px.
+    *   Header col logo ufficiale RomaFlash (Lupetto dorato cerchiato) e layout scoreboard pulito (senza marcatori).
+    *   Tasto *"Condividi"* nativo (Web Share API) con fallback al download PNG e copia istantanea negli appunti.
+*   **Kit Social Outro & Storie Instagram 9:16:**
+    *   Generatore di kit 2 slide per TikTok (1080x1350).
+    *   Generatore di Storie/Reel Instagram (1080x1920) con cover ad alta risoluzione, super sunto intelligente e slide outro di fidelizzazione.
 
 ---
 
@@ -55,6 +77,7 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.4 Integrazione TikTok (Auto-Post Account RomaFlash):** Pubblicazione automatica hands-free di caroselli fotografici e slide verticali (generate dal nostro motore grafico) direttamente sull'account ufficiale TikTok di RomaFlash tramite TikTok Content Posting API / webhook.
 *   **5.5 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
 *   **5.6 Canale WhatsApp / Telegram Ufficiale "Zero Rumore":** Bot automatico che inoltra esclusivamente 3 notifiche al giorno (il buongiorno alle 8:00, la breaking news se ufficiale, il punto serale alle 20:00).
+*   **5.7 Revisione Auto-Pubblicazione su X (Post Più Corti & Sintesi Ultra-Saliente):** Rivedere i testi generati per X. I post devono essere corti, secchi e d'impatto (massimo 120-150 caratteri, 1-2 frasi essenziali), estrapolando esclusivamente le informazioni super salienti dell'articolo (es. notizie bomba, recuperi/infortuni, numeri chiave) per massimizzare la leggibilità istantanea e il CTR.
 
 ---
 

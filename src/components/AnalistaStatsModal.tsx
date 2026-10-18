@@ -2,8 +2,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Download, Copy, Check, BarChart3 } from "lucide-react";
+import { X, Share2, Copy, Check, BarChart3 } from "lucide-react";
 import { getStatsForArticle, MatchStatsData } from "./MatchStatsWidget";
+import { WOLF_LOGO_SVG_PATH } from "@/lib/socialSlideGenerator";
 
 interface AnalistaStatsModalProps {
   article: any | null;
@@ -73,43 +74,60 @@ export function drawAnalistaPoster(
   ctx.stroke();
   ctx.restore();
 
-  // 5. Header Brand Bar
+  // 5. Header Brand Bar (Stile Ufficiale Header RomaFlash con Lupetto cerchiato)
   ctx.save();
-  // Badge icon
-  ctx.fillStyle = "#8e1b23";
+  const badgeCx = 110;
+  const badgeCy = 115;
+  const badgeR = 36;
+
+  // Cerchio bordeaux profondo #26050a
+  ctx.fillStyle = "#26050a";
   ctx.beginPath();
-  ctx.arc(110, 120, 32, 0, Math.PI * 2);
+  ctx.arc(badgeCx, badgeCy, badgeR, 0, Math.PI * 2);
   ctx.fill();
+
+  // Bordo dorato #f0b516
   ctx.strokeStyle = "#f0b516";
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 3;
   ctx.stroke();
 
+  // Lupetto dorato centrato nel cerchio
+  const wolfSize = badgeR * 1.35;
+  ctx.save();
+  ctx.translate(badgeCx - wolfSize * 0.495, badgeCy - wolfSize * 0.515);
+  const wolfScale = wolfSize / 512;
+  ctx.scale(wolfScale, wolfScale);
+  const wolfPath = new Path2D(WOLF_LOGO_SVG_PATH);
   ctx.fillStyle = "#f0b516";
-  ctx.font = "900 22px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("RF", 110, 120);
+  ctx.fill(wolfPath);
+  ctx.restore();
 
-  // Brand Titles
+  // Testo brand ufficiale: "Roma" (bianco) + "Flash" (rosso carminio #e02d47)
   ctx.textAlign = "left";
-  ctx.fillStyle = "#f0b516";
-  ctx.font = "900 18px sans-serif";
-  ctx.fillText("ROMAFLASH • L'ANALISTA", 160, 110);
-
+  ctx.textBaseline = "alphabetic";
+  ctx.font = "900 32px sans-serif";
   ctx.fillStyle = "#ffffff";
-  ctx.font = "700 24px sans-serif";
-  ctx.fillText("MATCH TELEMETRY REPORT", 160, 138);
+  ctx.fillText("Roma", 165, 116);
+  const romaWidth = ctx.measureText("Roma").width;
+  ctx.fillStyle = "#e02d47";
+  ctx.fillText("Flash", 165 + romaWidth, 116);
 
-  // Right competition pill
+  // Sottotitolo della rubrica
+  ctx.fillStyle = "#f0b516";
+  ctx.font = "800 16px sans-serif";
+  ctx.fillText("L'ANALISTA • MATCH TELEMETRY REPORT", 165, 142);
+
+  // Pillola competizione a destra
   ctx.fillStyle = "#f0b516";
   ctx.beginPath();
-  ctx.roundRect(width - 240, 100, 150, 40, 20);
+  ctx.roundRect(width - 240, 95, 150, 40, 20);
   ctx.fill();
 
   ctx.fillStyle = "#0c0204";
   ctx.font = "900 16px monospace";
   ctx.textAlign = "center";
-  ctx.fillText(stats.competition, width - 165, 124);
+  ctx.textBaseline = "middle";
+  ctx.fillText(stats.competition, width - 165, 116);
   ctx.restore();
 
   // Separator
@@ -120,7 +138,7 @@ export function drawAnalistaPoster(
   ctx.lineTo(width - 70, 180);
   ctx.stroke();
 
-  // 6. Scoreboard Hero con Loghi Ufficiali Squadre
+  // 6. Scoreboard Hero con Loghi Ufficiali Squadre (SENZA MARCATORI)
   ctx.save();
   ctx.fillStyle = "rgba(10, 2, 4, 0.7)";
   ctx.strokeStyle = "rgba(240, 181, 22, 0.25)";
@@ -136,32 +154,27 @@ export function drawAnalistaPoster(
   ctx.strokeStyle = "rgba(240, 181, 22, 0.35)";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(95, 225, 90, 95, 18);
+  ctx.roundRect(95, 228, 94, 94, 18);
   ctx.fill();
   ctx.stroke();
 
   if (homeImg) {
-    ctx.drawImage(homeImg, 105, 237, 70, 70);
+    ctx.drawImage(homeImg, 107, 240, 70, 70);
   } else {
     ctx.fillStyle = "#f0b516";
     ctx.font = "900 24px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("ASR", 140, 272);
+    ctx.fillText("ASR", 142, 275);
   }
   ctx.restore();
 
-  // Home Team Name & Scorers
+  // Home Team Name (perfettamente centrato in altezza, senza marcatori)
   ctx.fillStyle = "#ffffff";
-  ctx.font = "900 30px sans-serif";
+  ctx.font = "900 34px sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText(stats.homeTeam, 205, 265);
-
-  if (stats.scorersHome) {
-    ctx.fillStyle = "#f0b516";
-    ctx.font = "600 17px sans-serif";
-    ctx.fillText(stats.scorersHome, 205, 298);
-  }
+  ctx.textBaseline = "middle";
+  ctx.fillText(stats.homeTeam, 210, 275);
 
   // Central Score badge
   const scoreGrad = ctx.createLinearGradient(width / 2 - 85, 225, width / 2 + 85, 315);
@@ -178,7 +191,8 @@ export function drawAnalistaPoster(
   ctx.fillStyle = "#f0b516";
   ctx.font = "900 46px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(`${stats.homeScore} - ${stats.awayScore}`, width / 2, 290);
+  ctx.textBaseline = "middle";
+  ctx.fillText(`${stats.homeScore} - ${stats.awayScore}`, width / 2, 277);
 
   // Away Team Logo & Card
   ctx.save();
@@ -186,30 +200,27 @@ export function drawAnalistaPoster(
   ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(width - 185, 225, 90, 95, 18);
+  ctx.roundRect(width - 189, 228, 94, 94, 18);
   ctx.fill();
   ctx.stroke();
 
   if (awayImg) {
-    ctx.drawImage(awayImg, width - 175, 237, 70, 70);
+    ctx.drawImage(awayImg, width - 177, 240, 70, 70);
   } else {
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "900 24px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("GEN", width - 140, 272);
+    ctx.fillText("GEN", width - 142, 275);
   }
   ctx.restore();
 
-  // Away Team Name & Scorers
+  // Away Team Name (perfettamente centrato in altezza, senza marcatori)
   ctx.fillStyle = "#cbd5e1";
-  ctx.font = "900 30px sans-serif";
+  ctx.font = "900 34px sans-serif";
   ctx.textAlign = "right";
-  ctx.fillText(stats.awayTeam, width - 205, 265);
-
-  ctx.fillStyle = "#64748b";
-  ctx.font = "600 17px sans-serif";
-  ctx.fillText(stats.scorersAway || "0 Gol", width - 205, 298);
+  ctx.textBaseline = "middle";
+  ctx.fillText(stats.awayTeam, width - 210, 275);
   ctx.restore();
 
   // 7. Stats Bars Cards
@@ -353,7 +364,7 @@ export function drawAnalistaPoster(
 
 export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -394,22 +405,40 @@ export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsMo
 
   if (!mounted || !article || !stats) return null;
 
-  const handleDownload = () => {
+  const handleShare = async () => {
     if (!canvasRef.current) return;
-    setDownloading(true);
+    setSharing(true);
     try {
-      const dataUrl = canvasRef.current.toDataURL("image/png");
-      const a = document.createElement("a");
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvasRef.current?.toBlob(resolve, "image/png")
+      );
+      if (!blob) return;
+
       const filename = `scheda-statistiche-${stats.homeTeam.toLowerCase()}-${stats.awayTeam.toLowerCase()}.png`.replace(/\s+/g, "-");
-      a.href = dataUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (e) {
-      console.error("Errore download scheda analista:", e);
+      const file = new File([blob], filename, { type: "image/png" });
+
+      if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `${stats.homeTeam} ${stats.homeScore}-${stats.awayScore} ${stats.awayTeam} | RomaFlash L'Analista`,
+          text: `Ecco le statistiche ufficiali del match ${stats.homeTeam}-${stats.awayTeam}: report telemetrico de L'Analista su RomaFlash.`,
+          files: [file],
+        });
+      } else {
+        // Fallback al download diretto dell'immagine
+        const dataUrl = canvasRef.current.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        console.error("Errore condivisione:", err);
+      }
     } finally {
-      setDownloading(false);
+      setSharing(false);
     }
   };
 
@@ -488,12 +517,12 @@ export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsMo
 
             <button
               type="button"
-              onClick={handleDownload}
-              disabled={downloading}
+              onClick={handleShare}
+              disabled={sharing}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-xs transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95 disabled:opacity-50"
             >
-              <Download className="w-4 h-4" />
-              {downloading ? "Salvataggio..." : "Scarica Scheda PNG"}
+              <Share2 className="w-4 h-4" />
+              {sharing ? "Elaborazione..." : "Condividi"}
             </button>
           </div>
         </div>

@@ -18,7 +18,7 @@ function resolveFullImageUrl(rawUrl?: string | null): string {
     return `https://romaflash.app${rawUrl}`;
   }
   if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
-    return `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&output=jpg`;
+    return rawUrl;
   }
   return "https://romaflash.app/icon";
 }
@@ -170,6 +170,23 @@ export async function onRequestGet(context: any) {
     /<meta property="og:image" content=".*?"\s*\/?>/i,
     `<meta property="og:image" content="${imageUrl}">`
   );
+  if (/<meta property="og:image:width"/i.test(html)) {
+    html = html.replace(
+      /<meta property="og:image:width" content=".*?"\s*\/?>/i,
+      `<meta property="og:image:width" content="1200">`
+    );
+  } else {
+    html = html.replace(
+      `<meta property="og:image" content="${imageUrl}">`,
+      `<meta property="og:image" content="${imageUrl}">\n    <meta property="og:image:width" content="1200">\n    <meta property="og:image:height" content="630">`
+    );
+  }
+  if (/<meta property="og:image:height"/i.test(html)) {
+    html = html.replace(
+      /<meta property="og:image:height" content=".*?"\s*\/?>/i,
+      `<meta property="og:image:height" content="630">`
+    );
+  }
   html = html.replace(
     /<meta property="og:url" content=".*?"\s*\/?>/i,
     `<meta property="og:url" content="${articleUrl}">`

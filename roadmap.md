@@ -56,6 +56,7 @@ Funzionalità per aumentare la permanenza sull'app, l'interattività e il senso 
 *   **5.5 Integrazione Instagram (Auto-Post Account RomaFlash):** Pubblicazione automatica di post nel feed (formato 4:5) e Storie su Instagram per le notizie principali, le formazioni e il Daily Briefing tramite Instagram Graph API / Buffer.
 *   **5.6 Canale WhatsApp / Telegram Ufficiale "Zero Rumore":** Bot automatico che inoltra esclusivamente 3 notifiche al giorno (il buongiorno alle 8:00, la breaking news se ufficiale, il punto serale alle 20:00).
 *   [x] ✅ **5.7 Revisione Auto-Pubblicazione su X (Post Più Corti & Sintesi Ultra-Saliente) (COMPLETATO):** Riveduti i testi generati per X in formato puramente editoriale, corto, secco e d'impatto (massimo 100-120 caratteri per il copy, 120-140 caratteri complessivi con hashtag). Eliminata la concatenazione forzata dell'excerpt, vietati preamboli narrativi da Gemini ed eliminati testi superflui nel footer in favore di una firma snella `#ASRoma #TagDinamico`.
+*   **5.8 Link Attribution & Shortener Dedicato (Dub.co / Bitly):** Integrazione di un servizio avanzato di link management (es. Dub.co API o Bitly) per i link inseriti nei primi commenti di 𝕏/Twitter e nei canali social. Permette il tracciamento al 100% dei click reali, parametri UTM automatici per Google Analytics, statistiche geolocalizzate/dispositivo e garanzia di anteprime OpenGraph whitelisted per evitare qualunque disallineamento visivo sui social.
 
 ---
 

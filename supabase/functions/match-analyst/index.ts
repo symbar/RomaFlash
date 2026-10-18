@@ -344,18 +344,18 @@ ${statsContext}
 Istruzioni per l'output:
 1. "title": Un titolo accattivante e professionale che inizi con "L'Analista | [Nome Partita Risultato]: [frase che riassume la chiave tattica]" (es: "L'Analista | Roma-Fiorentina 1-0: il dominio del possesso e la diga a centrocampo"). Non menzionare mai lo stadio della squadra ospite.
 2. "excerpt": Breve sintesi d'impatto di 2 frasi sui numeri e sul piano gara.
-3. "content": Articolo completo organizzato rigorosamente con questi 4 paragrafi ben distinti, usando i grassetti per i sottotitoli:
-   - **Il Verdetto dei Numeri**: I dati salienti della sfida (possesso palla, tiri nello specchio, precisione dei passaggi e contrasti) spiegati nel loro significato tattico.
-   - **La Chiave Tattica**: Dove si è decisa la gara (pressione alta, corsie esterne, duelli individuali, compattezza tra i reparti).
-   - **L'Impatto Statistico**: Quale reparto o dinamica di gioco ha spostato gli equilibri numerici.
-   - **Promossi & Da Rivedere**: Sintesi tecnica finale con i punti di forza confermati e gli aspetti da registrare.
+3. "content": Articolo completo organizzato rigorosamente con questi 4 paragrafi ben distinti, con intestazione testuale seguita da due punti (NON usare mai asterischi **):
+   - Il Verdetto dei Numeri: I dati salienti della sfida (possesso palla, tiri nello specchio, precisione dei passaggi e contrasti) spiegati nel loro significato tattico.
+   - La Chiave Tattica: Dove si è decisa la gara (pressione alta, corsie esterne, duelli individuali, compattezza tra i reparti).
+   - L'Impatto Statistico: Quale reparto o dinamica di gioco ha spostato gli equilibri numerici.
+   - Promossi & Da Rivedere: Sintesi tecnica finale con i punti di forza confermati e gli aspetti da registrare.
 4. "sentiment": "Positivo" | "Negativo" | "Neutro" (in base alla prestazione della Roma e al risultato).
 5. "category": "L'Analista"
 6. "tweet_text": Un'analisi tattica post-gara densa, approfondita e incisiva per X che sfrutti appieno i 280 caratteri consentiti (scrivi ESATTAMENTE tra 200 e 240 caratteri, con emoji 📊♟️🟡🔴, SENZA hashtag e SENZA link), spiegando i numeri chiave e la chiave tattica del match.
 7. "dynamic_hashtags": 2 hashtag caldi sulla partita (es. "#RomaFiorentina #SerieA" o "#ChampionsLeague #Gasperini"), SENZA #ASRoma e #RomaFlash.
 8. "en": Versione inglese completa con gli stessi 4 paragrafi in "content", "title" ("The Analyst | ...") e "excerpt".
 
-Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
+Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (```json):
 {
   "title": "...",
   "excerpt": "...",
@@ -401,6 +401,14 @@ Restituisci ESCLUSIVAMENTE un JSON valido senza blocchi markdown (\`\`\`json):
       console.error("Failed to parse Gemini output:", resultText)
       throw new Error("Invalid JSON from Gemini")
     }
+
+    // Sanitize any stray asterisks
+    if (aiSummary.content) aiSummary.content = aiSummary.content.replace(/\*\*/g, '');
+    if (aiSummary.excerpt) aiSummary.excerpt = aiSummary.excerpt.replace(/\*\*/g, '');
+    if (aiSummary.title) aiSummary.title = aiSummary.title.replace(/\*\*/g, '');
+    if (aiSummary.en?.content) aiSummary.en.content = aiSummary.en.content.replace(/\*\*/g, '');
+    if (aiSummary.en?.excerpt) aiSummary.en.excerpt = aiSummary.en.excerpt.replace(/\*\*/g, '');
+    if (aiSummary.en?.title) aiSummary.en.title = aiSummary.en.title.replace(/\*\*/g, '');
 
     const homeLogo = homeTeam.team?.logos?.[0]?.href || (homeTeam.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${homeTeam.team.id}.png` : 'https://a.espncdn.com/i/teamlogos/soccer/500/104.png')
     const awayLogo = awayTeam.team?.logos?.[0]?.href || (awayTeam.team?.id ? `https://a.espncdn.com/i/teamlogos/soccer/500/${awayTeam.team.id}.png` : 'https://a.espncdn.com/i/teamlogos/soccer/500/109.png')

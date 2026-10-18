@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import GlobalHeader from "@/components/GlobalHeader";
 import TikTokKitModal, { TikTokIcon } from "@/components/TikTokKitModal";
 import InstagramStoryModal, { InstagramIcon } from "@/components/InstagramStoryModal";
+import AnalistaStatsModal from "@/components/AnalistaStatsModal";
 import {
   Eye,
   Flame,
@@ -44,6 +45,7 @@ export default function StatsBackofficePage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [tiktokArticle, setTiktokArticle] = useState<any | null>(null);
   const [instagramArticle, setInstagramArticle] = useState<any | null>(null);
+  const [analystArticle, setAnalystArticle] = useState<any | null>(null);
 
   useEffect(() => {
     try {
@@ -674,6 +676,20 @@ export default function StatsBackofficePage() {
                     <InstagramIcon className="w-3.5 h-3.5" />
                   </button>
 
+                  {Boolean(art.title?.toLowerCase().includes("l'analista") || art.ai_summary?.category === "L'Analista") && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAnalystArticle(art);
+                      }}
+                      className="p-1.5 rounded-lg bg-amber-500/15 text-amber-500 hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer border border-amber-500/30 shadow-xs hover:scale-105"
+                      title="Scheda Grafica Statistiche Match (L'Analista)"
+                    >
+                      <BarChart3 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => handleDeleteArticle(art.id, art.title)}
@@ -881,6 +897,19 @@ export default function StatsBackofficePage() {
                         >
                           <InstagramIcon className="w-3.5 h-3.5" />
                         </button>
+                        {Boolean(art.title?.toLowerCase().includes("l'analista") || art.ai_summary?.category === "L'Analista") && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAnalystArticle(art);
+                            }}
+                            className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer border border-amber-500/30 shadow-2xs hover:scale-105"
+                            title="Scheda Grafica Statistiche Match (L'Analista)"
+                          >
+                            <BarChart3 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleDeleteArticle(art.id, art.title)}
@@ -923,6 +952,12 @@ export default function StatsBackofficePage() {
         article={instagramArticle}
         onClose={() => setInstagramArticle(null)}
         onMarkShared={handleSetInstagramShared}
+      />
+
+      {/* Modal Scheda Grafica Statistiche L'Analista */}
+      <AnalistaStatsModal
+        article={analystArticle}
+        onClose={() => setAnalystArticle(null)}
       />
     </main>
   );

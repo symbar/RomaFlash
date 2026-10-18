@@ -15,6 +15,7 @@ import ArticleReactions from '@/components/ArticleReactions';
 import { useLanguage } from '@/components/LanguageContext';
 import ArticleImage, { getArticleImageUrl } from '@/components/ArticleImage';
 import { generateArticleSlug } from '@/lib/slug';
+import MatchStatsWidget from '@/components/MatchStatsWidget';
 
 function formatDate(dateString: string, lang: 'it' | 'en' = 'it') {
   const date = new Date(dateString);
@@ -367,24 +368,17 @@ function ArticleContent() {
                 let hasTweet = embedUrl && (embedUrl.includes('twitter.com') || embedUrl.includes('x.com'));
                 let tweetId = hasTweet ? embedUrl.split('status/')[1]?.split('?')[0] : '';
                 if (tweetId && !/^\d+$/.test(tweetId)) tweetId = '';
-                
+
                 const renderFormattedInline = (text: string) => {
                   if (!text) return null;
-                  const parts = text.split(/(\*\*.*?\*\*)/g);
-                  return parts.map((part, index) => {
-                    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
-                      return (
-                        <strong key={index} className="font-bold text-foreground">
-                          {part.slice(2, -2)}
-                        </strong>
-                      );
-                    }
-                    return part;
-                  });
+                  // Elimina qualsiasi asterisco residuo
+                  return text.replace(/\*\*/g, '');
                 };
 
                 const renderParagraph = (p: string, key: string | number) => {
-                  const trimmed = p.trim();
+                  const trimmed = p.trim().replace(/\*\*/g, '');
+                  if (!trimmed) return null;
+
                   const isBlockquote = trimmed.startsWith('>');
                   const isExplicitQuote = !isBlockquote && /^["“].+[”"]\s*[—–-]\s*.+$/.test(trimmed);
 
@@ -430,38 +424,69 @@ function ArticleContent() {
                     );
                   }
 
-                  return <p key={key} className="mb-6">{renderFormattedInline(p)}</p>;
+                  // Se il paragrafo inizia con un'intestazione editoriale tipo "La Chiave Tattica:" o "Il Verdetto dei Numeri:"
+                  const sectionTitleMatch = trimmed.match(/^([A-ZÀ-Ú][\w\s'&’\/-]{2,35}:)\s*([\s\S]*)$/);
+                  if (sectionTitleMatch) {
+                    return (
+                      <p key={key} className="mb-6 leading-relaxed">
+                        <strong className="font-bold text-foreground">
+                          {sectionTitleMatch[1]}{' '}
+                        </strong>
+                        {renderFormattedInline(sectionTitleMatch[2])}
+                      </p>
+                    );
+                  }
+
+                  return <p key={key} className="mb-6 leading-relaxed">{renderFormattedInline(trimmed)}</p>;
                 };
 
                 if (tweetId === '') hasTweet = false;
-                if (!hasTweet || paragraphs.length < 2) {
-                  return (
-                    <>
-                      {paragraphs.map((p: string, i: number) => renderParagraph(p, i))}
-                      {hasTweet && (
-                        <div className="my-8 flex justify-center w-full">
-                          <Tweet id={tweetId || ''} />
-                        </div>
-                      )}
-                      {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
-                    </>
+
+                // Rilevamento articolo de "L'Analista" per inserire la scheda statistiche
+                const isAnalyst = article?.title?.toLowerCase().includes("l'analista") || article?.ai_summary?.category === "L'Analista";
+
+                // Posiziona il widget statistiche esattamente tra "La Chiave Tattica" e "L'Impatto Statistico"
+                let statsWidgetTargetIndex = -1;
+                if (isAnalyst) {
+                  // Cerca prima il paragrafo con "chiave tattica"
+                  statsWidgetTargetIndex = paragraphs.findIndex((p: string) => 
+                    p.toLowerCase().includes('chiave tattica') || p.toLowerCase().includes('tactical key')
                   );
+                  // Se non trovato, cerca quello immediatamente precedente a "impatto statistico"
+                  if (statsWidgetTargetIndex === -1) {
+                    const impattoIdx = paragraphs.findIndex((p: string) =>
+                      p.toLowerCase().includes('impatto statistico') || p.toLowerCase().includes('statistical impact')
+                    );
+                    if (impattoIdx > 0) {
+                      statsWidgetTargetIndex = impattoIdx - 1;
+                    } else {
+                      // Fallback dopo il secondo paragrafo
+                      statsWidgetTargetIndex = Math.min(1, paragraphs.length - 1);
+                    }
+                  }
                 }
 
-                const midPoint = Math.ceil(paragraphs.length / 2);
-                const firstHalf = paragraphs.slice(0, midPoint);
-                const secondHalf = paragraphs.slice(midPoint);
+                const tweetIndex = hasTweet ? Math.floor(paragraphs.length / 2) : -1;
 
                 return (
                   <>
-                    {firstHalf.map((p: string, i: number) => renderParagraph(p, 'f' + i))}
-                    
-                    <div className="my-8 flex justify-center w-full">
-                      <Tweet id={tweetId || ''} />
-                    </div>
-                    
-                    {secondHalf.map((p: string, i: number) => renderParagraph(p, 's' + i))}
-                    
+                    {paragraphs.map((p: string, i: number) => (
+                      <div key={i}>
+                        {renderParagraph(p, i)}
+
+                        {/* Widget Statistiche Match: posizionato subito dopo "La Chiave Tattica" (prima de "L'Impatto Statistico") */}
+                        {isAnalyst && i === statsWidgetTargetIndex && (
+                          <MatchStatsWidget article={article} />
+                        )}
+
+                        {hasTweet && i === tweetIndex && (
+                          <div className="my-8 flex justify-center w-full">
+                            <Tweet id={tweetId || ''} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
                     {article.ai_summary?.formation && <PitchView formation={article.ai_summary.formation} />}
                   </>
                 );

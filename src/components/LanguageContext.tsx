@@ -210,10 +210,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const getArticleTitle = (article: any): string => {
     if (!article) return '';
-    if (lang === 'en' && article.ai_summary?.en?.title) {
-      return sanitizeSourceText(article.ai_summary.en.title);
-    }
-    return sanitizeSourceText(article.title || '');
+    const raw = lang === 'en' && article.ai_summary?.en?.title
+      ? article.ai_summary.en.title
+      : (article.title || '');
+    return sanitizeSourceText(raw).replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*\*/g, '');
   };
 
   const getArticleExcerpt = (article: any): string => {
@@ -221,15 +221,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const raw = lang === 'en' && article.ai_summary?.en?.excerpt
       ? article.ai_summary.en.excerpt
       : (article.ai_summary?.excerpt || '');
-    return sanitizeSourceText(raw).replace(/\*\*(.*?)\*\*/g, '$1');
+    return sanitizeSourceText(raw).replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*\*/g, '');
   };
 
   const getArticleContent = (article: any): string => {
     if (!article) return '';
-    if (lang === 'en' && article.ai_summary?.en?.content) {
-      return sanitizeSourceText(article.ai_summary.en.content);
-    }
-    return sanitizeSourceText(article.ai_summary?.content || '');
+    const raw = lang === 'en' && article.ai_summary?.en?.content
+      ? article.ai_summary.en.content
+      : (article.ai_summary?.content || '');
+    return sanitizeSourceText(raw).replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*\*/g, '');
   };
 
   const getArticlePoll = (article: any) => {

@@ -86,9 +86,9 @@ export async function onRequestGet(context: any) {
     return Response.redirect("https://romaflash.app/", 302);
   }
 
-  const title = article.title || "Notizia AS Roma";
-  const excerpt = article.ai_summary?.excerpt || article.title || "";
-  const content = article.ai_summary?.content || article.content || excerpt;
+  const title = (article.title || "Notizia AS Roma").replace(/\*\*/g, "");
+  const excerpt = (article.ai_summary?.excerpt || article.title || "").replace(/\*\*/g, "");
+  const content = (article.ai_summary?.content || article.content || excerpt).replace(/\*\*/g, "");
   const imageUrl = resolveFullImageUrl(article.image_url);
   const publishedAt = article.published_at || new Date().toISOString();
   const category = article.ai_summary?.category || "AS Roma";

@@ -20,6 +20,8 @@ export default function PollWidget({ articleId, poll }: PollProps) {
   const [totalVotes, setTotalVotes] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Carica i voti esistenti per questo articolo
     const fetchVotes = async () => {
       const { data } = await supabase
@@ -27,7 +29,7 @@ export default function PollWidget({ articleId, poll }: PollProps) {
         .select('option_index')
         .eq('article_id', articleId);
         
-      if (data) {
+      if (data && isMounted) {
         const counts: { [key: number]: number } = {};
         poll.options.forEach((_, i) => counts[i] = 0);
         
@@ -42,13 +44,39 @@ export default function PollWidget({ articleId, poll }: PollProps) {
       }
     };
     
-    // Controlla se l'utente ha già votato in questa sessione
-    const savedVote = localStorage.getItem(`vote_${articleId}`);
-    if (savedVote !== null) {
-      setVotedOption(parseInt(savedVote, 10));
-    }
+    // Controlla se l'utente ha già votato in questa sessione o nel database
+    const checkVote = async () => {
+      const savedVote = localStorage.getItem(`vote_${articleId}`);
+      if (savedVote !== null) {
+        if (isMounted) setVotedOption(parseInt(savedVote, 10));
+        return;
+      }
+
+      // Fallback: controlla se su Supabase per questo voter_token esiste già un voto
+      const voterToken = localStorage.getItem('romaflash_voter_token');
+      if (voterToken) {
+        try {
+          const { data: userVote } = await supabase
+            .from('poll_votes')
+            .select('option_index')
+            .eq('article_id', articleId)
+            .eq('voter_token', voterToken)
+            .maybeSingle();
+
+          if (userVote && userVote.option_index !== undefined && isMounted) {
+            setVotedOption(userVote.option_index);
+            localStorage.setItem(`vote_${articleId}`, userVote.option_index.toString());
+          }
+        } catch {}
+      }
+    };
     
+    checkVote();
     fetchVotes();
+
+    return () => {
+      isMounted = false;
+    };
   }, [articleId, poll.options]);
 
   const handleVote = async (index: number) => {
@@ -69,12 +97,14 @@ export default function PollWidget({ articleId, poll }: PollProps) {
       localStorage.setItem('romaflash_voter_token', voterToken);
     }
 
-    // Salva su Supabase con vincolo UNIQUE (article_id, voter_token)
-    await supabase.from('poll_votes').insert({
-      article_id: articleId,
-      option_index: index,
-      voter_token: voterToken,
-    });
+    try {
+      // Salva su Supabase con vincolo UNIQUE (article_id, voter_token)
+      await supabase.from('poll_votes').insert({
+        article_id: articleId,
+        option_index: index,
+        voter_token: voterToken,
+      });
+    } catch {}
   };
 
   return (

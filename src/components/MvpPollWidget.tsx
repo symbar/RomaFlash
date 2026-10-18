@@ -107,7 +107,9 @@ function getOrCreateVoterToken(): string {
   if (typeof window === 'undefined') return 'server';
   let token = localStorage.getItem('romaflash_voter_token');
   if (!token) {
-    token = 'voter_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now();
+    token = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : 'voter_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now();
     localStorage.setItem('romaflash_voter_token', token);
   }
   return token;
@@ -115,6 +117,7 @@ function getOrCreateVoterToken(): string {
 
 export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile' | 'desktop' | 'auto' }) {
   const { t } = useLanguage();
+  const [currentMatchInfo, setCurrentMatchInfo] = useState<{ id: number; matchKey: string; matchSlug: string } | null>(null);
   const [poll, setPoll] = useState<MvpPollData | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasVoted, setHasVoted] = useState(false);
@@ -123,6 +126,19 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
   const [totalVotes, setTotalVotes] = useState(0);
   const [isVoting, setIsVoting] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>('');
+
+  // Sincronizzazione immediata tra istanze concorrenti (mobile + desktop)
+  useEffect(() => {
+    const handleSync = (e: Event) => {
+      const custom = e as CustomEvent<{ pollId: string; slug: string }>;
+      if (custom.detail?.slug) {
+        setHasVoted(true);
+        setVotedSlug(custom.detail.slug);
+      }
+    };
+    window.addEventListener('romaflash_mvp_vote_recorded', handleSync);
+    return () => window.removeEventListener('romaflash_mvp_vote_recorded', handleSync);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -203,30 +219,63 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
 
           if (isInsideVotingWindow || isPreview) {
-            // Cerca articoli recenti legati alla partita pubblicati a ridosso del fischio finale
-            const { data: recentArticles } = await supabase
-              .from('articles')
-              .select('id, title, published_at')
-              .gte('published_at', match.match_date)
-              .order('published_at', { ascending: false })
-              .limit(15);
+            const opponent = (match.home_team.toLowerCase() === 'roma' ? match.away_team : match.home_team).trim();
+            const matchKey = `match_${match.id}`;
+            const matchDateStr = match.match_date ? match.match_date.slice(0, 10) : '';
+            const matchSlug = `${match.home_team}_${match.away_team}_${matchDateStr}`.toLowerCase().replace(/[^a-z0-9_]/g, '_');
 
-            // Trova l'articolo dell'Analista o dell'analisi match per agganciare l'ID dei voti a poll_votes
-            const analystArt = recentArticles?.find(a =>
-              a.title.toLowerCase().includes("l'analista") ||
-              a.title.toLowerCase().includes(match.away_team.toLowerCase()) ||
-              a.title.toLowerCase().includes(match.home_team.toLowerCase())
-            ) || recentArticles?.[0];
+            if (isMounted) {
+              setCurrentMatchInfo({
+                id: match.id,
+                matchKey,
+                matchSlug
+              });
+            }
 
-            const pollId = analystArt?.id || `mvp-match-${match.id}`;
+            // Cerca in modo STABILE l'articolo canonico per il sondaggio MVP della partita.
+            // Priorità 1: L'articolo ufficiale "L'Analista" per questo avversario (ordinato ASC: il primo pubblicato, mai sovrascritto)
+            let canonicalArticle: { id: string; title: string; published_at: string } | null = null;
+            try {
+              const { data: analystMatches } = await supabase
+                .from('articles')
+                .select('id, title, published_at')
+                .gte('published_at', match.match_date)
+                .ilike('title', "%Analista%")
+                .ilike('title', `%${opponent}%`)
+                .order('published_at', { ascending: true })
+                .limit(1);
+
+              if (analystMatches && analystMatches.length > 0) {
+                canonicalArticle = analystMatches[0];
+              }
+            } catch {}
+
+            // Priorità 2: Se non ancora pubblicato L'Analista, usa il primo articolo post-partita dell'avversario
+            if (!canonicalArticle) {
+              try {
+                const { data: firstMatchArticles } = await supabase
+                  .from('articles')
+                  .select('id, title, published_at')
+                  .gte('published_at', match.match_date)
+                  .ilike('title', `%${opponent}%`)
+                  .order('published_at', { ascending: true })
+                  .limit(1);
+
+                if (firstMatchArticles && firstMatchArticles.length > 0) {
+                  canonicalArticle = firstMatchArticles[0];
+                }
+              } catch {}
+            }
+
+            const pollId = canonicalArticle?.id || `mvp-match-${match.id}`;
 
             // Determina il punteggio
             let score = match.score_home != null && match.score_away != null 
               ? `${match.score_home} - ${match.score_away}` 
               : undefined;
 
-            if (!score && analystArt?.title) {
-              const sm = analystArt.title.match(/\b(\d+)\s*[-–]\s*(\d+)\b/);
+            if (!score && canonicalArticle?.title) {
+              const sm = canonicalArticle.title.match(/\b(\d+)\s*[-–]\s*(\d+)\b/);
               if (sm) score = `${sm[1]} - ${sm[2]}`;
             }
 
@@ -298,19 +347,21 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               ];
             }
 
-            // Inizializza TUTTI i voti a ZERO: nessun voto fittizio, solo voti 100% reali
+            // Inizializza i voti per candidato
             const liveVotesBySlug: Record<string, number> = {};
             candidates.forEach(c => {
               liveVotesBySlug[c.slug] = 0;
             });
             let realVotesCount = 0;
 
-            if (analystArt?.id) {
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pollId);
+
+            if (isUuid) {
               try {
                 const { data: dbVotes } = await supabase
                   .from('poll_votes')
-                  .select('option_index')
-                  .eq('article_id', analystArt.id);
+                  .select('option_index, voter_token')
+                  .eq('article_id', pollId);
 
                 if (dbVotes && dbVotes.length > 0) {
                   realVotesCount = dbVotes.length;
@@ -324,6 +375,86 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               } catch {
                 // Non bloccare in caso di micro-disconnessione
               }
+            }
+
+            // CONTROLLO PERSISTENZA MULTI-LIVELLO DEL VOTO UTENTE
+            const token = getOrCreateVoterToken();
+            let resolvedVotedSlug: string | null = null;
+
+            // 1. Verifica localStorage (chiave match ID, match slug, pollId, active_vote, prefisso storico)
+            if (typeof window !== 'undefined') {
+              const byMatch = localStorage.getItem(`romaflash_mvp_voted_${matchKey}`);
+              const bySlug = localStorage.getItem(`romaflash_mvp_voted_${matchSlug}`);
+              const byPoll = localStorage.getItem(`romaflash_mvp_voted_${pollId}`);
+
+              if (byMatch && candidates.some(c => c.slug === byMatch)) {
+                resolvedVotedSlug = byMatch;
+              } else if (bySlug && candidates.some(c => c.slug === bySlug)) {
+                resolvedVotedSlug = bySlug;
+              } else if (byPoll && candidates.some(c => c.slug === byPoll)) {
+                resolvedVotedSlug = byPoll;
+              } else {
+                try {
+                  const raw = localStorage.getItem('romaflash_mvp_active_vote');
+                  if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if ((parsed.matchId === match.id || parsed.pollId === pollId) && parsed.slug) {
+                      if (candidates.some(c => c.slug === parsed.slug)) {
+                        resolvedVotedSlug = parsed.slug;
+                      }
+                    }
+                  }
+                } catch {}
+
+                if (!resolvedVotedSlug) {
+                  // Controlla qualsiasi chiave residua di voto
+                  for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith('romaflash_mvp_voted_')) {
+                      const val = localStorage.getItem(k);
+                      if (val && candidates.some(c => c.slug === val)) {
+                        resolvedVotedSlug = val;
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            // 2. Verifica su SERVER (Supabase poll_votes con voter_token)
+            if (!resolvedVotedSlug && isUuid && token) {
+              try {
+                const { data: serverVote } = await supabase
+                  .from('poll_votes')
+                  .select('option_index')
+                  .eq('article_id', pollId)
+                  .eq('voter_token', token)
+                  .maybeSingle();
+
+                if (serverVote && serverVote.option_index != null) {
+                  const cand = candidates[serverVote.option_index];
+                  if (cand) {
+                    resolvedVotedSlug = cand.slug;
+                  }
+                }
+              } catch {}
+            }
+
+            // Se l'utente ha votato, garantisci la persistenza su tutte le chiavi canoniche
+            if (resolvedVotedSlug && typeof window !== 'undefined') {
+              try {
+                localStorage.setItem(`romaflash_mvp_voted_${matchKey}`, resolvedVotedSlug);
+                localStorage.setItem(`romaflash_mvp_voted_${matchSlug}`, resolvedVotedSlug);
+                localStorage.setItem(`romaflash_mvp_voted_${pollId}`, resolvedVotedSlug);
+                localStorage.setItem('romaflash_mvp_active_vote', JSON.stringify({
+                  matchId: match.id,
+                  matchTitle,
+                  pollId,
+                  slug: resolvedVotedSlug,
+                  timestamp: Date.now()
+                }));
+              } catch {}
             }
 
             const activePoll: MvpPollData = {
@@ -342,10 +473,9 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               setVotesByPlayer(liveVotesBySlug);
               setTotalVotes(realVotesCount);
 
-              const localVote = localStorage.getItem(`romaflash_mvp_voted_${pollId}`);
-              if (localVote) {
+              if (resolvedVotedSlug) {
                 setHasVoted(true);
-                setVotedSlug(localVote);
+                setVotedSlug(resolvedVotedSlug);
               }
               setLoading(false);
             }
@@ -353,7 +483,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           }
         }
 
-        // Se non siamo nel range orario (prima di 30m post match o dopo le 4 ore di chiusura)
+        // Se non siamo nel range orario
         if (isMounted) {
           const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
           if (isPreview) {
@@ -366,7 +496,6 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               setVotedSlug(localVote);
             }
           } else {
-            // Rispetta la volontà: nessun sondaggio visibile fuori dalla finestra dei 30m-4h
             setPoll(null);
           }
           setLoading(false);
@@ -386,7 +515,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
     };
   }, []);
 
-  // Timer rimanente per la chiusura del sondaggio (4 ore esatte)
+  // Timer rimanente per la chiusura del sondaggio
   useEffect(() => {
     if (!poll?.closes_at) return;
 
@@ -448,7 +577,28 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
     setTotalVotes(newTotal);
     setHasVoted(true);
     setVotedSlug(candidateSlug);
-    localStorage.setItem(`romaflash_mvp_voted_${poll.id}`, candidateSlug);
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`romaflash_mvp_voted_${poll.id}`, candidateSlug);
+        if (currentMatchInfo) {
+          localStorage.setItem(`romaflash_mvp_voted_${currentMatchInfo.matchKey}`, candidateSlug);
+          localStorage.setItem(`romaflash_mvp_voted_${currentMatchInfo.matchSlug}`, candidateSlug);
+          localStorage.setItem('romaflash_mvp_active_vote', JSON.stringify({
+            matchId: currentMatchInfo.id,
+            matchTitle: poll.match_title,
+            pollId: poll.id,
+            slug: candidateSlug,
+            timestamp: Date.now()
+          }));
+        }
+
+        // Notifica cross-istanza (per sincronizzare subito mobile & desktop)
+        window.dispatchEvent(new CustomEvent('romaflash_mvp_vote_recorded', {
+          detail: { pollId: poll.id, slug: candidateSlug }
+        }));
+      } catch {}
+    }
 
     const candidateIndex = poll.candidates.findIndex(c => c.slug === candidateSlug);
 

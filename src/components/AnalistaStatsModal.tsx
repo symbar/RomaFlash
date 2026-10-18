@@ -102,19 +102,19 @@ export function drawAnalistaPoster(
   ctx.fill(wolfPath);
   ctx.restore();
 
-  // Testo brand ufficiale: "Roma" (bianco) + "Flash" (rosso carminio #e02d47)
+  // Testo brand ufficiale identico all'Header del sito: "Roma" (oro #f0b516) + "Flash" (rosso Roma #8e1f2f)
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.font = "900 32px sans-serif";
-  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 34px sans-serif";
+  ctx.fillStyle = "#f0b516";
   ctx.fillText("Roma", 165, 116);
   const romaWidth = ctx.measureText("Roma").width;
-  ctx.fillStyle = "#e02d47";
+  ctx.fillStyle = "#8e1f2f";
   ctx.fillText("Flash", 165 + romaWidth, 116);
 
   // Sottotitolo della rubrica
-  ctx.fillStyle = "#f0b516";
-  ctx.font = "800 16px sans-serif";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "800 15px sans-serif";
   ctx.fillText("L'ANALISTA • MATCH TELEMETRY REPORT", 165, 142);
 
   // Pillola competizione a destra
@@ -467,15 +467,20 @@ export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsMo
       <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#1c0409] to-[#0c0204] border-2 border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Header Modal */}
         <div className="flex items-center justify-between p-4 border-b border-amber-500/20 bg-black/40">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
-              <BarChart3 className="w-4 h-4" />
-            </span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[#26050a] border-2 border-[#f0b516] flex items-center justify-center p-1 shadow-sm shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 0 512 512">
+                <path fill="#f0b516" d={WOLF_LOGO_SVG_PATH} />
+              </svg>
+            </div>
             <div>
-              <span className="text-[10px] uppercase font-mono font-black text-amber-400 tracking-wider block">
-                ROMAFLASH • L'ANALISTA
-              </span>
-              <h2 className="text-sm sm:text-base font-bold text-white leading-tight">
+              <div className="text-sm font-bold tracking-tight text-[#f0b516] leading-none flex items-center gap-0.5">
+                Roma<span className="text-[#8e1f2f]">Flash</span>
+                <span className="text-[10px] uppercase font-mono font-black text-amber-400/80 tracking-wider ml-1.5">
+                  • L'ANALISTA
+                </span>
+              </div>
+              <h2 className="text-xs text-slate-300 leading-tight mt-0.5">
                 Scheda Grafica Partita
               </h2>
             </div>
@@ -483,7 +488,7 @@ export default function AnalistaStatsModal({ article, onClose }: AnalistaStatsMo
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

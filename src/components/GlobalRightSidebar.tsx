@@ -40,6 +40,7 @@ export default function GlobalRightSidebar() {
     <aside className="flex w-full lg:w-[35%] xl:w-[30%] flex-col gap-4 lg:gap-6 order-1 lg:order-2 mb-2 lg:mb-0">
       {nextMatch && (
         <NextMatchWidget 
+          matchId={nextMatch.id}
           homeTeam={nextMatch.home_team} 
           awayTeam={nextMatch.away_team} 
           competition={nextMatch.competition} 

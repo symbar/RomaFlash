@@ -46,8 +46,8 @@ Potenziamento delle sezioni dati e post-partita sfruttando fonti specializzate e
 *   **2.1 Pagelle & Voti Ufficiali Roma (Fantacalcio.it):** Estrazione automatica post-partita dei voti ufficiali dei calciatori dell'AS Roma da Fantacalcio.it (voto puro di redazione, fantavoto calcolato con bonus/malus come gol, assist, ammonizioni e confronto multi-redazione Fantacalcio/Milano/Statistico).
 *   **2.2 Calciomercato Tabellone & Rumor-Meter:** Sezione dedicata al mercato estivo e invernale (Acquisti, Cessioni, Rinnovi) con termometro di affidabilità della fonte (0-100%) calcolato dall'AI.
 *   **2.3 Archivio Rosa & Statistiche Giocatori:** Schede dedicate per ciascun calciatore della prima squadra con presenze, gol, assist, minutaggio e trend di rendimento stagionale.
-*   **2.4 Precedenti Head-to-Head:** Nella settimana del match, pillola visiva con lo storico scontri diretti contro l'avversaria di turno (ultime 5 sfide, gol fatti/subiti, ultimo incrocio).
-*   **2.5 "Il Tassametro Arbitri" (Lo Storico con la Roma):** Quando viene designato l'arbitro del match, box sintetico con i precedenti (Vittorie, Pareggi, Sconfitte, rigori a favore/contro, espulsioni).
+*   **2.4 Precedenti Head-to-Head (COMPLETATO 18/10/2026):** Integrato come tab rapido *"⚔️ Storico"* all'interno del widget `NextMatch` (zero ingombro extra su mobile). Mostra lo storico delle ultime 5 sfide contro l'avversaria di turno (Serie A, Champions League, Europa League, Coppa Italia), con scoreboard V-P-S (Verde/Grigio/Rosso), rapporto gol fatti/subiti, micro-tabellino marcatori, gestione incroci inediti e tasto *"Condividi"*.
+*   **2.5 "Il Tassametro Arbitri" (Lo Storico con la Roma) (COMPLETATO 18/10/2026):** Integrato come tab rapido *"🟨 Arbitro"* nel widget `NextMatch`. Rileva in automatico la designazione arbitrale della partita in corso (comunicata 36-48h prima da AIA o UEFA) e calcola il "tassametro" completo: presenze, V-P-S, % vittorie, rigori a favore e contro, cartellini rossi (Roma vs avversari), media ammonizioni, ultimo precedente diretto e gestione debutti europei con tasto *"Condividi"*.
 
 ---
 

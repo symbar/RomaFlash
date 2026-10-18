@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Trophy, Tv, Swords, Scale, Clock, Share2, Check } from 'lucide-react';
+import { Trophy, Tv, Swords, Scale, Clock } from 'lucide-react';
 import { useLanguage } from '@/components/LanguageContext';
 import { getMatchInsights, type MatchInsightsResponse, type H2HData, type RefereeData } from '@/lib/matchInsights';
 
@@ -204,7 +204,6 @@ export default function NextMatchWidget({ matchId, homeTeam, awayTeam, competiti
   // Dati H2H & Tassametro
   const [insights, setInsights] = useState<MatchInsightsResponse | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
-  const [copiedShare, setCopiedShare] = useState(false);
 
   const opponent = (homeTeam.toLowerCase() === 'roma' ? awayTeam : homeTeam).trim();
 
@@ -275,25 +274,6 @@ export default function NextMatchWidget({ matchId, homeTeam, awayTeam, competiti
       isMounted = false;
     };
   }, [matchId, homeTeam, awayTeam, competition, matchDate, opponent]);
-
-  const handleShare = async (title: string, text: string) => {
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      try {
-        await navigator.share({
-          title,
-          text,
-          url: window.location.href,
-        });
-        return;
-      } catch {}
-    }
-
-    try {
-      await navigator.clipboard.writeText(`${title}\n${text}\nhttps://romaflash.app`);
-      setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2000);
-    } catch {}
-  };
 
   if (!timeLeft) return null;
 
@@ -495,21 +475,6 @@ export default function NextMatchWidget({ matchId, homeTeam, awayTeam, competiti
                     ✨ <strong>Incrocio Inedito:</strong> Nessun precedente ufficiale registrato tra i due club.
                   </div>
                 )}
-
-                {/* Nota Editoriale e Tasto Condividi */}
-                <div className="pt-1 flex items-center justify-between text-[10px] text-stone-500 border-t border-stone-100">
-                  <span className="truncate pr-2">{insights.h2h.note || 'Dati ufficiali AS Roma'}</span>
-                  <button
-                    onClick={() => handleShare(
-                      `Precedenti Roma vs ${insights?.h2h?.opponent}`,
-                      `Ultime sfide: ${insights?.h2h?.roma_wins} Vittorie Roma, ${insights?.h2h?.draws} Pareggi, ${insights?.h2h?.roma_losses} Sconfitte. Gol fatti: ${insights?.h2h?.roma_goals_for}, subiti: ${insights?.h2h?.roma_goals_against}.`
-                    )}
-                    className="flex items-center gap-1 text-[#8e1f2f] hover:text-[#26050a] font-bold shrink-0 bg-stone-100 px-2 py-0.5 rounded-md transition-colors"
-                  >
-                    {copiedShare ? <Check className="w-3 h-3 text-green-600" /> : <Share2 className="w-3 h-3" />}
-                    <span>{copiedShare ? 'Copiato' : 'Condividi'}</span>
-                  </button>
-                </div>
               </>
             ) : (
               <div className="py-4 text-center text-xs text-stone-500">
@@ -593,21 +558,6 @@ export default function NextMatchWidget({ matchId, homeTeam, awayTeam, competiti
                     <strong className="text-stone-900">Ultimo precedente:</strong> {insights.referee.last_match}
                   </div>
                 )}
-
-                {/* Footer con Tasto Condividi Tassametro */}
-                <div className="pt-1 flex items-center justify-between text-[10px] text-stone-500 border-t border-stone-100">
-                  <span className="truncate pr-2 font-medium">{insights.referee.note || 'Bilancio storico ufficiale'}</span>
-                  <button
-                    onClick={() => handleShare(
-                      `Tassametro Arbitro: ${insights?.referee?.referee_name} con la Roma`,
-                      `Bilancio con la Roma: ${insights?.referee?.total_matches} partite (${insights?.referee?.roma_wins}V, ${insights?.referee?.draws}P, ${insights?.referee?.roma_losses}S). Rigori: ${insights?.referee?.penalties_for_roma} a favore, ${insights?.referee?.penalties_against_roma} contro. Rossi alla Roma: ${insights?.referee?.red_cards_roma}.`
-                    )}
-                    className="flex items-center gap-1 text-[#8e1f2f] hover:text-[#26050a] font-bold shrink-0 bg-stone-100 px-2 py-0.5 rounded-md transition-colors"
-                  >
-                    {copiedShare ? <Check className="w-3 h-3 text-green-600" /> : <Share2 className="w-3 h-3" />}
-                    <span>{copiedShare ? 'Copiato' : 'Condividi'}</span>
-                  </button>
-                </div>
               </>
             ) : (
               <div className="py-4 text-center space-y-1">

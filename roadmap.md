@@ -1,29 +1,7 @@
 # Roadmap di Sviluppo: RomaFlash PWA 🐺
 
 > [!NOTE]
-> Questa roadmap include le funzionalità aperte, le nuove idee strategiche approvate e il registro delle feature completate di recente per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma.
-
----
-
-### ✅ Funzionalità Completate di Recente
-
-*   **Sondaggio MVP Post-Partita ("Migliore in Campo"):**
-    *   Attivazione automatica post-gara con i candidati reali scesi in campo (esclusi infortunati/non a referto).
-    *   Conteggi voti 100% reali con protezione anti-bot (IP + device fingerprint) e memorizzazione nel DB.
-    *   Chiusura automatica alle 23:59 del giorno antecedente la partita successiva.
-    *   Header e layout responsive ottimizzati per mobile e desktop.
-*   **Match Telemetry & Widget Statistiche ("L'Analista") nell'Articolo:**
-    *   Inserimento del widget comparativo bicolore posizionato strategicamente tra *"La Chiave Tattica"* e *"L'Impatto Statistico"*.
-    *   Loghi ufficiali delle squadre in alta definizione (AS Roma e club avversari).
-    *   Barre di telemetria per 5 metriche chiave (possesso palla, tiri totali/nello specchio, passaggi riusciti, contrasti vinti, respinte difensive) e verdetto tattico.
-    *   Eliminazione definitiva di ogni residuo di asterischi markdown (`**`) sia in Edge SSR che nel client.
-*   **Generatore Scheda Grafica Partita nel Backoffice (`/stats`):**
-    *   Modale dedicata per gli articoli di analisi con anteprima broadcast 1200x1200px.
-    *   Header col logo ufficiale RomaFlash (Lupetto dorato cerchiato) e layout scoreboard pulito (senza marcatori).
-    *   Tasto *"Condividi"* nativo (Web Share API) con fallback al download PNG e copia istantanea negli appunti.
-*   **Kit Social Outro & Storie Instagram 9:16:**
-    *   Generatore di kit 2 slide per TikTok (1080x1350).
-    *   Generatore di Storie/Reel Instagram (1080x1920) con cover ad alta risoluzione, super sunto intelligente e slide outro di fidelizzazione.
+> Questa roadmap include le funzionalità aperte e le nuove idee strategiche approvate per consolidare RomaFlash come l'applicazione di riferimento per i tifosi dell'AS Roma.
 
 ---
 
@@ -46,8 +24,8 @@ Potenziamento delle sezioni dati e post-partita sfruttando fonti specializzate e
 *   **2.1 Pagelle & Voti Ufficiali Roma (Fantacalcio.it):** Estrazione automatica post-partita dei voti ufficiali dei calciatori dell'AS Roma da Fantacalcio.it (voto puro di redazione, fantavoto calcolato con bonus/malus come gol, assist, ammonizioni e confronto multi-redazione Fantacalcio/Milano/Statistico).
 *   **2.2 Calciomercato Tabellone & Rumor-Meter:** Sezione dedicata al mercato estivo e invernale (Acquisti, Cessioni, Rinnovi) con termometro di affidabilità della fonte (0-100%) calcolato dall'AI.
 *   **2.3 Archivio Rosa & Statistiche Giocatori:** Schede dedicate per ciascun calciatore della prima squadra con presenze, gol, assist, minutaggio e trend di rendimento stagionale.
-*   **2.4 Precedenti Head-to-Head (COMPLETATO 18/10/2026):** Integrato come tab rapido *"⚔️ Storico"* all'interno del widget `NextMatch` (zero ingombro extra su mobile). Mostra lo storico delle ultime 5 sfide contro l'avversaria di turno (Serie A, Champions League, Europa League, Coppa Italia), con scoreboard V-P-S (Verde/Grigio/Rosso), rapporto gol fatti/subiti, micro-tabellino marcatori, gestione incroci inediti e tasto *"Condividi"*.
-*   **2.5 "Il Tassametro Arbitri" (Lo Storico con la Roma) (COMPLETATO 18/10/2026):** Integrato come tab rapido *"🟨 Arbitro"* nel widget `NextMatch`. Rileva in automatico la designazione arbitrale della partita in corso (comunicata 36-48h prima da AIA o UEFA) e calcola il "tassametro" completo: presenze, V-P-S, % vittorie, rigori a favore e contro, cartellini rossi (Roma vs avversari), media ammonizioni, ultimo precedente diretto e gestione debutti europei con tasto *"Condividi"*.
+*   [x] ✅ **2.4 Precedenti Head-to-Head (COMPLETATO):** Integrato come tab rapido *"⚔️ Storico"* all'interno del widget `NextMatch` (zero ingombro extra su mobile). Mostra lo storico delle ultime 5 sfide contro l'avversaria di turno (Serie A, Champions League, Europa League, Coppa Italia), con scoreboard V-P-S (Verde/Grigio/Rosso), rapporto gol fatti/subiti, micro-tabellino marcatori e gestione automatica degli incroci inediti.
+*   [x] ✅ **2.5 "Il Tassametro Arbitri" (Lo Storico con la Roma) (COMPLETATO):** Integrato come tab rapido *"🟨 Arbitro"* nel widget `NextMatch`. Rileva in automatico la designazione arbitrale della partita in corso (comunicata 36-48h prima da AIA o UEFA) e calcola il "tassametro" completo: presenze, V-P-S, % vittorie, rigori a favore e contro, cartellini rossi (Roma vs avversari), media ammonizioni, ultimo precedente diretto e gestione debutti europei.
 
 ---
 

@@ -9,7 +9,6 @@ import rawSquadStats from '@/data/squad_stats.json';
 interface MatchVote {
   matchday: number;
   grade: number;
-  fantaGrade: number;
 }
 
 interface PlayerStats {
@@ -21,7 +20,6 @@ interface PlayerStats {
   imagePath: string;
   number: number;
   mv: number | null;
-  fm: number | null;
   partite: number;
   gol: number;
   cleanSheet: number;
@@ -32,8 +30,6 @@ interface PlayerStats {
   birthdate: string | null;
   foot: string | null;
   nationalities: string | null;
-  quotazione: number | null;
-  fvm: number | null;
   heatIndex: number;
   matchVotes: MatchVote[];
 }
@@ -389,18 +385,18 @@ export default function RosaPage() {
               </div>
             </div>
 
-            {/* FantaValore e Quotazione */}
+            {/* Disciplina & Statistiche Cartellini */}
             <div className="grid grid-cols-2 gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 mb-5">
               <div className="flex items-center justify-between px-2">
-                <span className="text-xs text-slate-400">FantaMedia:</span>
-                <span className="text-sm font-bold text-[#FDB927] font-mono">
-                  {selectedPlayer.fm ? selectedPlayer.fm.toFixed(2) : '-'}
+                <span className="text-xs text-slate-400">Ammonizioni:</span>
+                <span className="text-sm font-bold text-amber-400 font-mono">
+                  {selectedPlayer.ammonizioni} 🟨
                 </span>
               </div>
               <div className="flex items-center justify-between px-2 border-l border-slate-800">
-                <span className="text-xs text-slate-400">Quotazione Classic:</span>
-                <span className="text-sm font-bold text-white font-mono">
-                  {selectedPlayer.quotazione ? `${selectedPlayer.quotazione} crediti` : '-'}
+                <span className="text-xs text-slate-400">Espulsioni:</span>
+                <span className="text-sm font-bold text-red-500 font-mono">
+                  {selectedPlayer.espulsioni} 🟥
                 </span>
               </div>
             </div>
@@ -422,19 +418,19 @@ export default function RosaPage() {
                   {selectedPlayer.matchVotes.map(vote => (
                     <div
                       key={vote.matchday}
-                      className="flex-1 min-w-[56px] bg-slate-900 border border-slate-800 rounded-xl p-2 text-center"
+                      className="flex-1 min-w-[56px] bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center"
                     >
-                      <span className="text-[9px] uppercase font-bold text-slate-400 block">
+                      <span className="text-[9.5px] uppercase font-bold text-slate-400 block mb-1">
                         G{vote.matchday}
                       </span>
-                      <span className={`text-sm font-bold font-mono block my-0.5 ${
+                      <span className={`text-base font-bold font-mono block ${
                         vote.grade >= 7.0 ? 'text-emerald-400' :
                         vote.grade >= 6.0 ? 'text-amber-400' : 'text-red-400'
                       }`}>
                         {vote.grade}
                       </span>
-                      <span className="text-[9px] text-slate-500 font-mono block">
-                        FV {vote.fantaGrade}
+                      <span className="text-[8.5px] text-slate-500 uppercase font-semibold block mt-0.5">
+                        {vote.grade >= 6.0 ? 'Suff.' : 'Insuff.'}
                       </span>
                     </div>
                   ))}

@@ -15,21 +15,27 @@ async function scrapePlayer(player) {
   const url = `https://www.fantacalcio.it/serie-a/squadre/roma/${player.slug}/${player.id}`;
   const html = await get(url);
   if (!html || html.length < 500) {
-    return { ...player, mv: null, fm: null, partite: 0, gol: 0, assist: 0, matchVotes: [] };
+    return { ...player, mv: null, partite: 0, gol: 0, cleanSheet: 0, assist: 0, matchVotes: [] };
   }
 
-  // 1. Media voto & Fantamedia
+  // 1. Media voto
   const mvMatch = html.match(/Media Voto[\s\S]*?class="badge[^"]*avg">([\d,]+)<\/span>/i);
-  const fmMatch = html.match(/Fantamedia[\s\S]*?class="badge[^"]*avg">([\d,]+)<\/span>/i);
 
-  // 2. Partite, Gol, Assist, Cartellini
-  const partiteMatch = html.match(/Partite a voto[\s\S]*?class="value">(\d+)<\/td>/i);
-  const golMatch = html.match(/<th[^>]*>Gol<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
-  const golSubitiMatch = html.match(/<th[^>]*>Gol subiti<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
+  // 2. Partite, Gol, Assist, Cartellini (Estratti dalla tabella precisa large-stats)
+  const largeStatsMatch = html.match(/<table class="large-stats">([\s\S]*?)<\/table>/i);
+  const largeStatsHtml = largeStatsMatch ? largeStatsMatch[1] : '';
+
+  const partiteMatch = largeStatsHtml.match(/Partite a voto[\s\S]*?class="value">(\d+)<\/td>/i);
+  const golMatch = largeStatsHtml.match(/<th[^>]*>Gol<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
+  const golSubitiMatch = largeStatsHtml.match(/<th[^>]*>Gol subiti<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
+  const assistMatch = largeStatsHtml.match(/<th[^>]*>Assist<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
+
+  // Small stats: Ammonizioni, Espulsioni, Autoreti
+  const smallStatsMatch = html.match(/<table class="small-stats">([\s\S]*?)<\/table>/i);
+  const smallStatsHtml = smallStatsMatch ? smallStatsMatch[1] : '';
   const cleanSheetMatch = html.match(/<th[^>]*>Porte inviolate<\/th>[\s\S]*?class="value">(\d+)<\/td>/i);
-  const assistMatch = html.match(/Assist[\s\S]*?class="value">(\d+)<\/td>/i);
-  const ammonizioniMatch = html.match(/Ammonizioni[\s\S]*?class="pill">(\d+)<\/span>/i);
-  const espulsioniMatch = html.match(/Espulsioni[\s\S]*?class="pill">(\d+)<\/span>/i);
+  const ammonizioniMatch = smallStatsHtml.match(/Ammonizioni[\s\S]*?class="pill">(\d+)<\/span>/i);
+  const espulsioniMatch = smallStatsHtml.match(/Espulsioni[\s\S]*?class="pill">(\d+)<\/span>/i);
 
   // 3. Info anagrafiche
   const heightMatch = html.match(/itemprop="height">([^<]+)<\/dd>/i);
@@ -37,11 +43,7 @@ async function scrapePlayer(player) {
   const footMatch = html.match(/<dt>Piede<\/dt>[\s\S]*?title="([^"]+)"/i);
   const natMatch = html.match(/class="nationalities">([^<]+)<\/dd>/i);
 
-  // 4. Quotazioni e FVM
-  const quotMatch = html.match(/Quotazione Classic[\s\S]*?class="value">(\d+)<\/meta>/i) || html.match(/Quotazione classic[\s\S]*?class="badge[^"]*">(\d+)<\/span>/i);
-  const fvmMatch = html.match(/FantaValore di Mercato \(Classic\)[\s\S]*?class="badge[^"]*">(\d+)<\/span>/i);
-
-  // 5. Ultimi voti da x-axis
+  // 4. Ultimi voti da x-axis
   const xAxisMatch = html.match(/<div class="x-axis">([\s\S]*?)<\/div>/i);
   const matchVotes = [];
   if (xAxisMatch) {
@@ -57,7 +59,7 @@ async function scrapePlayer(player) {
     });
   }
 
-  // Calcolo Heat Index sintetico (0 - 100) basato su media voto, ultime presenze e fantaGrade
+  // Calcolo Heat Index sintetico (0 - 100) basato su media voto e ultime presenze
   const mvVal = mvMatch ? parseFloat(mvMatch[1].replace(',', '.')) : 6.0;
   const recentVotes = matchVotes.slice(-5);
   const recentAvg = recentVotes.length > 0 
@@ -73,7 +75,6 @@ async function scrapePlayer(player) {
     slug: player.slug,
     imagePath: player.imagePath,
     mv: mvMatch ? parseFloat(mvMatch[1].replace(',', '.')) : null,
-    fm: fmMatch ? parseFloat(fmMatch[1].replace(',', '.')) : null,
     partite: partiteMatch ? parseInt(partiteMatch[1]) : 0,
     gol: golMatch ? parseInt(golMatch[1]) : (golSubitiMatch ? parseInt(golSubitiMatch[1]) : 0),
     cleanSheet: cleanSheetMatch ? parseInt(cleanSheetMatch[1]) : 0,
@@ -84,8 +85,6 @@ async function scrapePlayer(player) {
     birthdate: birthMatch ? birthMatch[1].trim() : null,
     foot: footMatch ? footMatch[1].trim() : null,
     nationalities: natMatch ? natMatch[1].trim() : null,
-    quotazione: quotMatch ? parseInt(quotMatch[1]) : null,
-    fvm: fvmMatch ? parseInt(fvmMatch[1]) : null,
     heatIndex,
     matchVotes
   };
@@ -121,7 +120,7 @@ const officialJerseyNumbers = {
 
 async function main() {
   const playersRaw = JSON.parse(fs.readFileSync('public/images/players/players.json', 'utf8'));
-  console.log(`Caricamento statistiche per ${playersRaw.length} giocatori...`);
+  console.log(`Caricamento statistiche pulite per ${playersRaw.length} giocatori...`);
   
   const results = [];
   for (const p of playersRaw) {
@@ -130,7 +129,7 @@ async function main() {
       const stats = await scrapePlayer(p);
       stats.number = officialJerseyNumbers[p.slug] || 0;
       results.push(stats);
-      console.log(`OK (MV: ${stats.mv || '-'}, P: ${stats.partite}, G: ${stats.gol})`);
+      console.log(`OK (P: ${stats.partite}, G: ${stats.gol}, A: ${stats.assist}, MV: ${stats.mv || '-'})`);
     } catch (e) {
       console.log(`ERR: ${e.message}`);
       results.push({ ...p, number: officialJerseyNumbers[p.slug] || 0, partite: 0, gol: 0, assist: 0, matchVotes: [] });

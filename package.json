@@ -1,53 +1,52 @@
 {
-    "name":  "romaflash",
-    "version":  "0.1.0",
-    "private":  true,
-    "scripts":  {
-                    "dev":  "next dev",
-                    "build":  "next build",
-                    "start":  "next start",
-                    "lint":  "eslint"
-                },
-    "dependencies":  {
-                         "@google/generative-ai":  "^0.24.1",
-                         "@supabase/supabase-js":  "^2.117.2",
-                         "cheerio":  "^1.2.0",
-                         "dotenv":  "^18.0.4",
-                         "framer-motion":  "^13.4.4",
-                         "lucide-react":  "^1.48.0",
-                         "next":  "16.3.6",
-                         "next-themes":  "^0.4.6",
-                         "next-view-transitions":  "^0.3.5",
-                         "pg":  "^8.23.0",
-                         "react":  "19.2.8",
-                         "react-dom":  "19.2.8",
-                         "react-simple-pull-to-refresh":  "^1.3.4",
-                         "react-tweet":  "^3.3.1",
-                         "rss-parser":  "^3.13.0"
-                     },
-    "devDependencies":  {
-                            "@tailwindcss/postcss":  "^4",
-                            "@types/node":  "^20",
-                            "@types/react":  "^19",
-                            "@types/react-dom":  "^19",
-                            "eslint":  "^9",
-                            "eslint-config-next":  "16.3.6",
-                            "tailwindcss":  "^4",
-                            "typescript":  "^5"
-                        },
-    "description":  "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
-    "main":  "fetch-test.js",
-    "repository":  {
-                       "type":  "git",
-                       "url":  "git+https://github.com/symbar/RomaFlash.git"
-                   },
-    "keywords":  [
-
-                 ],
-    "author":  "",
-    "license":  "ISC",
-    "bugs":  {
-                 "url":  "https://github.com/symbar/RomaFlash/issues"
-             },
-    "homepage":  "https://github.com/symbar/RomaFlash#readme"
+    "name": "romaflash",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint"
+    },
+    "dependencies": {
+        "@google/generative-ai": "^0.24.1",
+        "@supabase/supabase-js": "^2.117.2",
+        "cheerio": "^1.2.0",
+        "dotenv": "^18.0.4",
+        "framer-motion": "^13.4.4",
+        "lucide-react": "^1.48.0",
+        "next": "16.3.6",
+        "next-themes": "^0.4.6",
+        "next-view-transitions": "^0.3.5",
+        "pg": "^8.23.0",
+        "react": "19.2.8",
+        "react-dom": "19.2.8",
+        "react-simple-pull-to-refresh": "^1.3.4",
+        "react-tweet": "^3.3.1",
+        "rss-parser": "^3.13.0",
+        "sharp": "^0.35.5"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "16.3.6",
+        "tailwindcss": "^4",
+        "typescript": "^5"
+    },
+    "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+    "main": "fetch-test.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/symbar/RomaFlash.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/symbar/RomaFlash/issues"
+    },
+    "homepage": "https://github.com/symbar/RomaFlash#readme"
 }

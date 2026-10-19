@@ -1,0 +1,1134 @@
+[
+  {
+    "id": "7048",
+    "name": "De Marzi",
+    "fullName": "Gabriele De Marzi",
+    "role": "P",
+    "slug": "demarzi",
+    "imagePath": "/images/players/demarzi.png",
+    "mv": 0,
+    "fm": 0,
+    "partite": 0,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 0,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "187cm",
+    "birthdate": "18 apr 2007",
+    "foot": "Destro",
+    "nationalities": "Stati Uniti, Italia",
+    "quotazione": 1,
+    "fvm": 1,
+    "heatIndex": 50,
+    "matchVotes": [],
+    "number": 89
+  },
+  {
+    "id": "610",
+    "name": "Gollini",
+    "fullName": "Pierluigi Gollini",
+    "role": "P",
+    "slug": "gollini",
+    "imagePath": "/images/players/gollini.png",
+    "mv": 6.25,
+    "fm": 6.25,
+    "partite": 2,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 2,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "188cm",
+    "birthdate": "18 mar 1995",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 3,
+    "fvm": 13,
+    "heatIndex": 71,
+    "matchVotes": [
+      {
+        "matchday": 6,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 95
+  },
+  {
+    "id": "5841",
+    "name": "Svilar",
+    "fullName": "Mile Svilar",
+    "role": "P",
+    "slug": "svilar",
+    "imagePath": "/images/players/svilar.png",
+    "mv": 6.4,
+    "fm": 5.8,
+    "partite": 5,
+    "gol": 3,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "189cm",
+    "birthdate": "27 ago 1999",
+    "foot": "Destro",
+    "nationalities": "Serbia, Belgio",
+    "quotazione": 18,
+    "fvm": 80,
+    "heatIndex": 81,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 5
+      },
+      {
+        "matchday": 4,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 5,
+        "grade": 7,
+        "fantaGrade": 5
+      }
+    ],
+    "number": 99
+  },
+  {
+    "id": "6125",
+    "name": "Vasquez D.",
+    "fullName": "Devis Vasquez",
+    "role": "P",
+    "slug": "vasquez",
+    "imagePath": "/images/players/vasquez.png",
+    "mv": 0,
+    "fm": 0,
+    "partite": 0,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 0,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "193cm",
+    "birthdate": "12 mag 1998",
+    "foot": "Destro",
+    "nationalities": "Colombia",
+    "quotazione": 1,
+    "fvm": 1,
+    "heatIndex": 50,
+    "matchVotes": [],
+    "number": 1
+  },
+  {
+    "id": "6631",
+    "name": "Ghilardi",
+    "fullName": "Daniele Ghilardi",
+    "role": "D",
+    "slug": "ghilardi",
+    "imagePath": "/images/players/ghilardi.png",
+    "mv": 6.17,
+    "fm": 6,
+    "partite": 3,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 3,
+    "ammonizioni": 1,
+    "espulsioni": 1,
+    "height": "189cm",
+    "birthdate": "06 gen 2003",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 4,
+    "fvm": 10,
+    "heatIndex": 73,
+    "matchVotes": [
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 5,
+        "grade": 5.5,
+        "fantaGrade": 5
+      }
+    ],
+    "number": 84
+  },
+  {
+    "id": "4807",
+    "name": "Hermoso",
+    "fullName": "Mario Hermoso",
+    "role": "D",
+    "slug": "hermoso",
+    "imagePath": "/images/players/hermoso.png",
+    "mv": 6.21,
+    "fm": 6.5,
+    "partite": 7,
+    "gol": 1,
+    "cleanSheet": 0,
+    "assist": 7,
+    "ammonizioni": 2,
+    "espulsioni": 2,
+    "height": "184cm",
+    "birthdate": "18 giu 1995",
+    "foot": "Sinistro",
+    "nationalities": "Spagna",
+    "quotazione": 13,
+    "fvm": 40,
+    "heatIndex": 77,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 3,
+        "grade": 7,
+        "fantaGrade": 10
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 5,
+        "grade": 5.5,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 22
+  },
+  {
+    "id": "7529",
+    "name": "Koulierakis",
+    "fullName": "Konstantinos Koulierakis",
+    "role": "D",
+    "slug": "koulierakis",
+    "imagePath": "/images/players/koulierakis.png",
+    "mv": 6,
+    "fm": 6,
+    "partite": 2,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 2,
+    "ammonizioni": 1,
+    "espulsioni": 1,
+    "height": "188cm",
+    "birthdate": "28 nov 2003",
+    "foot": "Sinistro",
+    "nationalities": "Grecia",
+    "quotazione": 6,
+    "fvm": 9,
+    "heatIndex": 69,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 4
+  },
+  {
+    "id": "2296",
+    "name": "Mancini",
+    "fullName": "Gianluca Mancini",
+    "role": "D",
+    "slug": "mancini",
+    "imagePath": "/images/players/mancini.png",
+    "mv": 6.25,
+    "fm": 6.42,
+    "partite": 6,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 6,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "190cm",
+    "birthdate": "17 apr 1996",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 16,
+    "fvm": 55,
+    "heatIndex": 78,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 7.5
+      },
+      {
+        "matchday": 3,
+        "grade": 5,
+        "fantaGrade": 5
+      },
+      {
+        "matchday": 4,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 5,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 6,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      }
+    ],
+    "number": 23
+  },
+  {
+    "id": "4317",
+    "name": "N'Dicka",
+    "fullName": "Evan N'Dicka",
+    "role": "D",
+    "slug": "ndicka",
+    "imagePath": "/images/players/ndicka.png",
+    "mv": 5.9,
+    "fm": 5.8,
+    "partite": 5,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 1,
+    "espulsioni": 1,
+    "height": "192cm",
+    "birthdate": "20 ago 1999",
+    "foot": "Sinistro",
+    "nationalities": "Francia, Camerun",
+    "quotazione": 11,
+    "fvm": 30,
+    "heatIndex": 75,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 3,
+        "grade": 5.5,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 5,
+        "grade": 6,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 5
+  },
+  {
+    "id": "6986",
+    "name": "Rensch",
+    "fullName": "Devyne Rensch",
+    "role": "D",
+    "slug": "rensch",
+    "imagePath": "/images/players/rensch.png",
+    "mv": 5.83,
+    "fm": 5.83,
+    "partite": 3,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 3,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "179cm",
+    "birthdate": "18 gen 2003",
+    "foot": "Ambidestro",
+    "nationalities": "Olanda, Suriname",
+    "quotazione": 5,
+    "fvm": 12,
+    "heatIndex": 69,
+    "matchVotes": [
+      {
+        "matchday": 5,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 5.5,
+        "fantaGrade": 5.5
+      }
+    ],
+    "number": 2
+  },
+  {
+    "id": "7181",
+    "name": "Wesley",
+    "fullName": "Wesley Gassova",
+    "role": "D",
+    "slug": "wesley",
+    "imagePath": "/images/players/wesley.png",
+    "mv": 6.6,
+    "fm": 6.8,
+    "partite": 5,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "178cm",
+    "birthdate": "06 set 2003",
+    "foot": "Destro",
+    "nationalities": "Brasile",
+    "quotazione": 18,
+    "fvm": 85,
+    "heatIndex": 83,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 8
+      },
+      {
+        "matchday": 3,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 5,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 3
+  },
+  {
+    "id": "4998",
+    "name": "Molina N.",
+    "fullName": "Nahuel Molina",
+    "role": "D",
+    "slug": "molina",
+    "imagePath": "/images/players/molina.png",
+    "mv": 6.1,
+    "fm": 6.3,
+    "partite": 5,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "175cm",
+    "birthdate": "06 apr 1998",
+    "foot": "Destro",
+    "nationalities": "Argentina",
+    "quotazione": 17,
+    "fvm": 56,
+    "heatIndex": 77,
+    "matchVotes": [
+      {
+        "matchday": 2,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 5,
+        "grade": 6.5,
+        "fantaGrade": 7.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 16
+  },
+  {
+    "id": "7599",
+    "name": "Lulli",
+    "fullName": "Tommaso Lulli",
+    "role": "D",
+    "slug": "lulli",
+    "imagePath": "/images/players/lulli.png",
+    "mv": 6.4,
+    "fm": 7,
+    "partite": 5,
+    "gol": 1,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "184cm",
+    "birthdate": "17 ago 2007",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 3,
+    "fvm": 13,
+    "heatIndex": 78,
+    "matchVotes": [
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 7,
+        "fantaGrade": 10
+      }
+    ],
+    "number": 42
+  },
+  {
+    "id": "4705",
+    "name": "Balerdi",
+    "fullName": "Leonardo Balerdi",
+    "role": "D",
+    "slug": "balerdi",
+    "imagePath": "/images/players/balerdi.png",
+    "mv": 6.5,
+    "fm": 6.5,
+    "partite": 5,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "187cm",
+    "birthdate": "26 gen 1999",
+    "foot": "Destro",
+    "nationalities": "Argentina",
+    "quotazione": 9,
+    "fvm": 21,
+    "heatIndex": 82,
+    "matchVotes": [
+      {
+        "matchday": 3,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 4,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 5,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      }
+    ],
+    "number": 6
+  },
+  {
+    "id": "22",
+    "name": "De Roon",
+    "fullName": "Marten De Roon",
+    "role": "C",
+    "slug": "deroon",
+    "imagePath": "/images/players/deroon.png",
+    "mv": 6.33,
+    "fm": 6.17,
+    "partite": 3,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 3,
+    "ammonizioni": 1,
+    "espulsioni": 1,
+    "height": "185cm",
+    "birthdate": "29 mar 1991",
+    "foot": "Destro",
+    "nationalities": "Olanda",
+    "quotazione": 5,
+    "fvm": 8,
+    "heatIndex": 75,
+    "matchVotes": [
+      {
+        "matchday": 4,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 6,
+        "grade": 6.5,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 15
+  },
+  {
+    "id": "779",
+    "name": "Cristante",
+    "fullName": "Bryan Cristante",
+    "role": "C",
+    "slug": "cristante",
+    "imagePath": "/images/players/cristante.png",
+    "mv": 6.3,
+    "fm": 6.3,
+    "partite": 5,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "186cm",
+    "birthdate": "03 mar 1995",
+    "foot": "Destro",
+    "nationalities": "Italia, Canada",
+    "quotazione": 10,
+    "fvm": 31,
+    "heatIndex": 79,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 5,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      }
+    ],
+    "number": 4
+  },
+  {
+    "id": "5589",
+    "name": "Konè M.",
+    "fullName": "Manu Koné",
+    "role": "C",
+    "slug": "kone",
+    "imagePath": "/images/players/kone.png",
+    "mv": 6.5,
+    "fm": 7.33,
+    "partite": 6,
+    "gol": 2,
+    "cleanSheet": 0,
+    "assist": 6,
+    "ammonizioni": 2,
+    "espulsioni": 2,
+    "height": "185cm",
+    "birthdate": "17 mag 2001",
+    "foot": "Destro",
+    "nationalities": "Francia, Costa d&#x27;Avorio",
+    "quotazione": 14,
+    "fvm": 49,
+    "heatIndex": 83,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 5,
+        "grade": 8,
+        "fantaGrade": 14
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 5.5
+      }
+    ],
+    "number": 17
+  },
+  {
+    "id": "6190",
+    "name": "Pisilli",
+    "fullName": "Niccolò Pisilli",
+    "role": "C",
+    "slug": "pisilli",
+    "imagePath": "/images/players/pisilli.png",
+    "mv": 6.3,
+    "fm": 7.3,
+    "partite": 5,
+    "gol": 2,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 2,
+    "espulsioni": 2,
+    "height": "180cm",
+    "birthdate": "23 set 2004",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 9,
+    "fvm": 25,
+    "heatIndex": 79,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 9.5
+      },
+      {
+        "matchday": 2,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 4,
+        "grade": 6.5,
+        "fantaGrade": 9
+      },
+      {
+        "matchday": 5,
+        "grade": 5.5,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 7,
+        "grade": 6.5,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 61
+  },
+  {
+    "id": "530",
+    "name": "Pellegrini Lo.",
+    "fullName": "Lorenzo Pellegrini",
+    "role": "C",
+    "slug": "pellegrini",
+    "imagePath": "/images/players/pellegrini.png",
+    "mv": 6,
+    "fm": 6,
+    "partite": 2,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 2,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "186cm",
+    "birthdate": "19 giu 1996",
+    "foot": "Destro",
+    "nationalities": "Italia",
+    "quotazione": 8,
+    "fvm": 12,
+    "heatIndex": 69,
+    "matchVotes": [
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 7
+  },
+  {
+    "id": "7556",
+    "name": "Mora",
+    "fullName": "Giacomo Mora",
+    "role": "C",
+    "slug": "mora",
+    "imagePath": "/images/players/mora.png",
+    "mv": 6.3,
+    "fm": 6.9,
+    "partite": 5,
+    "gol": 1,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "168cm",
+    "birthdate": "05 mag 2007",
+    "foot": "Destro",
+    "nationalities": "Portogallo",
+    "quotazione": 19,
+    "fvm": 45,
+    "heatIndex": 79,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 10
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 7,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 82
+  },
+  {
+    "id": "5734",
+    "name": "Soulè",
+    "fullName": "Matías Soulé",
+    "role": "A",
+    "slug": "soule",
+    "imagePath": "/images/players/soule.png",
+    "mv": 6.5,
+    "fm": 7.36,
+    "partite": 7,
+    "gol": 2,
+    "cleanSheet": 0,
+    "assist": 7,
+    "ammonizioni": 2,
+    "espulsioni": 2,
+    "height": "176cm",
+    "birthdate": "15 apr 2003",
+    "foot": "Sinistro",
+    "nationalities": "Argentina, Italia",
+    "quotazione": 16,
+    "fvm": 64,
+    "heatIndex": 82,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 10
+      },
+      {
+        "matchday": 3,
+        "grade": 7.5,
+        "fantaGrade": 11.5
+      },
+      {
+        "matchday": 4,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 5,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 6,
+        "grade": 5.5,
+        "fantaGrade": 5
+      },
+      {
+        "matchday": 7,
+        "grade": 7,
+        "fantaGrade": 6.5
+      }
+    ],
+    "number": 18
+  },
+  {
+    "id": "309",
+    "name": "Dybala",
+    "fullName": "Paulo Dybala",
+    "role": "A",
+    "slug": "dybala",
+    "imagePath": "/images/players/dybala.png",
+    "mv": 6.92,
+    "fm": 7.58,
+    "partite": 6,
+    "gol": 0,
+    "cleanSheet": 0,
+    "assist": 6,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "177cm",
+    "birthdate": "15 nov 1993",
+    "foot": "Sinistro",
+    "nationalities": "Argentina, Italia",
+    "quotazione": 18,
+    "fvm": 120,
+    "heatIndex": 84,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 8,
+        "fantaGrade": 11
+      },
+      {
+        "matchday": 2,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 3,
+        "grade": 7,
+        "fantaGrade": 8
+      },
+      {
+        "matchday": 4,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 5,
+        "grade": 7,
+        "fantaGrade": 7
+      },
+      {
+        "matchday": 6,
+        "grade": 6,
+        "fantaGrade": 6
+      }
+    ],
+    "number": 21
+  },
+  {
+    "id": "6572",
+    "name": "Castro S.",
+    "fullName": "Santiago Castro",
+    "role": "A",
+    "slug": "castro",
+    "imagePath": "/images/players/castro.png",
+    "mv": 6.2,
+    "fm": 6.8,
+    "partite": 5,
+    "gol": 1,
+    "cleanSheet": 0,
+    "assist": 5,
+    "ammonizioni": 0,
+    "espulsioni": 0,
+    "height": "179cm",
+    "birthdate": "18 set 2004",
+    "foot": "Destro",
+    "nationalities": "Argentina",
+    "quotazione": 12,
+    "fvm": 30,
+    "heatIndex": 78,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 2,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 3,
+        "grade": 6.5,
+        "fantaGrade": 6.5
+      },
+      {
+        "matchday": 4,
+        "grade": 5.5,
+        "fantaGrade": 5.5
+      },
+      {
+        "matchday": 7,
+        "grade": 7,
+        "fantaGrade": 10
+      }
+    ],
+    "number": 9
+  },
+  {
+    "id": "5585",
+    "name": "Malen",
+    "fullName": "Donyell Malen",
+    "role": "A",
+    "slug": "malen",
+    "imagePath": "/images/players/malen.png",
+    "mv": 6.67,
+    "fm": 9.42,
+    "partite": 6,
+    "gol": 6,
+    "cleanSheet": 0,
+    "assist": 6,
+    "ammonizioni": 1,
+    "espulsioni": 1,
+    "height": "179cm",
+    "birthdate": "19 gen 1999",
+    "foot": "Destro",
+    "nationalities": "Olanda, Suriname",
+    "quotazione": 36,
+    "fvm": 425,
+    "heatIndex": 79,
+    "matchVotes": [
+      {
+        "matchday": 1,
+        "grade": 8.5,
+        "fantaGrade": 17.5
+      },
+      {
+        "matchday": 2,
+        "grade": 8,
+        "fantaGrade": 13.5
+      },
+      {
+        "matchday": 3,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 4,
+        "grade": 7,
+        "fantaGrade": 10
+      },
+      {
+        "matchday": 5,
+        "grade": 6,
+        "fantaGrade": 6
+      },
+      {
+        "matchday": 6,
+        "grade": 4.5,
+        "fantaGrade": 3.5
+      }
+    ],
+    "number": 11
+  }
+]

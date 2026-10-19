@@ -27,6 +27,7 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
   const isLineups = title === 'Probabili Formazioni' || title === 'Predicted Lineups';
   const isStandings = title === 'Classifica Serie A' || title === 'Serie A Standings';
   const isCalendar = title === 'Calendario Stagione' || title === 'Season Fixtures';
+  const isSquad = title === 'Rosa AS Roma' || title === 'AS Roma Squad';
 
   return (
     <header className="flex items-center justify-between gap-2 py-4 md:py-5 mb-5 border-b border-border relative z-30">
@@ -66,6 +67,14 @@ export default function GlobalHeader({ title = 'Le Ultime' }: { title?: string }
             }`}
           >
             {t('nav.lineups')}
+          </Link>
+          <Link
+            href="/rosa"
+            className={`transition-colors ${
+              isSquad ? 'text-primary font-semibold' : 'text-gray-800 hover:text-primary'
+            }`}
+          >
+            {t('nav.squad')}
           </Link>
           <Link
             href="/calendario"

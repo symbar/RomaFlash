@@ -27,11 +27,6 @@ export default function TabBar() {
           <span className={`text-[9.5px] font-medium ${pathname === '/classifica' ? 'text-primary font-bold' : 'text-gray-500'}`}>{t('nav.standings')}</span>
         </Link>
         
-        <Link href="/rosa" className="flex flex-col items-center justify-center w-full h-full gap-1">
-          <Users className={`w-5 h-5 transition-colors ${pathname === '/rosa' ? 'text-primary' : 'text-gray-500'}`} />
-          <span className={`text-[9.5px] font-medium ${pathname === '/rosa' ? 'text-primary font-bold' : 'text-gray-500'}`}>{t('nav.squad')}</span>
-        </Link>
-        
         <Link href="/formazioni" className={`flex flex-col items-center gap-1 justify-center w-full h-full ${pathname === '/formazioni' ? 'text-primary' : 'text-gray-500'}`}>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-5 h-5 ${pathname === '/formazioni' ? 'text-primary' : ''}`}>
             <rect width="18" height="12" x="3" y="6" rx="2" ry="2"/>
@@ -40,6 +35,11 @@ export default function TabBar() {
             <circle cx="12" cy="12" r="2"/>
           </svg>
           <span className={`text-[9.5px] font-medium tracking-wide ${pathname === '/formazioni' ? 'text-primary font-bold' : ''}`}>{t('nav.lineups')}</span>
+        </Link>
+        
+        <Link href="/rosa" className="flex flex-col items-center justify-center w-full h-full gap-1">
+          <Users className={`w-5 h-5 transition-colors ${pathname === '/rosa' ? 'text-primary' : 'text-gray-500'}`} />
+          <span className={`text-[9.5px] font-medium ${pathname === '/rosa' ? 'text-primary font-bold' : 'text-gray-500'}`}>{t('nav.squad')}</span>
         </Link>
         <Link href="/calendario" className="flex flex-col items-center justify-center w-full h-full gap-1">
           <CalendarDays className={`w-5 h-5 transition-colors ${pathname === '/calendario' ? 'text-primary' : 'text-gray-500'}`} />

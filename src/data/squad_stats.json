@@ -17,7 +17,6 @@
     "birthdate": "18 apr 2007",
     "foot": "Destro",
     "nationalities": "Stati Uniti, Italia",
-    "heatIndex": 50,
     "matchVotes": [],
     "number": 89
   },
@@ -39,17 +38,16 @@
     "birthdate": "18 mar 1995",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 71,
     "matchVotes": [
       {
         "matchday": 6,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "COM",
+        "grade": 6.5
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 95
@@ -72,32 +70,31 @@
     "birthdate": "27 ago 1999",
     "foot": "Destro",
     "nationalities": "Serbia, Belgio",
-    "heatIndex": 81,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "FIO",
+        "grade": 6
       },
       {
         "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "LEC",
+        "grade": 6.5
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 5
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "TOR",
+        "grade": 6.5
       },
       {
         "matchday": 5,
-        "grade": 7,
-        "fantaGrade": 5
+        "opponent": "INT",
+        "grade": 7
       }
     ],
     "number": 99
@@ -120,7 +117,6 @@
     "birthdate": "12 mag 1998",
     "foot": "Destro",
     "nationalities": "Colombia",
-    "heatIndex": 50,
     "matchVotes": [],
     "number": 1
   },
@@ -142,22 +138,21 @@
     "birthdate": "06 gen 2003",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 73,
     "matchVotes": [
       {
         "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "LEC",
+        "grade": 7
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 5.5,
-        "fantaGrade": 5
+        "opponent": "INT",
+        "grade": 5.5
       }
     ],
     "number": 84
@@ -180,42 +175,31 @@
     "birthdate": "18 giu 1995",
     "foot": "Sinistro",
     "nationalities": "Spagna",
-    "heatIndex": 77,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 6
-      },
-      {
-        "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 6.5
-      },
-      {
         "matchday": 3,
-        "grade": 7,
-        "fantaGrade": 10
+        "opponent": "ATA",
+        "grade": 7
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 5.5
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 5.5,
-        "fantaGrade": 5.5
+        "opponent": "INT",
+        "grade": 5.5
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 22
@@ -238,17 +222,16 @@
     "birthdate": "28 nov 2003",
     "foot": "Sinistro",
     "nationalities": "Grecia",
-    "heatIndex": 69,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "FIO",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 4
@@ -271,37 +254,31 @@
     "birthdate": "17 apr 1996",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 78,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 6.5
-      },
-      {
         "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 7.5
+        "opponent": "LEC",
+        "grade": 6.5
       },
       {
         "matchday": 3,
-        "grade": 5,
-        "fantaGrade": 5
+        "opponent": "ATA",
+        "grade": 5
       },
       {
         "matchday": 4,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "TOR",
+        "grade": 7
       },
       {
         "matchday": 5,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "INT",
+        "grade": 6
       },
       {
         "matchday": 6,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "COM",
+        "grade": 6.5
       }
     ],
     "number": 23
@@ -324,32 +301,31 @@
     "birthdate": "20 ago 1999",
     "foot": "Sinistro",
     "nationalities": "Francia, Camerun",
-    "heatIndex": 75,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "FIO",
+        "grade": 6
       },
       {
         "matchday": 3,
-        "grade": 5.5,
-        "fantaGrade": 5.5
+        "opponent": "ATA",
+        "grade": 5.5
       },
       {
         "matchday": 5,
-        "grade": 6,
-        "fantaGrade": 5.5
+        "opponent": "INT",
+        "grade": 6
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 5
@@ -372,22 +348,21 @@
     "birthdate": "18 gen 2003",
     "foot": "Ambidestro",
     "nationalities": "Olanda, Suriname",
-    "heatIndex": 69,
     "matchVotes": [
       {
         "matchday": 5,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "INT",
+        "grade": 6
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 5.5,
-        "fantaGrade": 5.5
+        "opponent": "GEN",
+        "grade": 5.5
       }
     ],
     "number": 2
@@ -410,32 +385,31 @@
     "birthdate": "06 set 2003",
     "foot": "Destro",
     "nationalities": "Brasile",
-    "heatIndex": 83,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "FIO",
+        "grade": 6.5
       },
       {
         "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 8
+        "opponent": "LEC",
+        "grade": 7
       },
       {
         "matchday": 3,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "ATA",
+        "grade": 7
       },
       {
         "matchday": 5,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "INT",
+        "grade": 6.5
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       }
     ],
     "number": 3
@@ -458,32 +432,31 @@
     "birthdate": "06 apr 1998",
     "foot": "Destro",
     "nationalities": "Argentina",
-    "heatIndex": 77,
     "matchVotes": [
       {
         "matchday": 2,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "LEC",
+        "grade": 6
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 6.5,
-        "fantaGrade": 7.5
+        "opponent": "INT",
+        "grade": 6.5
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       }
     ],
     "number": 16
@@ -506,27 +479,26 @@
     "birthdate": "17 ago 2007",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 78,
     "matchVotes": [
       {
         "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "LEC",
+        "grade": 6.5
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 7,
-        "fantaGrade": 10
+        "opponent": "GEN",
+        "grade": 7
       }
     ],
     "number": 42
@@ -549,32 +521,31 @@
     "birthdate": "26 gen 1999",
     "foot": "Destro",
     "nationalities": "Argentina",
-    "heatIndex": 82,
     "matchVotes": [
       {
         "matchday": 3,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "ATA",
+        "grade": 6.5
       },
       {
         "matchday": 4,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "TOR",
+        "grade": 7
       },
       {
         "matchday": 5,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "INT",
+        "grade": 6.5
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "GEN",
+        "grade": 6.5
       }
     ],
     "number": 6
@@ -597,22 +568,21 @@
     "birthdate": "29 mar 1991",
     "foot": "Destro",
     "nationalities": "Olanda",
-    "heatIndex": 75,
     "matchVotes": [
       {
         "matchday": 4,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "TOR",
+        "grade": 6.5
       },
       {
         "matchday": 6,
-        "grade": 6.5,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6.5
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 15
@@ -635,32 +605,31 @@
     "birthdate": "03 mar 1995",
     "foot": "Destro",
     "nationalities": "Italia, Canada",
-    "heatIndex": 79,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "FIO",
+        "grade": 6.5
       },
       {
         "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "LEC",
+        "grade": 6.5
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "INT",
+        "grade": 6.5
       }
     ],
     "number": 4
@@ -683,37 +652,31 @@
     "birthdate": "17 mag 2001",
     "foot": "Destro",
     "nationalities": "Francia, Costa d&#x27;Avorio",
-    "heatIndex": 83,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 5.5
-      },
-      {
         "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "LEC",
+        "grade": 7
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 8,
-        "fantaGrade": 14
+        "opponent": "INT",
+        "grade": 8
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 5.5
+        "opponent": "COM",
+        "grade": 6
       }
     ],
     "number": 17
@@ -736,32 +699,31 @@
     "birthdate": "23 set 2004",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 79,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 9.5
+        "opponent": "FIO",
+        "grade": 6.5
       },
       {
         "matchday": 2,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "LEC",
+        "grade": 6.5
       },
       {
         "matchday": 4,
-        "grade": 6.5,
-        "fantaGrade": 9
+        "opponent": "TOR",
+        "grade": 6.5
       },
       {
         "matchday": 5,
-        "grade": 5.5,
-        "fantaGrade": 5.5
+        "opponent": "INT",
+        "grade": 5.5
       },
       {
         "matchday": 7,
-        "grade": 6.5,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6.5
       }
     ],
     "number": 61
@@ -784,17 +746,16 @@
     "birthdate": "19 giu 1996",
     "foot": "Destro",
     "nationalities": "Italia",
-    "heatIndex": 69,
     "matchVotes": [
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 7
@@ -817,32 +778,31 @@
     "birthdate": "05 mag 2007",
     "foot": "Destro",
     "nationalities": "Portogallo",
-    "heatIndex": 79,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "FIO",
+        "grade": 6.5
       },
       {
         "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 10
+        "opponent": "LEC",
+        "grade": 7
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 7,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "GEN",
+        "grade": 6
       }
     ],
     "number": 82
@@ -865,42 +825,31 @@
     "birthdate": "15 apr 2003",
     "foot": "Sinistro",
     "nationalities": "Argentina, Italia",
-    "heatIndex": 82,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 6
-      },
-      {
-        "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 10
-      },
-      {
         "matchday": 3,
-        "grade": 7.5,
-        "fantaGrade": 11.5
+        "opponent": "ATA",
+        "grade": 7.5
       },
       {
         "matchday": 4,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "TOR",
+        "grade": 6
       },
       {
         "matchday": 5,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "INT",
+        "grade": 6.5
       },
       {
         "matchday": 6,
-        "grade": 5.5,
-        "fantaGrade": 5
+        "opponent": "COM",
+        "grade": 5.5
       },
       {
         "matchday": 7,
-        "grade": 7,
-        "fantaGrade": 6.5
+        "opponent": "GEN",
+        "grade": 7
       }
     ],
     "number": 18
@@ -923,37 +872,31 @@
     "birthdate": "15 nov 1993",
     "foot": "Sinistro",
     "nationalities": "Argentina, Italia",
-    "heatIndex": 84,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 8,
-        "fantaGrade": 11
-      },
-      {
         "matchday": 2,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "LEC",
+        "grade": 7
       },
       {
         "matchday": 3,
-        "grade": 7,
-        "fantaGrade": 8
+        "opponent": "ATA",
+        "grade": 7
       },
       {
         "matchday": 4,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "TOR",
+        "grade": 6.5
       },
       {
         "matchday": 5,
-        "grade": 7,
-        "fantaGrade": 7
+        "opponent": "INT",
+        "grade": 7
       },
       {
         "matchday": 6,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "COM",
+        "grade": 6
       }
     ],
     "number": 21
@@ -976,32 +919,31 @@
     "birthdate": "18 set 2004",
     "foot": "Destro",
     "nationalities": "Argentina",
-    "heatIndex": 78,
     "matchVotes": [
       {
         "matchday": 1,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "FIO",
+        "grade": 6
       },
       {
         "matchday": 2,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "LEC",
+        "grade": 6
       },
       {
         "matchday": 3,
-        "grade": 6.5,
-        "fantaGrade": 6.5
+        "opponent": "ATA",
+        "grade": 6.5
       },
       {
         "matchday": 4,
-        "grade": 5.5,
-        "fantaGrade": 5.5
+        "opponent": "TOR",
+        "grade": 5.5
       },
       {
         "matchday": 7,
-        "grade": 7,
-        "fantaGrade": 10
+        "opponent": "GEN",
+        "grade": 7
       }
     ],
     "number": 9
@@ -1024,37 +966,31 @@
     "birthdate": "19 gen 1999",
     "foot": "Destro",
     "nationalities": "Olanda, Suriname",
-    "heatIndex": 79,
     "matchVotes": [
       {
-        "matchday": 1,
-        "grade": 8.5,
-        "fantaGrade": 17.5
-      },
-      {
         "matchday": 2,
-        "grade": 8,
-        "fantaGrade": 13.5
+        "opponent": "LEC",
+        "grade": 8
       },
       {
         "matchday": 3,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "ATA",
+        "grade": 6
       },
       {
         "matchday": 4,
-        "grade": 7,
-        "fantaGrade": 10
+        "opponent": "TOR",
+        "grade": 7
       },
       {
         "matchday": 5,
-        "grade": 6,
-        "fantaGrade": 6
+        "opponent": "INT",
+        "grade": 6
       },
       {
         "matchday": 6,
-        "grade": 4.5,
-        "fantaGrade": 3.5
+        "opponent": "COM",
+        "grade": 4.5
       }
     ],
     "number": 11

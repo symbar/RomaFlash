@@ -3,11 +3,12 @@
 import { useState, useMemo } from 'react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { useLanguage } from '@/components/LanguageContext';
-import { Search, Flame, X, Shield, ArrowUpRight, TrendingUp, Calendar, Activity } from 'lucide-react';
+import { Search, X, ArrowUpRight, Activity } from 'lucide-react';
 import rawSquadStats from '@/data/squad_stats.json';
 
 interface MatchVote {
   matchday: number;
+  opponent: string;
   grade: number;
 }
 
@@ -30,7 +31,6 @@ interface PlayerStats {
   birthdate: string | null;
   foot: string | null;
   nationalities: string | null;
-  heatIndex: number;
   matchVotes: MatchVote[];
 }
 
@@ -45,7 +45,7 @@ export default function RosaPage() {
   // Calcolo statistiche aggregate club
   const statsOverview = useMemo(() => {
     const totalPlayers = squadData.length;
-    const avgAge = 25.8; // Calcolata sull'anagrafica
+    const avgAge = 25.8;
     const totalGoals = squadData.reduce((acc, p) => acc + (p.role !== 'P' ? p.gol : 0), 0);
     const totalAssists = squadData.reduce((acc, p) => acc + p.assist, 0);
     return { totalPlayers, avgAge, totalGoals, totalAssists };
@@ -84,61 +84,62 @@ export default function RosaPage() {
     }
   };
 
-  const getRoleColor = (role: 'P' | 'D' | 'C' | 'A') => {
+  const getRoleBadge = (role: 'P' | 'D' | 'C' | 'A') => {
     switch (role) {
-      case 'P': return 'bg-amber-500 text-amber-50 border-amber-600/30';
-      case 'D': return 'bg-blue-600 text-blue-50 border-blue-700/30';
-      case 'C': return 'bg-emerald-600 text-emerald-50 border-emerald-700/30';
-      case 'A': return 'bg-[#8E1B23] text-white border-[#8E1B23]/40';
+      case 'P': return 'bg-amber-500/10 text-amber-700 border-amber-300';
+      case 'D': return 'bg-blue-500/10 text-blue-700 border-blue-300';
+      case 'C': return 'bg-emerald-500/10 text-emerald-700 border-emerald-300';
+      case 'A': return 'bg-[#8E1B23]/10 text-[#8E1B23] border-[#8E1B23]/30 font-bold';
     }
   };
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 pb-32 lg:pb-16 relative">
+    <main className="flex-1 w-full max-w-5xl mx-auto p-3 sm:p-6 pb-28 md:pb-16 relative">
       <GlobalHeader title={lang === 'en' ? 'AS Roma Squad' : 'Rosa AS Roma'} />
 
       {/* Hero Banner Squadra */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1a080c] via-slate-900 to-[#120407] border border-[#8E1B23]/30 rounded-2xl p-5 sm:p-7 shadow-xl mb-6 text-white">
-        <div className="absolute -right-12 -bottom-12 w-72 h-72 bg-[#8E1B23]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#1a080c] via-slate-900 to-[#120407] border border-[#8E1B23]/30 rounded-2xl p-4 sm:p-6 shadow-xl mb-5 text-white">
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[#8E1B23]/20 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#FDB927] animate-pulse" />
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#FDB927]" />
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#FDB927]">
                 Stagione 2026/2027 • AS Roma
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-serif">
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-serif">
               {t('squad.title')}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl leading-relaxed">
+            <p className="text-xs text-slate-300 mt-0.5 max-w-md leading-relaxed">
               {t('squad.subtitle')}
             </p>
           </div>
 
           {/* Statistiche Sintetiche Roster */}
-          <div className="grid grid-cols-4 gap-2 bg-slate-950/70 border border-slate-800/80 p-2.5 sm:p-3 rounded-xl shrink-0">
+          <div className="grid grid-cols-4 gap-2 bg-slate-950/70 border border-slate-800/80 p-2 sm:p-2.5 rounded-xl shrink-0">
             <div className="flex flex-col items-center justify-center text-center px-1">
-              <span className="text-[9.5px] uppercase font-semibold text-slate-400">Rosa</span>
-              <span className="text-base sm:text-lg font-bold text-white font-mono">{statsOverview.totalPlayers}</span>
+              <span className="text-[9px] uppercase font-semibold text-slate-400">Rosa</span>
+              <span className="text-base font-bold text-white font-mono">{statsOverview.totalPlayers}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center px-1 border-l border-slate-800">
-              <span className="text-[9.5px] uppercase font-semibold text-slate-400">Età Media</span>
-              <span className="text-base sm:text-lg font-bold text-[#FDB927] font-mono">{statsOverview.avgAge}</span>
+              <span className="text-[9px] uppercase font-semibold text-slate-400">Età Media</span>
+              <span className="text-base font-bold text-[#FDB927] font-mono">{statsOverview.avgAge}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center px-1 border-l border-slate-800">
-              <span className="text-[9.5px] uppercase font-semibold text-slate-400">Gol Tot.</span>
-              <span className="text-base sm:text-lg font-bold text-white font-mono">{statsOverview.totalGoals}</span>
+              <span className="text-[9px] uppercase font-semibold text-slate-400">Gol Tot.</span>
+              <span className="text-base font-bold text-white font-mono">{statsOverview.totalGoals}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center px-1 border-l border-slate-800">
-              <span className="text-[9.5px] uppercase font-semibold text-slate-400">Assist</span>
-              <span className="text-base sm:text-lg font-bold text-white font-mono">{statsOverview.totalAssists}</span>
+              <span className="text-[9px] uppercase font-semibold text-slate-400">Assist</span>
+              <span className="text-base font-bold text-white font-mono">{statsOverview.totalAssists}</span>
             </div>
           </div>
         </div>
 
         {/* Barra di Ricerca e Filtri Ruolo */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             <input
@@ -190,105 +191,96 @@ export default function RosaPage() {
         </div>
       </section>
 
-      {/* Griglia Reparti */}
+      {/* LISTA A STRISCE ORIZZONTALI (OPZIONE B) */}
       {(['P', 'D', 'C', 'A'] as const).map(role => {
         const players = groupedPlayers[role];
         if (players.length === 0) return null;
 
         return (
-          <section key={role} className="mb-8">
-            <div className="flex items-center justify-between mb-3.5 px-1 border-b border-border/60 pb-2">
+          <section key={role} className="mb-6">
+            {/* Header Reparto */}
+            <div className="flex items-center justify-between mb-2 px-1 pb-1">
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-sm ${
                   role === 'P' ? 'bg-amber-500' :
                   role === 'D' ? 'bg-blue-600' :
                   role === 'C' ? 'bg-emerald-600' : 'bg-[#8E1B23]'
                 }`} />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-foreground">
                   {getRoleLabel(role)}
                 </h2>
               </div>
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-[11px] text-muted-foreground">
                 {players.length} {players.length === 1 ? 'calciatore' : 'calciatori'}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Intestazione Colonne Tabella Strisce */}
+            <div className="flex items-center justify-between text-[10px] text-gray-500 font-bold uppercase tracking-wider px-3 py-1 bg-gray-50 border-y border-border/80 rounded-t-lg">
+              <span className="flex-1">Calciatore</span>
+              <div className="flex items-center gap-3 sm:gap-6 text-center shrink-0">
+                <span className="w-7 sm:w-10">Pres.</span>
+                <span className="w-8 sm:w-10">{role === 'P' ? 'Gol S.' : 'Gol'}</span>
+                <span className="w-8 sm:w-10">{role === 'P' ? 'C. Sh.' : 'Assist'}</span>
+                <span className="w-8 sm:w-10">MV</span>
+              </div>
+            </div>
+
+            {/* Righe Giocatori a Strisce */}
+            <div className="flex flex-col divide-y divide-border/60 bg-white border-x border-b border-border rounded-b-lg shadow-xs overflow-hidden">
               {players.map(player => (
                 <article
                   key={player.id}
                   onClick={() => setSelectedPlayer(player)}
-                  className="group relative bg-white border border-border/80 hover:border-[#8E1B23]/70 rounded-2xl p-4 transition-all duration-200 hover:shadow-lg cursor-pointer overflow-hidden flex flex-col justify-between"
+                  className="group px-3 py-2 sm:py-2.5 flex items-center justify-between hover:bg-gray-50/80 cursor-pointer transition-colors"
                 >
-                  {/* Numero di Maglia in Filigrana */}
-                  {player.number > 0 && (
-                    <div className="absolute top-1 right-2 font-mono font-bold text-5xl text-gray-100 select-none group-hover:text-[#FDB927]/15 transition-colors pointer-events-none">
-                      {player.number}
+                  {/* Numero di Maglia + Busto Sagoma + Nome e Nazionalità */}
+                  <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0 pr-2">
+                    <span className="font-mono text-xs sm:text-sm font-bold text-gray-400 group-hover:text-primary transition-colors w-5 sm:w-6 text-center shrink-0">
+                      {player.number > 0 ? player.number : '-'}
+                    </span>
+                    
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:border-primary/40 transition-colors">
+                      <img
+                        src={player.imagePath}
+                        alt={player.fullName}
+                        className="w-7 h-7 sm:w-8 sm:h-8 object-contain translate-y-0.5"
+                        loading="lazy"
+                      />
                     </div>
-                  )}
 
-                  {/* Header Card Giocatore */}
-                  <div className="flex items-start justify-between relative z-10 mb-2">
-                    <div className="min-w-0 pr-2">
-                      <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider mb-1 ${getRoleColor(player.role)}`}>
-                        {player.role === 'P' ? 'Portiere' :
-                         player.role === 'D' ? 'Difensore' :
-                         player.role === 'C' ? 'Centrocampista' : 'Attaccante'}
-                      </span>
-                      <h3 className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate">
-                        {player.fullName}
-                      </h3>
-                      <p className="text-[11px] text-gray-500 truncate">
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate">
+                          {player.fullName}
+                        </span>
+                        <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded border uppercase tracking-wider shrink-0 hidden sm:inline-block ${getRoleBadge(player.role)}`}>
+                          {player.role}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-gray-500 truncate">
                         {player.nationalities || 'AS Roma'}
-                      </p>
-                    </div>
-
-                    {/* Forma / Heat Index */}
-                    <div className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold" title="Indice Forma">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      {player.heatIndex}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Sagoma Trasparente Giocatore */}
-                  <div className="h-32 flex items-center justify-center my-1 relative">
-                    <img
-                      src={player.imagePath}
-                      alt={player.fullName}
-                      className="max-h-32 object-contain drop-shadow-md group-hover:scale-105 group-hover:-translate-y-1 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  {/* Matrice Statistiche Rapide */}
-                  <div className="grid grid-cols-4 gap-1 bg-gray-50/90 border border-gray-200/80 rounded-xl p-2 text-center relative z-10 mt-2">
-                    <div>
-                      <span className="text-[8.5px] uppercase text-gray-400 block font-semibold">Pres.</span>
-                      <span className="text-xs font-bold text-gray-800 font-mono">{player.partite}</span>
-                    </div>
-                    <div>
-                      <span className="text-[8.5px] uppercase text-gray-400 block font-semibold">
-                        {player.role === 'P' ? 'Gol Sub.' : 'Gol'}
-                      </span>
-                      <span className="text-xs font-bold text-primary font-mono">{player.gol}</span>
-                    </div>
-                    <div>
-                      <span className="text-[8.5px] uppercase text-gray-400 block font-semibold">
-                        {player.role === 'P' ? 'C. Sheet' : 'Assist'}
-                      </span>
-                      <span className="text-xs font-bold text-gray-800 font-mono">
-                        {player.role === 'P' ? player.cleanSheet : player.assist}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[8.5px] uppercase text-gray-400 block font-semibold">MV</span>
-                      <span className={`text-xs font-bold font-mono ${
-                        (player.mv || 0) >= 6.5 ? 'text-emerald-600' :
-                        (player.mv || 0) >= 6.0 ? 'text-blue-600' : 'text-gray-600'
-                      }`}>
-                        {player.mv ? player.mv.toFixed(2) : '-'}
-                      </span>
-                    </div>
+                  {/* Metriche Statistiche Orizzontali */}
+                  <div className="flex items-center gap-3 sm:gap-6 text-center text-xs font-mono shrink-0">
+                    <span className="w-7 sm:w-10 text-gray-700 font-bold">{player.partite}</span>
+                    <span className={`w-8 sm:w-10 font-bold ${player.gol > 0 ? 'text-primary' : 'text-gray-400'}`}>
+                      {player.gol}
+                    </span>
+                    <span className={`w-8 sm:w-10 font-bold ${
+                      (player.role === 'P' ? player.cleanSheet : player.assist) > 0 ? 'text-gray-900 font-bold' : 'text-gray-400'
+                    }`}>
+                      {player.role === 'P' ? player.cleanSheet : player.assist}
+                    </span>
+                    <span className={`w-8 sm:w-10 font-bold ${
+                      (player.mv || 0) >= 6.5 ? 'text-emerald-600' :
+                      (player.mv || 0) >= 6.0 ? 'text-blue-600' : 'text-gray-500'
+                    }`}>
+                      {player.mv ? player.mv.toFixed(2) : '-'}
+                    </span>
                   </div>
                 </article>
               ))}
@@ -332,7 +324,12 @@ export default function RosaPage() {
 
               <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${getRoleColor(selectedPlayer.role)}`}>
+                  <span className={`text-[9.5px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                    selectedPlayer.role === 'P' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                    selectedPlayer.role === 'D' ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' :
+                    selectedPlayer.role === 'C' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                    'bg-[#8E1B23]/40 text-[#FDB927] border-[#FDB927]/30'
+                  }`}>
                     {selectedPlayer.role === 'P' ? 'Portiere' :
                      selectedPlayer.role === 'D' ? 'Difensore' :
                      selectedPlayer.role === 'C' ? 'Centrocampista' : 'Attaccante'}
@@ -350,7 +347,7 @@ export default function RosaPage() {
                   {selectedPlayer.nationalities || 'AS Roma'} {selectedPlayer.birthdate ? `• Nato il ${selectedPlayer.birthdate}` : ''}
                 </p>
                 {selectedPlayer.height && (
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 mt-0.5">
                     Altezza: <span className="text-slate-200">{selectedPlayer.height}</span> • Piede: <span className="text-slate-200">{selectedPlayer.foot || 'N/D'}</span>
                   </p>
                 )}
@@ -358,7 +355,7 @@ export default function RosaPage() {
             </div>
 
             {/* Griglia Metriche Stagionali */}
-            <div className="grid grid-cols-4 gap-2 bg-slate-900 border border-slate-800/80 rounded-xl p-3 text-center mb-5">
+            <div className="grid grid-cols-4 gap-2 bg-slate-900 border border-slate-800/80 rounded-xl p-3 text-center mb-4">
               <div>
                 <span className="text-[9.5px] uppercase font-semibold text-slate-400 block">Presenze</span>
                 <span className="text-base font-bold text-white font-mono">{selectedPlayer.partite}</span>
@@ -385,8 +382,8 @@ export default function RosaPage() {
               </div>
             </div>
 
-            {/* Disciplina & Statistiche Cartellini */}
-            <div className="grid grid-cols-2 gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 mb-5">
+            {/* Disciplina & Cartellini */}
+            <div className="grid grid-cols-2 gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 mb-4">
               <div className="flex items-center justify-between px-2">
                 <span className="text-xs text-slate-400">Ammonizioni:</span>
                 <span className="text-sm font-bold text-amber-400 font-mono">
@@ -401,15 +398,15 @@ export default function RosaPage() {
               </div>
             </div>
 
-            {/* Ultime 5 Pagelle / Voti */}
+            {/* Ultime 5 Pagelle Ufficiali con Codice Squadra Avversaria */}
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2 px-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-[#FDB927]" />
                   {t('squad.last_votes')}
                 </span>
-                <span className="text-[11px] font-bold text-emerald-400">
-                  Forma: {selectedPlayer.heatIndex}/100
+                <span className="text-[11px] text-slate-400">
+                  {selectedPlayer.matchVotes.length > 0 ? `Ultime ${selectedPlayer.matchVotes.length} a voto` : 'Nessun voto'}
                 </span>
               </div>
 
@@ -420,8 +417,9 @@ export default function RosaPage() {
                       key={vote.matchday}
                       className="flex-1 min-w-[56px] bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center"
                     >
-                      <span className="text-[9.5px] uppercase font-bold text-slate-400 block mb-1">
-                        G{vote.matchday}
+                      {/* Abbreviazione Avversaria */}
+                      <span className="text-[10px] uppercase font-bold text-[#FDB927] block mb-0.5 tracking-wider">
+                        vs {vote.opponent}
                       </span>
                       <span className={`text-base font-bold font-mono block ${
                         vote.grade >= 7.0 ? 'text-emerald-400' :

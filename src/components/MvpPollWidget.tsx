@@ -419,12 +419,36 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               }
             }
 
-            // CONTROLLO PERSISTENZA MULTI-LIVELLO DEL VOTO UTENTE
+            // CONTROLLO PERSISTENZA: IL DATABASE È LA FONTE DI VERITÀ CANONICA
             const token = getOrCreateVoterToken();
             let resolvedVotedSlug: string | null = null;
+            let queriedServerSuccessfully = false;
 
-            // 1. Verifica localStorage (chiave match ID, match slug, pollId, active_vote, prefisso storico)
-            if (typeof window !== 'undefined') {
+            if (isUuid && token) {
+              try {
+                const { data: serverVote, error: serverVoteError } = await supabase
+                  .from('poll_votes')
+                  .select('option_index')
+                  .eq('article_id', pollId)
+                  .eq('voter_token', token)
+                  .maybeSingle();
+
+                if (!serverVoteError) {
+                  queriedServerSuccessfully = true;
+                  if (serverVote && serverVote.option_index != null) {
+                    const cand = candidates[serverVote.option_index];
+                    if (cand) {
+                      resolvedVotedSlug = cand.slug;
+                    }
+                  }
+                }
+              } catch {
+                queriedServerSuccessfully = false;
+              }
+            }
+
+            // Se il database non è stato raggiungibile (es. offline), usa come fallback il localStorage
+            if (!queriedServerSuccessfully && typeof window !== 'undefined') {
               const byMatch = localStorage.getItem(`romaflash_mvp_voted_${matchKey}`);
               const bySlug = localStorage.getItem(`romaflash_mvp_voted_${matchSlug}`);
               const byPoll = localStorage.getItem(`romaflash_mvp_voted_${pollId}`);
@@ -450,38 +474,27 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               }
             }
 
-            // 2. Verifica su SERVER (Supabase poll_votes con voter_token)
-            if (!resolvedVotedSlug && isUuid && token) {
+            // Allinea sempre localStorage allo stato reale per evitare qualsiasi disallineamento
+            if (typeof window !== 'undefined') {
               try {
-                const { data: serverVote } = await supabase
-                  .from('poll_votes')
-                  .select('option_index')
-                  .eq('article_id', pollId)
-                  .eq('voter_token', token)
-                  .maybeSingle();
-
-                if (serverVote && serverVote.option_index != null) {
-                  const cand = candidates[serverVote.option_index];
-                  if (cand) {
-                    resolvedVotedSlug = cand.slug;
-                  }
+                if (resolvedVotedSlug) {
+                  localStorage.setItem(`romaflash_mvp_voted_${matchKey}`, resolvedVotedSlug);
+                  localStorage.setItem(`romaflash_mvp_voted_${matchSlug}`, resolvedVotedSlug);
+                  localStorage.setItem(`romaflash_mvp_voted_${pollId}`, resolvedVotedSlug);
+                  localStorage.setItem('romaflash_mvp_active_vote', JSON.stringify({
+                    matchId: match.id,
+                    matchTitle,
+                    pollId,
+                    slug: resolvedVotedSlug,
+                    timestamp: Date.now()
+                  }));
+                } else if (queriedServerSuccessfully) {
+                  // Se il server ha risposto confermando l'assenza di voti, ripulisci il localStorage locale
+                  localStorage.removeItem(`romaflash_mvp_voted_${matchKey}`);
+                  localStorage.removeItem(`romaflash_mvp_voted_${matchSlug}`);
+                  localStorage.removeItem(`romaflash_mvp_voted_${pollId}`);
+                  localStorage.removeItem('romaflash_mvp_active_vote');
                 }
-              } catch {}
-            }
-
-            // Se l'utente ha votato, garantisci la persistenza su tutte le chiavi canoniche
-            if (resolvedVotedSlug && typeof window !== 'undefined') {
-              try {
-                localStorage.setItem(`romaflash_mvp_voted_${matchKey}`, resolvedVotedSlug);
-                localStorage.setItem(`romaflash_mvp_voted_${matchSlug}`, resolvedVotedSlug);
-                localStorage.setItem(`romaflash_mvp_voted_${pollId}`, resolvedVotedSlug);
-                localStorage.setItem('romaflash_mvp_active_vote', JSON.stringify({
-                  matchId: match.id,
-                  matchTitle,
-                  pollId,
-                  slug: resolvedVotedSlug,
-                  timestamp: Date.now()
-                }));
               } catch {}
             }
 
@@ -634,11 +647,51 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
       // Salva nel database Supabase su tabella esistente poll_votes se l'ID è un UUID articolo valido
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poll.id);
       if (isUuid) {
-        await supabase.from('poll_votes').insert({
-          article_id: poll.id,
-          option_index: candidateIndex >= 0 ? candidateIndex : 0,
-          voter_token: token,
-        });
+        // Verifica se esiste già un voto per questo voter_token: se c'è, aggiorna (UPDATE), altrimenti inserisci (INSERT)
+        const { data: existingVotes } = await supabase
+          .from('poll_votes')
+          .select('id')
+          .eq('article_id', poll.id)
+          .eq('voter_token', token);
+
+        if (existingVotes && existingVotes.length > 0) {
+          await supabase
+            .from('poll_votes')
+            .update({ option_index: candidateIndex >= 0 ? candidateIndex : 0 })
+            .eq('id', existingVotes[0].id);
+
+          if (existingVotes.length > 1) {
+            const extraIds = existingVotes.slice(1).map(x => x.id);
+            await supabase.from('poll_votes').delete().in('id', extraIds);
+          }
+        } else {
+          await supabase.from('poll_votes').insert({
+            article_id: poll.id,
+            option_index: candidateIndex >= 0 ? candidateIndex : 0,
+            voter_token: token,
+          });
+        }
+
+        // Ricarica la distribuzione reale dei voti direttamente dal database per allineamento perfetto
+        const { data: dbVotes } = await supabase
+          .from('poll_votes')
+          .select('option_index')
+          .eq('article_id', poll.id);
+
+        if (dbVotes && dbVotes.length > 0) {
+          const liveVotes: Record<string, number> = {};
+          poll.candidates.forEach(c => {
+            liveVotes[c.slug] = 0;
+          });
+          dbVotes.forEach(v => {
+            const c = poll.candidates[v.option_index];
+            if (c) {
+              liveVotes[c.slug] = (liveVotes[c.slug] || 0) + 1;
+            }
+          });
+          setVotesByPlayer(liveVotes);
+          setTotalVotes(dbVotes.length);
+        }
       }
 
       // Prova anche RPC se presente
@@ -693,6 +746,27 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           .delete()
           .eq('article_id', poll.id)
           .eq('voter_token', token);
+
+        // Ricarica la distribuzione reale dopo la cancellazione
+        const { data: dbVotes } = await supabase
+          .from('poll_votes')
+          .select('option_index')
+          .eq('article_id', poll.id);
+
+        if (dbVotes) {
+          const liveVotes: Record<string, number> = {};
+          poll.candidates.forEach(c => {
+            liveVotes[c.slug] = 0;
+          });
+          dbVotes.forEach(v => {
+            const c = poll.candidates[v.option_index];
+            if (c) {
+              liveVotes[c.slug] = (liveVotes[c.slug] || 0) + 1;
+            }
+          });
+          setVotesByPlayer(liveVotes);
+          setTotalVotes(dbVotes.length);
+        }
       } catch {}
     }
 

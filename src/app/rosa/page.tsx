@@ -411,24 +411,26 @@ export default function RosaPage() {
               </div>
 
               {selectedPlayer.matchVotes && selectedPlayer.matchVotes.length > 0 ? (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                   {selectedPlayer.matchVotes.map(vote => (
                     <div
                       key={vote.matchday}
-                      className="flex-1 min-w-[56px] bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-center"
+                      className="flex flex-col items-center justify-between bg-slate-900 border border-slate-800 rounded-xl py-2 px-1 text-center min-w-0"
                     >
-                      {/* Abbreviazione Avversaria */}
-                      <span className="text-[10px] uppercase font-bold text-[#FDB927] block mb-0.5 tracking-wider">
-                        vs {vote.opponent}
+                      {/* Badge Squadra Avversaria Omogeneo */}
+                      <span className="text-[10px] sm:text-[11px] font-bold text-[#FDB927] tracking-wider truncate w-full">
+                        {vote.opponent}
                       </span>
-                      <span className={`text-base font-bold font-mono block ${
+                      {/* Voto Ufficiale */}
+                      <span className={`text-sm sm:text-base font-bold font-mono my-0.5 ${
                         vote.grade >= 7.0 ? 'text-emerald-400' :
                         vote.grade >= 6.0 ? 'text-amber-400' : 'text-red-400'
                       }`}>
-                        {vote.grade}
+                        {vote.grade.toFixed(1).replace('.0', '')}
                       </span>
-                      <span className="text-[8.5px] text-slate-500 uppercase font-semibold block mt-0.5">
-                        {vote.grade >= 6.0 ? 'Suff.' : 'Insuff.'}
+                      {/* Sufficienza / Giornata */}
+                      <span className="text-[9px] text-slate-500 font-medium block">
+                        G{vote.matchday}
                       </span>
                     </div>
                   ))}

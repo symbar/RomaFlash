@@ -280,8 +280,14 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
             }
 
             const isGenoaMatch = match.away_team.toLowerCase().includes('genoa') || match.home_team.toLowerCase().includes('genoa');
+            const isSlovanMatch = match.away_team.toLowerCase().includes('slovan') || match.home_team.toLowerCase().includes('slovan') ||
+                                  match.away_team.toLowerCase().includes('bratislava') || match.home_team.toLowerCase().includes('bratislava');
+
             if (!score && isGenoaMatch) {
               score = '2 - 0';
+            }
+            if (!score && isSlovanMatch) {
+              score = '4 - 0';
             }
 
             const matchTitle = `${match.home_team} - ${match.away_team}`;
@@ -289,7 +295,35 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
             // Configura i candidati ufficiali
             let candidates: MvpCandidate[] = [];
 
-            if (isGenoaMatch) {
+            if (isSlovanMatch) {
+              // I 4 protagonisti di Roma - Slovan Bratislava: Hermoso, Molina, Malen, Balerdi
+              candidates = [
+                {
+                  slug: 'hermoso',
+                  name: 'Mario Hermoso',
+                  role: 'Difensore',
+                  image: '/images/players/hermoso.png'
+                },
+                {
+                  slug: 'molina',
+                  name: 'Nahuel Molina',
+                  role: 'Esterno',
+                  image: '/images/players/molina.png'
+                },
+                {
+                  slug: 'malen',
+                  name: 'Donyell Malen',
+                  role: 'Attaccante',
+                  image: '/images/players/malen.png'
+                },
+                {
+                  slug: 'balerdi',
+                  name: 'Leonardo Balerdi',
+                  role: 'Difensore',
+                  image: '/images/players/balerdi.png'
+                }
+              ];
+            } else if (isGenoaMatch) {
               // I 4 protagonisti reali: Castro, Lulli, Soulé, Balerdi
               candidates = [
                 {
@@ -318,25 +352,25 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                 }
               ];
             } else {
-              // Fallback per future gare (solo giocatori attivi)
+              // Fallback per future gare
               candidates = [
                 {
-                  slug: 'castro',
-                  name: 'Santiago Castro',
-                  role: 'Attaccante',
-                  image: '/images/players/castro.png'
+                  slug: 'hermoso',
+                  name: 'Mario Hermoso',
+                  role: 'Difensore',
+                  image: '/images/players/hermoso.png'
                 },
                 {
-                  slug: 'lulli',
-                  name: 'Emanuele Lulli',
+                  slug: 'molina',
+                  name: 'Nahuel Molina',
                   role: 'Esterno',
-                  image: '/images/players/lulli.png'
+                  image: '/images/players/molina.png'
                 },
                 {
-                  slug: 'soule',
-                  name: 'Matías Soulé',
+                  slug: 'malen',
+                  name: 'Donyell Malen',
                   role: 'Attaccante',
-                  image: '/images/players/soule.png'
+                  image: '/images/players/malen.png'
                 },
                 {
                   slug: 'balerdi',

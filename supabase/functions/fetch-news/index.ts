@@ -267,52 +267,53 @@ serve(async (req) => {
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) throw new Error("GEMINI_API_KEY non configurata")
 
-    // Helper resiliente per invocare Gemini con retry automatico su 503/429 e fallback trasparente tra modelli
-    const callGeminiWithFallback = async (requestParts: any[]): Promise<any> => {
-      const candidateModels = ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+    // Invocazione esclusiva di gemini-3.5-flash-lite con retry automatico in caso di temporaneo sovraccarico (503/429)
+    const callGemini = async (requestParts: any[]): Promise<any> => {
+      const modelName = 'gemini-3.5-flash-lite';
       let lastError: any = null;
 
-      for (const modelName of candidateModels) {
-        for (let attempt = 1; attempt <= 2; attempt++) {
-          try {
-            const resp = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ parts: requestParts }],
-                  generationConfig: { temperature: 0.1 }
-                }),
-              }
-            );
-
-            if (resp.status === 200) {
-              const data = await resp.json();
-              if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                return data;
-              }
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const resp = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: requestParts }],
+                generationConfig: { temperature: 0.1 }
+              }),
             }
+          );
 
-            if (resp.status === 503 || resp.status === 429) {
-              console.warn(`[GEMINI] Modello ${modelName} occupato (HTTP ${resp.status}), tentativo ${attempt}/2...`);
-              if (attempt === 1) {
-                await new Promise((r) => setTimeout(r, 1200));
-                continue;
-              }
-            } else {
-              const errBody = await resp.text().catch(() => '');
-              console.warn(`[GEMINI] Modello ${modelName} ha restituito HTTP ${resp.status}: ${errBody.slice(0, 150)}`);
-              break;
+          if (resp.status === 200) {
+            const data = await resp.json();
+            if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+              return data;
             }
-          } catch (netErr) {
-            lastError = netErr;
-            console.warn(`[GEMINI] Errore di connessione con ${modelName}:`, netErr);
+          }
+
+          if (resp.status === 503 || resp.status === 429) {
+            console.warn(`[GEMINI] ${modelName} temporaneamente occupato (HTTP ${resp.status}), tentativo ${attempt}/3...`);
+            if (attempt < 3) {
+              await new Promise((r) => setTimeout(r, 1500));
+              continue;
+            }
+          } else {
+            const errBody = await resp.text().catch(() => '');
+            console.warn(`[GEMINI] ${modelName} errore HTTP ${resp.status}: ${errBody.slice(0, 150)}`);
             break;
+          }
+        } catch (netErr) {
+          lastError = netErr;
+          console.warn(`[GEMINI] Errore di rete con ${modelName}:`, netErr);
+          if (attempt < 3) {
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
           }
         }
       }
-      throw lastError || new Error("Tutti i modelli Gemini sono temporaneamente non disponibili");
+      throw lastError || new Error("gemini-3.5-flash-lite non ha risposto correttamente dopo 3 tentativi");
     };
 
     // 2. Recupera le fonti RSS attive dal DB
@@ -776,7 +777,7 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
 
           let geminiData: any = null;
           try {
-            geminiData = await callGeminiWithFallback(requestParts);
+            geminiData = await callGemini(requestParts);
           } catch (gemErr) {
             console.error(`Impossibile ottenere risposta da Gemini per "${item.title}":`, gemErr);
             continue;

@@ -433,20 +433,21 @@ serve(async (req) => {
       link: string,
       snippet?: string
     ): boolean => {
-      const combined = `${title || ''} ${link || ''} ${snippet || ''}`.toLowerCase();
+      // Testiamo i pattern promozionali solo su titolo e snippet, NON sul link (che contiene il dominio es. vocegiallorossa.it)
+      const textOnly = `${title || ''} ${snippet || ''}`.toLowerCase();
       
-      // 1. Riferimenti diretti a VG o Vocegiallorossa (podcast, rubriche, TG, talk, interviste interne)
+      // 1. Riferimenti espliciti a podcast, TG o rubriche interne/autoreferenziali
       if (
-        /\bvg\b/i.test(combined) ||
-        /\bpodcast\s*vg\b/i.test(combined) ||
-        /\bvg\s*podcast\b/i.test(combined) ||
-        /\bvocegiallorossa\b/i.test(combined) ||
-        /\bvoce\s+giallorossa\b/i.test(combined) ||
-        /\btg\s+vg\b/i.test(combined) ||
-        /\bvg\s+talk\b/i.test(combined) ||
-        /\blive\s+vg\b/i.test(combined) ||
-        /\brassegna\s+stampa\s+vg\b/i.test(combined) ||
-        /\bla\s+voce\s+della\s+sera\b/i.test(combined)
+        /\bpodcast\s*vg\b/i.test(textOnly) ||
+        /\bvg\s*podcast\b/i.test(textOnly) ||
+        /\btg\s+vg\b/i.test(textOnly) ||
+        /\bvg\s+tg\b/i.test(textOnly) ||
+        /\bvg\s+talk\b/i.test(textOnly) ||
+        /\blive\s+vg\b/i.test(textOnly) ||
+        /\bvg\s+live\b/i.test(textOnly) ||
+        /\brassegna\s+stampa\s+vg\b/i.test(textOnly) ||
+        /\brassegna\s+stampa\s+vocegiallorossa\b/i.test(textOnly) ||
+        /\bla\s+voce\s+della\s+sera\b/i.test(textOnly)
       ) {
         return true;
       }
@@ -464,11 +465,11 @@ serve(async (req) => {
 
       // 3. Podcast e rubriche autoreferenziali di testata generici
       if (
-        /\bnostro\s+podcast\b/i.test(combined) ||
-        /\bi\s+nostri\s+podcast\b/i.test(combined) ||
-        /\bpodcast\s+della\s+redazione\b/i.test(combined) ||
-        /\bcanale\s+twitch\b/i.test(combined) ||
-        /\bscarica\s+l['']app\s+di\b/i.test(combined)
+        /\bnostro\s+podcast\b/i.test(textOnly) ||
+        /\bi\s+nostri\s+podcast\b/i.test(textOnly) ||
+        /\bpodcast\s+della\s+redazione\b/i.test(textOnly) ||
+        /\bcanale\s+twitch\b/i.test(textOnly) ||
+        /\bscarica\s+l['']app\s+di\b/i.test(textOnly)
       ) {
         return true;
       }
@@ -503,8 +504,8 @@ serve(async (req) => {
       try {
         const feed = await parser.parseURL(source.rss_url)
         
-        // Prendiamo solo le ultime 2 notizie per fonte ad ogni giro
-        const items = feed.items.slice(0, 2)
+        // Prendiamo fino a 5 notizie per fonte ad ogni giro per non perdere breaking news nei picchi di traffico
+        const items = feed.items.slice(0, 5)
 
         for (const item of items) {
           if (!item.link || !item.title) continue;
@@ -634,7 +635,8 @@ Nel dubbio, imposta SEMPRE "is_duplicate": true!
 
 2) SPAM / NOTIZIE NON PERTINENTI / PROMO DI ALTRE REDAZIONI (TASSATIVO):
 - Verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
-- Scarta TASSATIVAMENTE (imposta "is_spam": true) qualsiasi articolo, podcast, rubrica, rassegna o contenuto che faccia riferimento a "VG", "VoceGiallorossa", "Voce Giallorossa", podcast di testata (es. "Podcast VG", "VG Podcast", "La Voce della Sera"), dirette Twitch o canali delle fonti esterne. RomaFlash è un quotidiano indipendente: non deve MAI pubblicare né citare sigle di altre fonti esterne come VG o Vocegiallorossa.
+- Scarta TASSATIVAMENTE (imposta "is_spam": true) podcast, rubriche promozionali interne, TG/talk redazionali o dirette Twitch di testate esterne (es. "Podcast VG", "VG Podcast", "TG VG", "La Voce della Sera", "Live Twitch").
+- Se la notizia è un reale fatto di cronaca, campo o calciomercato ma cita fonti esterne o contiene sigle (come "VG" o "Vocegiallorossa"), NON scartarla se ha rilevanza informativa: rielaborala integralmente eliminando qualsiasi riferimento o sigla alle testate concorrenti (RomaFlash è un quotidiano indipendente: nel testo riscritto non devono MAI comparire nomi o sigle di fonti esterne come VG o Vocegiallorossa).
 
 Se l'articolo è valido (non è un duplicato e non è spam), procedi con la rielaborazione:
 1. Scrivi un nuovo titolo in italiano (diverso dall'originale). Se l'articolo riguarda un'intervista o dichiarazioni, usa la formula: Soggetto: "Virgolettato d'impatto" (es. Ranieri: "A Roma servono uomini veri", Dybala: "Voglio vincere qui").

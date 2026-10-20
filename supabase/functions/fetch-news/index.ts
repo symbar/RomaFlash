@@ -267,6 +267,54 @@ serve(async (req) => {
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) throw new Error("GEMINI_API_KEY non configurata")
 
+    // Helper resiliente per invocare Gemini con retry automatico su 503/429 e fallback trasparente tra modelli
+    const callGeminiWithFallback = async (requestParts: any[]): Promise<any> => {
+      const candidateModels = ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+      let lastError: any = null;
+
+      for (const modelName of candidateModels) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const resp = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: requestParts }],
+                  generationConfig: { temperature: 0.1 }
+                }),
+              }
+            );
+
+            if (resp.status === 200) {
+              const data = await resp.json();
+              if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return data;
+              }
+            }
+
+            if (resp.status === 503 || resp.status === 429) {
+              console.warn(`[GEMINI] Modello ${modelName} occupato (HTTP ${resp.status}), tentativo ${attempt}/2...`);
+              if (attempt === 1) {
+                await new Promise((r) => setTimeout(r, 1200));
+                continue;
+              }
+            } else {
+              const errBody = await resp.text().catch(() => '');
+              console.warn(`[GEMINI] Modello ${modelName} ha restituito HTTP ${resp.status}: ${errBody.slice(0, 150)}`);
+              break;
+            }
+          } catch (netErr) {
+            lastError = netErr;
+            console.warn(`[GEMINI] Errore di connessione con ${modelName}:`, netErr);
+            break;
+          }
+        }
+      }
+      throw lastError || new Error("Tutti i modelli Gemini sono temporaneamente non disponibili");
+    };
+
     // 2. Recupera le fonti RSS attive dal DB
     const { data: sources, error: sourcesError } = await supabase
       .from('sources')
@@ -375,51 +423,45 @@ serve(async (req) => {
       fullText: string;
     }
 
+    // Filtro deterministico anti-duplicato testuale:
+    // Blocca esclusivamente dispacci d'agenzia identici o parafrasi evidenti dello stesso titolo (Jaccard >= 0.65 o 4+ parole identiche con alto overlap).
+    // Evita falsi positivi tra notizie diverse sullo stesso match (es. formazioni, convocati, pagelle, interviste) delegando a Gemini il controllo semantico.
     const isArticleTooSimilar = (
       candidateTitle: string,
-      candidateExtra: string,
+      _candidateExtra: string,
       existingItems: ExistingArticleItem[]
     ): string | null => {
-      const candTitleSet = new Set(extractTokens(candidateTitle));
-      const candFullSet = new Set(extractTokens(`${candidateTitle} ${candidateExtra}`));
+      const candTokens = extractTokens(candidateTitle);
+      const candTitleSet = new Set(candTokens);
       if (candTitleSet.size === 0) return null;
 
       for (const existing of existingItems) {
-        const exTitleSet = new Set(extractTokens(existing.title));
-        const exFullSet = new Set(extractTokens(existing.fullText));
+        const exTokens = extractTokens(existing.title);
+        const exTitleSet = new Set(exTokens);
         if (exTitleSet.size === 0) continue;
 
-        // 1. Intersezione diretta Titolo vs Titolo
-        let titleIntersection = 0;
-        for (const t of candTitleSet) {
-          if (exTitleSet.has(t)) titleIntersection++;
+        let intersection = 0;
+        for (const t of candTokens) {
+          if (exTitleSet.has(t)) intersection++;
         }
-        const minTitleSize = Math.min(candTitleSet.size, exTitleSet.size);
-        const titleOverlap = minTitleSize > 0 ? titleIntersection / minTitleSize : 0;
 
-        if (titleIntersection >= 3 || (titleIntersection >= 2 && titleOverlap >= 0.4)) {
+        const union = new Set([...candTitleSet, ...exTitleSet]).size;
+        const jaccard = union > 0 ? intersection / union : 0;
+        const minSize = Math.min(candTitleSet.size, exTitleSet.size);
+        const overlapMin = minSize > 0 ? intersection / minSize : 0;
+
+        // Criterio 1: Altissima sovrapposizione Jaccard (es. stesso dispaccio ANSA/Gazzetta su fonti diverse)
+        if (jaccard >= 0.65 && intersection >= 3) {
           return existing.title;
         }
 
-        // 2. Intersezione incrociata Titolo candidato vs (Titolo + Excerpt esistente) e viceversa
-        let candInExFull = 0;
-        for (const t of candTitleSet) {
-          if (exFullSet.has(t)) candInExFull++;
-        }
-        let exInCandFull = 0;
-        for (const t of exTitleSet) {
-          if (candFullSet.has(t)) exInCandFull++;
-        }
-        if (candInExFull >= 3 || exInCandFull >= 3) {
+        // Criterio 2: Il titolo più corto è quasi interamente contenuto nell'altro (minimo 4 parole chiave)
+        if (intersection >= 4 && overlapMin >= 0.8) {
           return existing.title;
         }
 
-        // 3. Intersezione complessiva (Titolo + Excerpt) vs (Titolo + Excerpt)
-        let fullIntersection = 0;
-        for (const t of candFullSet) {
-          if (exFullSet.has(t)) fullIntersection++;
-        }
-        if (fullIntersection >= 5) {
+        // Criterio 3: Almeno 5 parole chiave identiche nel titolo
+        if (intersection >= 5) {
           return existing.title;
         }
       }
@@ -496,9 +538,14 @@ serve(async (req) => {
       }
     })
     let processedCount = 0
+    const executionStartTime = Date.now()
+    const MAX_EXECUTION_TIME_MS = 100_000 // 100s di guardia contro il timeout a 150s di Supabase
+    const MAX_NEW_ARTICLES_PER_RUN = 3 // Massimo 3 nuovi articoli per singola esecuzione cron (garantisce risposte rapide e zero timeout)
 
     // 3. Itera su ogni fonte
+    let shouldHaltExecution = false
     for (const source of sources) {
+      if (shouldHaltExecution) break
       console.log(`Analizzando fonte: ${source.name} (${source.rss_url})`)
       
       try {
@@ -508,6 +555,17 @@ serve(async (req) => {
         const items = feed.items.slice(0, 5)
 
         for (const item of items) {
+          if (processedCount >= MAX_NEW_ARTICLES_PER_RUN) {
+            console.log(`[BATCH LIMIT] Raggiunto limite di ${MAX_NEW_ARTICLES_PER_RUN} nuovi articoli per questa esecuzione. Uscita pulita.`)
+            shouldHaltExecution = true
+            break
+          }
+          if (Date.now() - executionStartTime > MAX_EXECUTION_TIME_MS) {
+            console.log(`[TIMEOUT GUARD] Tempo limite di 100s raggiunto (${Math.round((Date.now() - executionStartTime)/1000)}s). Uscita pulita.`)
+            shouldHaltExecution = true
+            break
+          }
+
           if (!item.link || !item.title) continue;
 
           // Controllo blacklist deterministico anti-autopromozione / VG / podcast di testata
@@ -716,19 +774,13 @@ Contenuto (incluso HTML): ${item.content || item.contentSnippet || "Nessun conte
             requestParts.push(inlineImagePart);
           }
 
-          const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiApiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: requestParts }],
-                generationConfig: { temperature: 0.1 }
-              }),
-            }
-          )
-
-          const geminiData = await geminiResponse.json()
+          let geminiData: any = null;
+          try {
+            geminiData = await callGeminiWithFallback(requestParts);
+          } catch (gemErr) {
+            console.error(`Impossibile ottenere risposta da Gemini per "${item.title}":`, gemErr);
+            continue;
+          }
           
           let aiSummary: any = {}
           let newTitle = item.title

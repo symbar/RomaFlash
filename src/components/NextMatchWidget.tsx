@@ -565,9 +565,6 @@ export default function NextMatchWidget({ matchId, homeTeam, awayTeam, competiti
                 <p className="text-[11px] font-bold text-stone-800">
                   Designazione in arrivo
                 </p>
-                <p className="text-[9.5px] text-stone-500 max-w-xs mx-auto">
-                  L'AIA o la UEFA comunicano la designazione circa 36-48 ore prima della partita.
-                </p>
               </div>
             )}
           </div>

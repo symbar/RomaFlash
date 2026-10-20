@@ -612,8 +612,7 @@ export async function getMatchInsights(params: {
       designatedReferee = REFEREE_ARCHIVE['schärer'];
     } else {
       designatedReferee = {
-        designated: false,
-        note: 'Designazione arbitrale comunicata circa 36-48 ore prima della partita.'
+        designated: false
       };
     }
   }

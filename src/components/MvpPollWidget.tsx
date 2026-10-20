@@ -219,7 +219,12 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           const isPreview = typeof window !== 'undefined' && window.location.search.includes('mvp_preview=1');
 
           if (isInsideVotingWindow || isPreview) {
-            const opponent = (match.home_team.toLowerCase() === 'roma' ? match.away_team : match.home_team).trim();
+            const rawOpponent = (match.home_team.toLowerCase() === 'roma' ? match.away_team : match.home_team).trim();
+            // Normalizza per la ricerca nel database (es. "Sl. Bratislava" -> cerca "Bratislava")
+            const opponentKeyword = rawOpponent.toLowerCase().includes('bratislava')
+              ? 'Bratislava'
+              : rawOpponent.replace(/^sl\.\s*/i, '').trim();
+
             const matchKey = `match_${match.id}`;
             const matchDateStr = match.match_date ? match.match_date.slice(0, 10) : '';
             const matchSlug = `${match.home_team}_${match.away_team}_${matchDateStr}`.toLowerCase().replace(/[^a-z0-9_]/g, '_');
@@ -241,7 +246,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                 .select('id, title, published_at')
                 .gte('published_at', match.match_date)
                 .ilike('title', "%Analista%")
-                .ilike('title', `%${opponent}%`)
+                .ilike('title', `%${opponentKeyword}%`)
                 .order('published_at', { ascending: true })
                 .limit(1);
 
@@ -257,7 +262,7 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                   .from('articles')
                   .select('id, title, published_at')
                   .gte('published_at', match.match_date)
-                  .ilike('title', `%${opponent}%`)
+                  .ilike('title', `%${opponentKeyword}%`)
                   .order('published_at', { ascending: true })
                   .limit(1);
 
@@ -290,7 +295,10 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
               score = '4 - 0';
             }
 
-            const matchTitle = `${match.home_team} - ${match.away_team}`;
+            const cleanOpponentName = isSlovanMatch ? 'Slovan Bratislava' : rawOpponent;
+            const matchTitle = match.home_team.toLowerCase() === 'roma'
+              ? `Roma - ${cleanOpponentName}`
+              : `${cleanOpponentName} - Roma`;
 
             // Configura i candidati ufficiali
             let candidates: MvpCandidate[] = [];
@@ -439,20 +447,6 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
                     }
                   }
                 } catch {}
-
-                if (!resolvedVotedSlug) {
-                  // Controlla qualsiasi chiave residua di voto
-                  for (let i = 0; i < localStorage.length; i++) {
-                    const k = localStorage.key(i);
-                    if (k && k.startsWith('romaflash_mvp_voted_')) {
-                      const val = localStorage.getItem(k);
-                      if (val && candidates.some(c => c.slug === val)) {
-                        resolvedVotedSlug = val;
-                        break;
-                      }
-                    }
-                  }
-                }
               }
             }
 
@@ -660,6 +654,51 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
     }
   };
 
+  const handleResetVote = async () => {
+    if (!poll || isVoting) return;
+    setIsVoting(true);
+
+    const prevSlug = votedSlug;
+    if (prevSlug && votesByPlayer[prevSlug]) {
+      setVotesByPlayer(prev => ({
+        ...prev,
+        [prevSlug]: Math.max(0, (prev[prevSlug] || 1) - 1)
+      }));
+      setTotalVotes(prev => Math.max(0, prev - 1));
+    }
+
+    setHasVoted(false);
+    setVotedSlug(null);
+
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`romaflash_mvp_voted_${poll.id}`);
+        if (currentMatchInfo) {
+          localStorage.removeItem(`romaflash_mvp_voted_${currentMatchInfo.matchKey}`);
+          localStorage.removeItem(`romaflash_mvp_voted_${currentMatchInfo.matchSlug}`);
+        }
+        localStorage.removeItem('romaflash_mvp_active_vote');
+        window.dispatchEvent(new CustomEvent('romaflash_mvp_vote_recorded', {
+          detail: { pollId: poll.id, slug: '' }
+        }));
+      } catch {}
+    }
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poll.id);
+    const token = getOrCreateVoterToken();
+    if (isUuid && token) {
+      try {
+        await supabase
+          .from('poll_votes')
+          .delete()
+          .eq('article_id', poll.id)
+          .eq('voter_token', token);
+      } catch {}
+    }
+
+    setIsVoting(false);
+  };
+
   if (loading || !poll) return null;
 
   // Render Componente Desktop (Sidebar)
@@ -780,9 +819,18 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
       {/* Footer Stato */}
       <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[10.5px]">
         {hasVoted ? (
-          <span className="text-green-700 font-bold flex items-center gap-1">
-            ✔ {t('mvp.voted_success')}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-green-700 font-bold flex items-center gap-1">
+              ✔ {t('mvp.voted_success')}
+            </span>
+            <button
+              type="button"
+              onClick={handleResetVote}
+              className="text-[10px] text-amber-800 underline hover:text-amber-950 font-semibold cursor-pointer"
+            >
+              (Cambia)
+            </button>
+          </div>
         ) : (
           <span className="text-gray-400 font-medium">
             1 voto a tifoso • Tap su VOTA
@@ -882,6 +930,21 @@ export default function MvpPollWidget({ variant = 'auto' }: { variant?: 'mobile'
           );
         })}
       </div>
+
+      {hasVoted && (
+        <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-amber-100 text-[10px]">
+          <span className="text-green-700 font-bold flex items-center gap-1">
+            ✔ {t('mvp.voted_success')}
+          </span>
+          <button
+            type="button"
+            onClick={handleResetVote}
+            className="text-amber-800 underline hover:text-amber-950 font-semibold cursor-pointer"
+          >
+            Cambia voto
+          </button>
+        </div>
+      )}
     </div>
   );
 

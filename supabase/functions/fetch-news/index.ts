@@ -546,7 +546,7 @@ serve(async (req) => {
     let processedCount = 0
     const executionStartTime = Date.now()
     const MAX_EXECUTION_TIME_MS = 100_000 // 100s di guardia contro il timeout a 150s di Supabase
-    const MAX_NEW_ARTICLES_PER_RUN = 2 // Massimo 2 nuovi articoli per singola esecuzione (garantisce pieno rispetto della quota free RPD di Gemini)
+    const MAX_NEW_ARTICLES_PER_RUN = 3 // Massimo 3 nuovi articoli per singola esecuzione (ottimizzato per esecuzioni ogni 15 min, max teorico 288 RPD su 500)
 
     // 3. Itera su ogni fonte
     let shouldHaltExecution = false
@@ -557,8 +557,8 @@ serve(async (req) => {
       try {
         const feed = await parser.parseURL(source.rss_url)
         
-        // Prendiamo i primi 2 articoli per fonte ad ogni giro (esattamente 2 articoli ogni 30 minuti come richiesto)
-        const items = feed.items.slice(0, 2)
+        // Prendiamo i primi 3 articoli per fonte ad ogni giro (Opzione B: bilanciamento ideale freschezza e quota)
+        const items = feed.items.slice(0, 3)
 
         for (const item of items) {
           if (processedCount >= MAX_NEW_ARTICLES_PER_RUN) {

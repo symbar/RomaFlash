@@ -294,7 +294,12 @@ serve(async (req) => {
           }
 
           if (resp.status === 503 || resp.status === 429) {
-            console.warn(`[GEMINI] ${modelName} temporaneamente occupato (HTTP ${resp.status}), tentativo ${attempt}/3...`);
+            const errBody = await resp.text().catch(() => '');
+            console.warn(`[GEMINI] ${modelName} temporaneamente occupato (HTTP ${resp.status}), tentativo ${attempt}/3... ${errBody.slice(0, 150)}`);
+            // Se l'errore 429 è dovuto a esaurimento della quota giornaliera (RPD / Resource Exhausted), interrompi subito per non sprecare ulteriori tentativi
+            if (resp.status === 429 && (errBody.includes('quota') || errBody.includes('RESOURCE_EXHAUSTED') || errBody.includes('PerDay') || errBody.includes('quota_exceeded'))) {
+              throw new Error(`[GEMINI RPD LIMIT] Quota giornaliera RPD superata: ${errBody.slice(0, 150)}`);
+            }
             if (attempt < 3) {
               await new Promise((r) => setTimeout(r, 1500));
               continue;
@@ -541,7 +546,7 @@ serve(async (req) => {
     let processedCount = 0
     const executionStartTime = Date.now()
     const MAX_EXECUTION_TIME_MS = 100_000 // 100s di guardia contro il timeout a 150s di Supabase
-    const MAX_NEW_ARTICLES_PER_RUN = 3 // Massimo 3 nuovi articoli per singola esecuzione cron (garantisce risposte rapide e zero timeout)
+    const MAX_NEW_ARTICLES_PER_RUN = 2 // Massimo 2 nuovi articoli per singola esecuzione (garantisce pieno rispetto della quota free RPD di Gemini)
 
     // 3. Itera su ogni fonte
     let shouldHaltExecution = false
@@ -552,8 +557,8 @@ serve(async (req) => {
       try {
         const feed = await parser.parseURL(source.rss_url)
         
-        // Prendiamo fino a 5 notizie per fonte ad ogni giro per non perdere breaking news nei picchi di traffico
-        const items = feed.items.slice(0, 5)
+        // Prendiamo i primi 2 articoli per fonte ad ogni giro (esattamente 2 articoli ogni 30 minuti come richiesto)
+        const items = feed.items.slice(0, 2)
 
         for (const item of items) {
           if (processedCount >= MAX_NEW_ARTICLES_PER_RUN) {

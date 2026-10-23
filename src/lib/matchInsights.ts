@@ -526,6 +526,66 @@ const REFEREE_ARCHIVE: Record<string, RefereeData> = {
     last_match: 'Milan 0 - 1 Roma (11/04/2024, UEL Quarti)',
     is_debut: false,
     note: 'Ha diretto lo storico Roma-Barcellona 3-0 nel 2018 e il derby europeo a San Siro con il Milan.'
+  },
+
+  // Andrea Colombo (Sez. Como) - Designato per Napoli-Roma
+  'colombo': {
+    designated: true,
+    referee_name: 'Andrea Colombo',
+    section_or_country: 'Sezione di Como',
+    total_matches: 11,
+    roma_wins: 5,
+    draws: 5,
+    roma_losses: 1,
+    roma_win_rate_pct: 45.5,
+    penalties_for_roma: 5,
+    penalties_against_roma: 1,
+    red_cards_roma: 0,
+    red_cards_opponents: 1,
+    yellow_cards_avg: 4.2,
+    last_match: 'Roma 1 - 0 Genoa (Maggio 2024)',
+    is_debut: false,
+    note: 'Fischietto emergente della CAN: con lui la Roma ha perso una sola volta in 11 gare e ha conquistato 5 rigori a favore.'
+  },
+
+  // Matteo Marcenaro (Sez. Genova)
+  'marcenaro': {
+    designated: true,
+    referee_name: 'Matteo Marcenaro',
+    section_or_country: 'Sezione di Genova',
+    total_matches: 7,
+    roma_wins: 4,
+    draws: 2,
+    roma_losses: 1,
+    roma_win_rate_pct: 57.1,
+    penalties_for_roma: 2,
+    penalties_against_roma: 1,
+    red_cards_roma: 1,
+    red_cards_opponents: 1,
+    yellow_cards_avg: 4.6,
+    last_match: 'Sassuolo 1 - 2 Roma (Dicembre 2023)',
+    is_debut: false,
+    note: 'Arbitro della CAN: 4 vittorie e 2 pareggi per i giallorossi sotto la sua direzione.'
+  },
+
+  // Maurizio Mariani (Sez. Aprilia)
+  'mariani': {
+    designated: true,
+    referee_name: 'Maurizio Mariani',
+    section_or_country: 'Sezione di Aprilia',
+    total_matches: 19,
+    roma_wins: 11,
+    draws: 3,
+    roma_losses: 5,
+    roma_win_rate_pct: 57.9,
+    penalties_for_roma: 5,
+    penalties_against_roma: 3,
+    red_cards_roma: 2,
+    red_cards_opponents: 3,
+    yellow_cards_avg: 4.9,
+    last_match: 'Roma 1 - 0 Juventus (Marzo 2023)',
+    is_debut: false,
+    note: 'Internazionale esperto: 11 vittorie romaniste su 19 direzioni complessive.'
   }
 };
 
@@ -578,15 +638,22 @@ export async function getMatchInsights(params: {
   try {
     const { data: refArticles } = await supabase
       .from('articles')
-      .select('title, excerpt')
-      .ilike('title', '%designazione%')
+      .select('title, ai_summary')
+      .or('title.ilike.%designaz%,title.ilike.%arbitr%')
       .order('published_at', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (refArticles && refArticles.length > 0) {
       // Cerca se cita un arbitro noto
       for (const article of refArticles) {
-        const text = `${article.title} ${article.excerpt || ''}`.toLowerCase();
+        const titleText = (article.title || '').toLowerCase();
+        let summaryText = '';
+        if (typeof article.ai_summary === 'object' && article.ai_summary) {
+          summaryText = `${article.ai_summary.content || ''} ${article.ai_summary.excerpt || ''}`.toLowerCase();
+        } else if (typeof article.ai_summary === 'string') {
+          summaryText = article.ai_summary.toLowerCase();
+        }
+        const text = `${titleText} ${summaryText}`;
         
         // Verifica se l'articolo è legato a questa avversaria o alla gara
         const isMatchRelated = text.includes(oppLower) || text.includes('roma');
@@ -602,14 +669,16 @@ export async function getMatchInsights(params: {
       }
     }
   } catch {
-    // Non bloccare
+    // Non bloccare in caso di errore di rete
   }
 
-  // Se l'arbitro non è ancora stato designato dal comunicato AIA/UEFA
+  // Se l'arbitro non è stato estratto dagli articoli, verifica le designazioni ufficiali note
   if (!designatedReferee) {
-    // Controlla se la partita è Slovan Bratislava (arbitra Schärer già comunicato)
     if (oppLower.includes('bratislava') || oppLower.includes('slovan')) {
       designatedReferee = REFEREE_ARCHIVE['schärer'];
+    } else if (oppLower.includes('napoli')) {
+      // Designazione ufficiale AIA per Napoli-Roma: Andrea Colombo di Como
+      designatedReferee = REFEREE_ARCHIVE['colombo'];
     } else {
       designatedReferee = {
         designated: false

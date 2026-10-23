@@ -334,14 +334,15 @@ serve(async (req) => {
       })
     }
 
-    // 2b. Recupera i titoli e riassunti recenti per la deduplicazione e il conteggio tweet X (ultime 36 ore)
-    const thirtySixHoursAgo = new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString()
+    // 2b. Recupera i titoli e riassunti recenti per la deduplicazione e il conteggio tweet X (ultime 18 ore, max 20 articoli per evitare falsi positivi)
+    const eighteenHoursAgo = new Date(Date.now() - 18 * 60 * 60 * 1000).toISOString()
     const { data: recentArticles } = await supabase
       .from('articles')
       .select('title, ai_summary, published_at, image_url')
-      .gte('published_at', thirtySixHoursAgo)
+      .gte('published_at', eighteenHoursAgo)
       .not('original_url', 'like', 'romaflash-daily-briefing-%')
-      .order('published_at', { ascending: false });
+      .order('published_at', { ascending: false })
+      .limit(20);
       
     const eightHoursAgoMs = Date.now() - 8 * 60 * 60 * 1000;
     const usedImageUrls = new Set<string>(
@@ -557,8 +558,8 @@ serve(async (req) => {
       try {
         const feed = await parser.parseURL(source.rss_url)
         
-        // Prendiamo i primi 3 articoli per fonte ad ogni giro (Opzione B: bilanciamento ideale freschezza e quota)
-        const items = feed.items.slice(0, 3)
+        // Prendiamo fino a 8 articoli per fonte ad ogni giro (recupera notizie che scivolano oltre i primi posti senza perdere breaking news)
+        const items = feed.items.slice(0, 8)
 
         for (const item of items) {
           if (processedCount >= MAX_NEW_ARTICLES_PER_RUN) {
@@ -683,22 +684,24 @@ serve(async (req) => {
 
           // 4. Chiama Gemini per il riassunto, controllo anti-spam e ispezione visiva dell'immagine
           const prompt = `Sei il caporedattore di RomaFlash, quotidiano sportivo sull'AS Roma. 
-Il tuo compito è rielaborare questa notizia, ma PRIMA devi applicare un FILTRO ANTI-DUPLICATI E ANTI-SPAM ESTREMAMENTE RIGOROSO.
+Il tuo compito è rielaborare questa notizia, applicando un filtro intelligente anti-duplicati e anti-spam.
 
-1) CONTROLLO DUPLICATI (FONDAMENTALE):
-Verifica se la notizia che ti sto passando parla DELLO STESSO ARGOMENTO, EVENTO, INTERVISTA, CONVOCATI O PROBABILI FORMAZIONI di uno qualsiasi di questi articoli già pubblicati nelle ultime ore:
+1) CONTROLLO DUPLICATI:
+Verifica se la notizia che ti sto passando parla DELLO STESSO IDENTICO FATTO, EVENTO O DICHIARAZIONE di uno qualsiasi di questi articoli già pubblicati nelle ultime ore:
 ---
 ${recentTitlesList}
 ---
-REGOLE TASSATIVE SUI DUPLICATI (imposta "is_duplicate": true in tutti questi casi):
-- Se nella lista c'è già un articolo sui "Convocati" della partita e questo parla dei convocati -> È DUPLICATO (is_duplicate: true).
-- Se nella lista c'è già un articolo sulle "Probabili formazioni / scelte dei quotidiani / ultime di formazione" per la stessa partita -> È DUPLICATO (is_duplicate: true).
-- Se nella lista c'è già un'intervista o dichiarazione della stessa persona (es. Vierchowod, Capello, Fabregas, Gasperini, Tchouameni, Totti, Bove) sullo stesso tema -> È DUPLICATO (is_duplicate: true).
-- Se due testate diverse riportano la stessa notizia, episodio, tributo, murale, evento, ospitata TV, libro, infortunio o designazione arbitrale usando sinonimi o angolazioni diverse (es. "Mourinho" vs "Special One", "murale" vs "murales") -> È DUPLICATO (is_duplicate: true).
-Nel dubbio, imposta SEMPRE "is_duplicate": true!
+LINEE GUIDA DUPLICATI:
+- Imposta "is_duplicate": true se e solo se l'articolo tratta dello stesso identico fatto di cronaca, della stessa identica conferenza/intervista o della stessa indiscrezione già riportata.
+- DISTINZIONE FONDAMENTALE (NOTIZIE DIVERSE SULLO STESSO MATCH NON SONO DUPLICATI):
+  * Le "Probabili formazioni" o scelte tattiche NON sono un duplicato dei "Convocati ufficiali".
+  * I "Precedenti e statistiche" o "Quote e pronostici" NON sono un duplicato delle interviste ai protagonisti o delle probabili formazioni.
+  * Interviste o dichiarazioni di persone DIVERSE (es. Ranieri, Dybala, ex calciatori, opinionisti) sono notizie autonome e NON duplicati.
+  * Un reale aggiornamento (es. nuovo infortunio, esito esami strumentali, rientro in gruppo) NON è un duplicato di un generico allarme precedente.
+- Imposta "is_duplicate": true SOLO se due testate diverse riportano la stessa notizia o le stesse identiche dichiarazioni con semplici parafrasi o sinonimi.
 
 2) SPAM / NOTIZIE NON PERTINENTI / PROMO DI ALTRE REDAZIONI (TASSATIVO):
-- Verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla, imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
+- Verifica se la notizia parla effettivamente dell'AS Roma o dei suoi prossimi avversari. Se non c'entra nulla (es. calcio a 5, altre squadre di Serie A, campionati giovanili senza la Roma, gossip generico), imposta "is_spam" a true. ATTENZIONE: I post dai canali social ufficiali (AS Roma) NON SONO MAI SPAM.
 - Scarta TASSATIVAMENTE (imposta "is_spam": true) podcast, rubriche promozionali interne, TG/talk redazionali o dirette Twitch di testate esterne (es. "Podcast VG", "VG Podcast", "TG VG", "La Voce della Sera", "Live Twitch").
 - Se la notizia è un reale fatto di cronaca, campo o calciomercato ma cita fonti esterne o contiene sigle (come "VG" o "Vocegiallorossa"), NON scartarla se ha rilevanza informativa: rielaborala integralmente eliminando qualsiasi riferimento o sigla alle testate concorrenti (RomaFlash è un quotidiano indipendente: nel testo riscritto non devono MAI comparire nomi o sigle di fonti esterne come VG o Vocegiallorossa).
 
